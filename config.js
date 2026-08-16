@@ -9,11 +9,11 @@ const config = {
 
  owner: {
  name: "Aizat",
- number: ["628xxxxxxxx"],
+ number: ["628311880113"],
  },
 
  session: {
- pairingNumber: "628xxxxxxxx",
+ pairingNumber: "628311880113",
  usePairingCode: true,
  },
 

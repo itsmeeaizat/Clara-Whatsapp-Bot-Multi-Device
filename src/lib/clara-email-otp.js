@@ -124,12 +124,7 @@ export async function sendOtp(sender, email) {
   const key = normalizeSender(sender);
 
   // rate-limit check (per-sender)
-  try {
-    checkRateLimit(key);
-  } catch (err) {
-    // surface rate limit error
-    throw err;
-  }
+  checkRateLimit(key);
 
   const transporter = createTransporter();
   const code = generateCode();

@@ -186,8 +186,7 @@ async function uploadImage(buffer, filename) {
     }
   }
 
-  let json = null;
-
+  let json;
   try {
     json = JSON.parse(result.responseText);
   } catch {

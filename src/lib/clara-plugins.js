@@ -268,7 +268,7 @@ async function loadPlugin(filePath, bustCache = false) {
     return pInfo;
   } catch (error) {
     const fileName = path.basename(filePath);
-    if (process.env.DEBUG_PLUGINS === "true" || true) {
+    if (process.env.DEBUG_PLUGINS === "true") {
       logger.error("plugin", `failed ${fileName} - ${error.message}`);
     }
     return null;

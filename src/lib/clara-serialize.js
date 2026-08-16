@@ -884,8 +884,7 @@ async function serialize(sock, msg, store = {}) {
           url: config.info?.website || "https://github.com",
           title: config.bot?.name || "Clara-AI",
           description:
-            `Pengembang: ${config.bot.developer} | Versi: ${config.bot.version}` ||
-            "WhatsApp Bot",
+            `Pengembang: ${config.bot?.developer || "Clara"} | Versi: ${config.bot?.version || "15.0.0"}`,
           image: thumbnail,
           previewType: 0,
         },

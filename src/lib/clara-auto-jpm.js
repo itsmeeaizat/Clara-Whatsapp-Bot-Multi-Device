@@ -12,7 +12,7 @@ let isSending = false;
 let cachedThumb = null;
 
 try {
-  if (!!getAssetBuffer("clara2")) {
+  if (getAssetBuffer("clara2")) {
     cachedThumb = getAssetBuffer("clara2");
   }
 } catch (e) {}

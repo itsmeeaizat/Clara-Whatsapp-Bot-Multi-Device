@@ -154,8 +154,6 @@ class Pinterest {
                 media: mediaUrls
             }
 
-        } catch (error) {
-            throw error
         }
     }
 }

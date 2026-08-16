@@ -1,3 +1,4 @@
+import axios from "axios";
 import {
   alyaHeader,
   bracketBox,
@@ -5,13 +6,23 @@ import {
   tipText,
 } from "../../src/lib/clara-menu-style.js";
 
+const RSS_FEEDS = {
+  nasional: "https://www.cnnindonesia.com/nasional/rss",
+  internasional: "https://www.cnnindonesia.com/internasional/rss",
+  ekonomi: "https://www.cnnindonesia.com/ekonomi/rss",
+  teknologi: "https://www.cnnindonesia.com/teknologi/rss",
+  olahraga: "https://www.cnnindonesia.com/olahraga/rss",
+  hiburan: "https://www.cnnindonesia.com/hiburan/rss",
+  default: "https://www.cnnindonesia.com/rss",
+};
+
 const pluginConfig = {
   name: "berita",
-  alias: ["berita", "news", "info", "headline"],
+  alias: ["berita", "news", "beritaterkini"],
   category: "info",
-  description: "Cari berita terbaru",
-  usage: ".berita <query>",
-  example: ".berita teknologi",
+  description: "Berita terkini dari CNN Indonesia",
+  usage: ".berita <kategori>",
+  example: ".berita nasional",
   isOwner: false,
   isPremium: false,
   isGroup: true,
@@ -24,72 +35,36 @@ const pluginConfig = {
 async function handler(m, { sock, config: botConfig }) {
   try {
     const prefix = botConfig.command?.prefix || ".";
-    const query = m.text?.trim();
+    const kategori = m.text?.trim()?.toLowerCase() || "default";
+    const rssUrl = RSS_FEEDS[kategori] || RSS_FEEDS.default;
 
-    if (!query) {
-      const text =
-        alyaHeader("Cara Pakai", "📰") +
-        "\n\n" +
-        bracketBox("📋", "ɪɴꜰᴏ", [
-          `◦ Penggunaan: *${prefix}berita <query>*`,
-          `◦ Contoh: *${prefix}berita teknologi*`,
-        ]) +
-        "\n\n" +
-        separator() +
-        "\n" +
-        tipText(`Ketik ${prefix}menu untuk kembali`);
+    const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
+    const res = await axios.get(apiUrl, { timeout: 15000 });
+    const data = res.data;
 
-      await m.reply(text);
-      return { handled: true };
-    }
+    if (!data?.items?.length) throw new Error("Gagal mengambil berita");
 
-    const apiUrl = `https://api.zeks.xyz/api/news?q=${encodeURIComponent(query)}`;
-    let news = [];
-
-    try {
-      const res = await fetch(apiUrl);
-      const json = await res.json();
-      if (json.status && Array.isArray(json.result)) {
-        news = json.result.map((item) => ({
-          title: item.title || "Tanpa judul",
-          link: item.link || item.url || "-",
-        }));
-      }
-    } catch {
-      news = [];
-    }
-
-    if (!news.length) {
-      const text =
-        alyaHeader("Berita", "📰") +
-        "\n\n" +
-        bracketBox("📰", "ʜᴀꜱɪʟ", [
-          `◦ Query: *${query}*`,
-          "◦ Status: *Tidak ada berita ditemukan*",
-        ]) +
-        "\n\n" +
-        separator() +
-        "\n" +
-        tipText(`Ketik ${prefix}berita <query> untuk cari berita lain`) +
-        "\n" +
-        tipText(`Ketik ${prefix}menu untuk kembali ke menu utama`);
-
-      await m.reply(text);
-      return { handled: true };
-    }
-
-    const items = news.slice(0, 8).map((n, i) => `${i + 1}. ${n.title}\n   ${n.link}`);
+    const items = data.items.slice(0, 8);
+    const newsList = items.map((item, i) =>
+      `${i + 1}. *${item.title}*\n   ${item.link}`
+    ).join("\n\n");
 
     const text =
       alyaHeader("Berita", "📰") +
       "\n\n" +
-      bracketBox("📰", "ʜᴇᴀᴅʟɪɴᴇ", items) +
+      bracketBox("📰", "ʙᴇʀɪᴛᴀ ᴛᴇʀᴋɪɴɪ", [
+        `◦ Kategori: *${kategori}*`,
+        `◦ Sumber: *CNN Indonesia*`,
+        `◦ Total: *${items.length} berita*`,
+      ]) +
+      "\n\n" +
+      newsList +
       "\n\n" +
       separator() +
       "\n" +
-      tipText(`Ketik ${prefix}berita <query> untuk cari berita lain`) +
+      tipText(`Ketik ${prefix}berita <kategori> untuk kategori lain`) +
       "\n" +
-      tipText(`Ketik ${prefix}menu untuk kembali ke menu utama`);
+      tipText(`Kategori: nasional, internasional, ekonomi, teknologi, olahraga, hiburan`);
 
     await m.reply(text);
   } catch (error) {
@@ -104,7 +79,7 @@ async function handler(m, { sock, config: botConfig }) {
       "\n\n" +
       separator() +
       "\n" +
-      tipText(`Coba lagi nanti atau hubungi owner`);
+      tipText(`Coba lagi nanti`);
 
     await m.reply(text);
   }

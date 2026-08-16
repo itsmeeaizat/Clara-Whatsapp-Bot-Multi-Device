@@ -1,7 +1,5 @@
 import fs from "fs";
 import path from "path";
-import { fileURLToPath } from "url";
-import axios from "axios";
 import {
   alyaHeader,
   bracketBox,
@@ -9,8 +7,6 @@ import {
   tipText,
 } from "../../src/lib/clara-menu-style.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 const TMP_DIR = path.join(process.cwd(), "tmp");
 
 function ensureTmp() {
@@ -19,20 +15,20 @@ function ensureTmp() {
 
 function tempPath(ext) {
   ensureTmp();
-  return path.join(TMP_DIR, `spotify_${Date.now()}_${Math.random().toString(16).slice(2)}${ext}`);
+  return path.join(TMP_DIR, `sp_${Date.now()}_${Math.random().toString(16).slice(2)}${ext}`);
 }
 
 async function handler(m, { sock, config: botConfig }) {
   try {
     const prefix = botConfig.command?.prefix || ".";
-    const input = m.text?.trim();
+    const url = m.text?.trim();
 
-    if (!input) {
+    if (!url) {
       const text =
-        alyaHeader("Cara Pakai", "🟢") +
+        alyaHeader("Cara Pakai", "🎵") +
         "\n\n" +
         bracketBox("📋", "ɪɴꜰᴏ", [
-          `◦ Penggunaan: *${prefix}spotify <link/lagu>*`,
+          `◦ Penggunaan: *${prefix}spotify <link>*`,
           `◦ Contoh: *${prefix}spotify https://open.spotify.com/track/xxxx*`,
         ]) +
         "\n\n" +
@@ -44,29 +40,40 @@ async function handler(m, { sock, config: botConfig }) {
       return { handled: true };
     }
 
-    const apiUrl = `https://api.zeks.xyz/api/spotify?q=${encodeURIComponent(input)}`;
-    const response = await axios.get(apiUrl, { timeout: 10000 });
-    const data = response.data;
-    const result = data?.result || data;
-    const title = result?.title || result?.name || input;
-    const artist = result?.artist || result?.artists || "Unknown";
-    const url = result?.url || result?.link || input;
+    const { spotify } = await import("btch-downloader");
+    const data = await spotify(url);
+
+    if (!data?.status) throw new Error("Spotify API returned no data");
+
+    const downloadUrl = data.url || data.download || data.link;
+    if (!downloadUrl) throw new Error("No download URL found");
+
+    const filePath = tempPath(".mp3");
+    const axios = (await import("axios")).default;
+    const res = await axios.get(downloadUrl, { responseType: "arraybuffer", timeout: 60000 });
+    fs.writeFileSync(filePath, Buffer.from(res.data));
+
+    await sock.sendMessage(m.chat, {
+      audio: fs.readFileSync(filePath),
+      mimetype: "audio/mpeg",
+      ptt: false,
+      fileName: `${data.title || "spotify"}.mp3`,
+    }, { quoted: m });
+
+    try { fs.unlinkSync(filePath); } catch {}
 
     const text =
-      alyaHeader("Spotify", "🟢") +
+      alyaHeader("Spotify", "🎵") +
       "\n\n" +
-      bracketBox("🟢", "ᴅᴏᴡɴʟᴏᴀᴅ", [
-        `◦ Judul: *${title}*`,
-        `◦ Artis: *${artist}*`,
-        `◦ Link: *${url}*`,
+      bracketBox("🎵", "ᴅᴏᴡɴʟᴏᴀᴅ", [
+        `◦ Judul: *${data.title || url}*`,
+        `◦ Artist: *${data.artist || "-"}*`,
         "◦ Status: *Berhasil*",
       ]) +
       "\n\n" +
       separator() +
       "\n" +
-      tipText(`Ketik ${prefix}spotify <link> untuk download lagu lain`) +
-      "\n" +
-      tipText(`Ketik ${prefix}menu untuk kembali ke menu utama`);
+      tipText(`Ketik ${prefix}spotify <link> untuk download lagu lain`);
 
     await m.reply(text);
   } catch (error) {
@@ -89,23 +96,21 @@ async function handler(m, { sock, config: botConfig }) {
   return { handled: true };
 }
 
-const pluginConfig = {
-  name: "spotify",
-  alias: ["spotify", "spotifydl", "spotifydownloader"],
-  category: "music",
-  description: "Cari/download lagu Spotify",
-  usage: ".spotify <link/lagu>",
-  example: ".spotify https://open.spotify.com/track/xxxx",
-  isOwner: false,
-  isPremium: false,
-  isGroup: true,
-  isPrivate: false,
-  cooldown: 10,
-  energi: 0,
-  isEnabled: true,
-};
-
 export default {
-  config: pluginConfig,
+  config: {
+    name: "spotify",
+    alias: ["spotify", "spdl", "spotifydl"],
+    category: "music",
+    description: "Download lagu dari Spotify",
+    usage: ".spotify <link>",
+    example: ".spotify https://open.spotify.com/track/xxxx",
+    isOwner: false,
+    isPremium: false,
+    isGroup: true,
+    isPrivate: false,
+    cooldown: 10,
+    energi: 0,
+    isEnabled: true,
+  },
   handler,
 };

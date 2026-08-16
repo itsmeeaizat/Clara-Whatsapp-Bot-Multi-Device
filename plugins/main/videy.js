@@ -1,6 +1,5 @@
 import fs from "fs";
 import path from "path";
-import { fileURLToPath } from "url";
 import axios from "axios";
 import {
   alyaHeader,
@@ -9,8 +8,6 @@ import {
   tipText,
 } from "../../src/lib/clara-menu-style.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 const TMP_DIR = path.join(process.cwd(), "tmp");
 
 function ensureTmp() {
@@ -44,26 +41,51 @@ async function handler(m, { sock, config: botConfig }) {
       return { handled: true };
     }
 
-    const apiUrl = `https://api.zeks.xyz/api/videy?url=${encodeURIComponent(url)}`;
-    const response = await axios.get(apiUrl, { timeout: 10000 });
-    const data = response.data;
-    const result = data?.result || data;
-    const videoUrl = result?.url || result?.link || url;
+    // Try internal scraper first
+    try {
+      const videy = (await import("../../src/scraper/videy.js")).default;
+      const data = await videy(url);
+      if (data?.url || data?.link) {
+        const videoUrl = data.url || data.link;
+        const filePath = tempPath(".mp4");
+        const res = await axios.get(videoUrl, { responseType: "arraybuffer", timeout: 60000 });
+        fs.writeFileSync(filePath, Buffer.from(res.data));
+
+        await sock.sendMessage(m.chat, {
+          video: fs.readFileSync(filePath),
+          caption: `🎬 *Videy Download*\n◦ Status: *Berhasil*`,
+          mimetype: "video/mp4",
+        }, { quoted: m });
+
+        try { fs.unlinkSync(filePath); } catch {}
+        return { handled: true };
+      }
+    } catch {}
+
+    // Fallback: direct download attempt
+    const filePath = tempPath(".mp4");
+    const res = await axios.get(url, { responseType: "arraybuffer", timeout: 60000, maxRedirects: 5 });
+    fs.writeFileSync(filePath, Buffer.from(res.data));
+
+    await sock.sendMessage(m.chat, {
+      video: fs.readFileSync(filePath),
+      caption: `🎬 *Videy Download*\n◦ Status: *Berhasil*`,
+      mimetype: "video/mp4",
+    }, { quoted: m });
+
+    try { fs.unlinkSync(filePath); } catch {}
 
     const text =
       alyaHeader("Videy", "🎬") +
       "\n\n" +
       bracketBox("🎬", "ᴅᴏᴡɴʟᴏᴀᴅ", [
         `◦ Link: *${url}*`,
-        `◦ Result: *${videoUrl}*`,
         "◦ Status: *Berhasil*",
       ]) +
       "\n\n" +
       separator() +
       "\n" +
-      tipText(`Ketik ${prefix}videy <link> untuk download video lain`) +
-      "\n" +
-      tipText(`Ketik ${prefix}menu untuk kembali ke menu utama`);
+      tipText(`Ketik ${prefix}videy <link> untuk download video lain`);
 
     await m.reply(text);
   } catch (error) {

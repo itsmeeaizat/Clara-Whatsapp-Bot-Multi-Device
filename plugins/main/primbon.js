@@ -7,11 +7,11 @@ import {
 
 const pluginConfig = {
   name: "primbon",
-  alias: ["primbon", "sunda", "jawa", "ramalan"],
+  alias: ["primbon", "artinama", "artimimpi", "nomorhoki", "zodiak"],
   category: "religi",
-  description: "Cek primbon Jawa/Sunda",
-  usage: ".primbon <nama> <tanggal>",
-  example: ".primbon Ahmad 2000-01-01",
+  description: "Cek primbon (arti nama, arti mimpi, nomor hoki, zodiak)",
+  usage: ".artinama <nama> | .artimimpi <mimpi> | .nomorhoki <nomor> | .zodiak <zodiak>",
+  example: ".artinama Budi",
   isOwner: false,
   isPremium: false,
   isGroup: true,
@@ -24,53 +24,66 @@ const pluginConfig = {
 async function handler(m, { sock, config: botConfig }) {
   try {
     const prefix = botConfig.command?.prefix || ".";
-    const args = m.text?.trim().split(/\s+/);
+    const text = m.text?.trim();
 
-    if (args.length < 2) {
-      const text =
+    if (!text) {
+      const reply =
         alyaHeader("Cara Pakai", "🔮") +
         "\n\n" +
         bracketBox("📋", "ɪɴꜰᴏ", [
-          `◦ Penggunaan: *${prefix}primbon <nama> <tanggal>*`,
-          `◦ Contoh: *${prefix}primbon Ahmad 2000-01-01*`,
+          `◦ .artinama <nama> - Arti nama`,
+          `◦ .artimimpi <mimpi> - Arti mimpi`,
+          `◦ .nomorhoki <nomor> - Cek nomor hoki`,
+          `◦ .zodiak <zodiak> - Ramalan zodiak`,
         ]) +
         "\n\n" +
         separator() +
         "\n" +
         tipText(`Ketik ${prefix}menu untuk kembali`);
 
-      await m.reply(text);
+      await m.reply(reply);
       return { handled: true };
     }
 
-    const name = args[0];
-    const date = args.slice(1).join(" ");
+    const primbon = await import("@bochilteam/scraper-primbon");
+    const cmd = m.body?.split(" ")[0]?.replace(prefix, "").toLowerCase() || "primbon";
+    const input = text;
 
-    let ramalan = "Akan sukses di masa depan";
-    try {
-      const apiUrl = `https://api.zeks.xyz/api/primbon?nama=${encodeURIComponent(name)}&tgl=${encodeURIComponent(date)}`;
-      const res = await fetch(apiUrl);
-      const json = await res.json();
-      ramalan = json.result || json.ramalan || ramalan;
-    } catch {}
+    let result = null;
+    let title = "Primbon";
 
-    const text =
-      alyaHeader("Primbon", "🔮") +
+    if (cmd === "artinama" || cmd === "primbon") {
+      result = await primbon.artinama(input);
+      title = "Arti Nama";
+    } else if (cmd === "artimimpi") {
+      result = await primbon.artimimpi(input);
+      title = "Arti Mimpi";
+    } else if (cmd === "nomorhoki") {
+      result = await primbon.nomorhoki(input);
+      title = "Nomor Hoki";
+    } else if (cmd === "zodiak") {
+      result = await primbon.getZodiac(input);
+      title = "Zodiak";
+    } else {
+      result = await primbon.artinama(input);
+      title = "Arti Nama";
+    }
+
+    const reply =
+      alyaHeader(title, "🔮") +
       "\n\n" +
-      bracketBox("🔮", "ʜᴀꜱɪʟ", [
-        `◦ Nama: *${name}*`,
-        `◦ Tanggal: *${date}*`,
-        `◦ Ramalan: *${ramalan}*`,
+      bracketBox("🔮", title.toUpperCase(), [
+        `◦ Input: *${input}*`,
+        `◦ Hasil: *${result || "Tidak ditemukan"}*`,
       ]) +
       "\n\n" +
       separator() +
       "\n" +
-      tipText(`Ketik ${prefix}primbon <nama> <tanggal> untuk cek primbon lain`) +
-      "\n" +
-      tipText(`Ketik ${prefix}menu untuk kembali ke menu utama`);
+      tipText(`Ketik ${prefix}primbon untuk cek lagi`);
 
-    await m.reply(text);
+    await m.reply(reply);
   } catch (error) {
+    const prefix = botConfig.command?.prefix || ".";
     const text =
       alyaHeader("Gagal", "❌") +
       "\n\n" +
@@ -81,7 +94,7 @@ async function handler(m, { sock, config: botConfig }) {
       "\n\n" +
       separator() +
       "\n" +
-      tipText(`Coba lagi nanti atau hubungi owner`);
+      tipText(`Coba lagi nanti`);
 
     await m.reply(text);
   }

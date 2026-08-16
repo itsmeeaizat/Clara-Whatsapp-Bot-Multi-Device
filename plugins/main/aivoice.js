@@ -1,7 +1,5 @@
 import fs from "fs";
 import path from "path";
-import { fileURLToPath } from "url";
-import axios from "axios";
 import {
   alyaHeader,
   bracketBox,
@@ -9,8 +7,6 @@ import {
   tipText,
 } from "../../src/lib/clara-menu-style.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 const TMP_DIR = path.join(process.cwd(), "tmp");
 
 function ensureTmp() {
@@ -22,68 +18,35 @@ function tempPath(ext) {
   return path.join(TMP_DIR, `aivoice_${Date.now()}_${Math.random().toString(16).slice(2)}${ext}`);
 }
 
-const ENDPOINTS = [
-  "https://api.zeks.xyz/api/tts",
-  "https://api.miaou.xyz/api/tts",
-];
-
-const pluginConfig = {
-  name: "aivoice",
-  alias: ["aivoice", "aitts", "aitts2", "speak", "ttsai"],
-  category: "ai",
-  description: "Ubah teks menjadi suara dengan AI/TTS",
-  usage: ".aivoice <teks>",
-  example: ".aivoice Halo, ini suara AI.",
-  isOwner: false,
-  isPremium: false,
-  isGroup: true,
-  isPrivate: false,
-  cooldown: 5,
-  energi: 0,
-  isEnabled: true,
-};
-
 async function handler(m, { sock, config: botConfig }) {
   try {
     const prefix = botConfig.command?.prefix || ".";
     const text = m.text?.trim();
 
     if (!text) {
-      const out =
-        alyaHeader("Cara Pakai", "🔊") +
+      const reply =
+        alyaHeader("Cara Pakai", "🎙️") +
         "\n\n" +
         bracketBox("📋", "ɪɴꜰᴏ", [
           `◦ Penggunaan: *${prefix}aivoice <teks>*`,
-          `◦ Contoh: *${prefix}aivoice Halo dunia*`,
+          `◦ Contoh: *${prefix}aivoice Halo semuanya*`,
         ]) +
         "\n\n" +
         separator() +
         "\n" +
         tipText(`Ketik ${prefix}menu untuk kembali`);
 
-      await m.reply(out);
+      await m.reply(reply);
       return { handled: true };
     }
 
-    let buffer = null;
-    for (const baseUrl of ENDPOINTS) {
-      try {
-        const res = await axios.get(baseUrl, {
-          params: { text },
-          responseType: "arraybuffer",
-          timeout: 60000,
-        });
-        if (res.status === 200 && res.data && res.data.length > 1000) {
-          buffer = Buffer.from(res.data);
-          break;
-        }
-      } catch {}
-    }
-
-    if (!buffer) throw new Error("Gagal generate suara dari semua endpoint.");
+    const { getAudioUrl } = await import("google-tts-api");
+    const audioUrl = getAudioUrl(text, { lang: "id", slow: false });
 
     const filePath = tempPath(".mp3");
-    fs.writeFileSync(filePath, buffer);
+    const axios = (await import("axios")).default;
+    const res = await axios.get(audioUrl, { responseType: "arraybuffer", timeout: 15000 });
+    fs.writeFileSync(filePath, Buffer.from(res.data));
 
     await sock.sendMessage(m.chat, {
       audio: fs.readFileSync(filePath),
@@ -91,24 +54,25 @@ async function handler(m, { sock, config: botConfig }) {
       ptt: false,
     }, { quoted: m });
 
-    const out =
-      alyaHeader("AI Voice", "🔊") +
+    try { fs.unlinkSync(filePath); } catch {}
+
+    const info =
+      alyaHeader("AI Voice", "🎙️") +
       "\n\n" +
-      bracketBox("🔊", "ᴛᴛꜱ", [
-        `◦ Teks: *${text.slice(0, 100)}${text.length > 100 ? "..." : ""}*`,
+      bracketBox("🎙️", "ᴀɪ ᴠᴏɪᴄᴇ", [
+        `◦ Teks: *${text}*`,
+        "◦ Engine: *Google TTS*",
         "◦ Status: *Berhasil*",
       ]) +
       "\n\n" +
       separator() +
       "\n" +
-      tipText(`Ketik ${prefix}aivoice <teks> untuk suara lain`) +
-      "\n" +
-      tipText(`Ketik ${prefix}menu untuk kembali ke menu utama`);
+      tipText(`Ketik ${prefix}aivoice <teks> untuk audio lain`);
 
-    await m.reply(out);
+    await m.reply(info);
   } catch (error) {
     const prefix = botConfig.command?.prefix || ".";
-    const text =
+    const reply =
       alyaHeader("Gagal", "❌") +
       "\n\n" +
       bracketBox("❌", "ᴇʀʀᴏʀ", [
@@ -120,11 +84,27 @@ async function handler(m, { sock, config: botConfig }) {
       "\n" +
       tipText(`Coba lagi nanti atau hubungi owner`);
 
-    await m.reply(text);
+    await m.reply(reply);
   }
 
   return { handled: true };
 }
+
+const pluginConfig = {
+  name: "aivoice",
+  alias: ["aivoice", "aivo", "voiceai"],
+  category: "ai",
+  description: "AI Voice - ubah teks jadi suara (Google TTS)",
+  usage: ".aivoice <teks>",
+  example: ".aivoice Halo semuanya",
+  isOwner: false,
+  isPremium: false,
+  isGroup: true,
+  isPrivate: false,
+  cooldown: 10,
+  energi: 0,
+  isEnabled: true,
+};
 
 export default {
   config: pluginConfig,

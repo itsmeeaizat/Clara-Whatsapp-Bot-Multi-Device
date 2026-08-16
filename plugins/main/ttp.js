@@ -1,7 +1,3 @@
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-import axios from "axios";
 import {
   alyaHeader,
   bracketBox,
@@ -9,18 +5,21 @@ import {
   tipText,
 } from "../../src/lib/clara-menu-style.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const TMP_DIR = path.join(process.cwd(), "tmp");
-
-function ensureTmp() {
-  if (!fs.existsSync(TMP_DIR)) fs.mkdirSync(TMP_DIR, { recursive: true });
-}
-
-function tempPath(ext) {
-  ensureTmp();
-  return path.join(TMP_DIR, `ttp_${Date.now()}_${Math.random().toString(16).slice(2)}${ext}`);
-}
+const pluginConfig = {
+  name: "ttp",
+  alias: ["ttp", "texttopicture"],
+  category: "maker",
+  description: "Ubah teks jadi gambar (TTP)",
+  usage: ".ttp <teks>",
+  example: ".ttp Halo",
+  isOwner: false,
+  isPremium: false,
+  isGroup: true,
+  isPrivate: false,
+  cooldown: 5,
+  energi: 0,
+  isEnabled: true,
+};
 
 async function handler(m, { sock, config: botConfig }) {
   try {
@@ -29,11 +28,11 @@ async function handler(m, { sock, config: botConfig }) {
 
     if (!text) {
       const reply =
-        alyaHeader("Cara Pakai", "🖼️") +
+        alyaHeader("Cara Pakai", "🔤") +
         "\n\n" +
         bracketBox("📋", "ɪɴꜰᴏ", [
           `◦ Penggunaan: *${prefix}ttp <teks>*`,
-          `◦ Contoh: *${prefix}ttp Alya*`,
+          `◦ Contoh: *${prefix}ttp Halo*`,
         ]) +
         "\n\n" +
         separator() +
@@ -44,37 +43,71 @@ async function handler(m, { sock, config: botConfig }) {
       return { handled: true };
     }
 
-    const encoded = encodeURIComponent(text);
-    const apiUrl = `https://api.miaou.xyz/text2image?text=${encoded}`;
+    const { createCanvas, registerFont } = await import("@napi-rs/canvas");
+    const fs = (await import("fs")).default;
 
-    const response = await axios.get(apiUrl, { responseType: "arraybuffer", maxRedirects: 5 });
-    const buffer = Buffer.from(response.data);
-    const filePath = tempPath(".png");
-    fs.writeFileSync(filePath, buffer);
+    // Create canvas
+    const fontSize = 60;
+    const padding = 40;
+    const canvas = createCanvas(512, 512);
+    const ctx = canvas.getContext("2d");
 
+    // Black background
+    ctx.fillStyle = "#000000";
+    ctx.fillRect(0, 0, 512, 512);
+
+    // White text
+    ctx.fillStyle = "#FFFFFF";
+    ctx.font = `bold ${fontSize}px sans-serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    // Word wrap
+    const maxWidth = 512 - padding * 2;
+    const words = text.split(" ");
+    const lines = [];
+    let currentLine = "";
+
+    for (const word of words) {
+      const testLine = currentLine ? `${currentLine} ${word}` : word;
+      if (ctx.measureText(testLine).width > maxWidth && currentLine) {
+        lines.push(currentLine);
+        currentLine = word;
+      } else {
+        currentLine = testLine;
+      }
+    }
+    if (currentLine) lines.push(currentLine);
+
+    const lineHeight = fontSize * 1.3;
+    const startY = 256 - ((lines.length - 1) * lineHeight) / 2;
+
+    lines.forEach((line, i) => {
+      ctx.fillText(line, 256, startY + i * lineHeight);
+    });
+
+    const buffer = canvas.toBuffer("image/png");
     await sock.sendMessage(m.chat, {
-      image: fs.readFileSync(filePath),
-      caption: `◦ Teks: *${text}*`,
+      image: buffer,
+      caption: `🔤 *TTP*\n◦ Teks: *${text}*`,
     }, { quoted: m });
 
     const info =
-      alyaHeader("TTP", "🖼️") +
+      alyaHeader("TTP", "🔤") +
       "\n\n" +
-      bracketBox("🖼️", "ᴛᴇxᴛ ᴛᴏ ᴘɪᴄᴛᴜʀᴇ", [
+      bracketBox("🔤", "ʀᴇꜱᴜʟᴛ", [
         `◦ Teks: *${text}*`,
         "◦ Status: *Berhasil*",
       ]) +
       "\n\n" +
       separator() +
       "\n" +
-      tipText(`Ketik ${prefix}ttp <teks> untuk gambar lain`) +
-      "\n" +
-      tipText(`Ketik ${prefix}menu untuk kembali`);
+      tipText(`Ketik ${prefix}ttp <teks> untuk TTP lain`);
 
     await m.reply(info);
   } catch (error) {
     const prefix = botConfig.command?.prefix || ".";
-    const reply =
+    const text =
       alyaHeader("Gagal", "❌") +
       "\n\n" +
       bracketBox("❌", "ᴇʀʀᴏʀ", [
@@ -84,29 +117,13 @@ async function handler(m, { sock, config: botConfig }) {
       "\n\n" +
       separator() +
       "\n" +
-      tipText(`Coba lagi nanti atau hubungi owner`);
+      tipText(`Coba lagi nanti`);
 
-    await m.reply(reply);
+    await m.reply(text);
   }
 
   return { handled: true };
 }
-
-const pluginConfig = {
-  name: "ttp",
-  alias: ["ttp", "texttopic", "ttp"],
-  category: "sticker",
-  description: "Ubah teks menjadi gambar",
-  usage: ".ttp <teks>",
-  example: ".ttp Alya",
-  isOwner: false,
-  isPremium: false,
-  isGroup: true,
-  isPrivate: false,
-  cooldown: 10,
-  energi: 0,
-  isEnabled: true,
-};
 
 export default {
   config: pluginConfig,

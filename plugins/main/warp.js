@@ -1,6 +1,3 @@
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
 import axios from "axios";
 import {
   alyaHeader,
@@ -9,53 +6,68 @@ import {
   tipText,
 } from "../../src/lib/clara-menu-style.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const TMP_DIR = path.join(process.cwd(), "tmp");
-
-function ensureTmp() {
-  if (!fs.existsSync(TMP_DIR)) fs.mkdirSync(TMP_DIR, { recursive: true });
-}
-
-function tempPath(ext) {
-  ensureTmp();
-  return path.join(TMP_DIR, `warp_${Date.now()}_${Math.random().toString(16).slice(2)}${ext}`);
-}
+const pluginConfig = {
+  name: "warp",
+  alias: ["warp", "warpaint"],
+  category: "maker",
+  description: "Generate gambar dari teks (AI Warp)",
+  usage: ".warp <deskripsi>",
+  example: ".warp futuristic city at night",
+  isOwner: false,
+  isPremium: false,
+  isGroup: true,
+  isPrivate: false,
+  cooldown: 15,
+  energi: 0,
+  isEnabled: true,
+};
 
 async function handler(m, { sock, config: botConfig }) {
   try {
     const prefix = botConfig.command?.prefix || ".";
+    const prompt = m.text?.trim();
 
-    let warpInfo = {
-      status: "Unknown",
-      config: "Placeholder",
-    };
+    if (!prompt) {
+      const text =
+        alyaHeader("Cara Pakai", "🌀") +
+        "\n\n" +
+        bracketBox("📋", "ɪɴꜰᴏ", [
+          `◦ Penggunaan: *${prefix}warp <deskripsi>*`,
+          `◦ Contoh: *${prefix}warp futuristic city*`,
+        ]) +
+        "\n\n" +
+        separator() +
+        "\n" +
+        tipText(`Ketik ${prefix}menu untuk kembali`);
 
-    try {
-      const apiUrl = "https://api.zeks.xyz/api/warp?apikey=APIKEY";
-      const response = await axios.get(apiUrl, { timeout: 10000 });
-      const data = response.data;
-      warpInfo.status = data?.status || "Ready";
-      warpInfo.config = data?.config || data?.result || warpInfo.config;
-    } catch {
-      warpInfo.status = "Ready";
-      warpInfo.config = "Placeholder";
+      await m.reply(text);
+      return { handled: true };
     }
 
-    const text =
-      alyaHeader("Warp", "🚀") +
+    const { fluxImage } = await import("../../src/scraper/seaart.js");
+    const result = await fluxImage(prompt);
+
+    if (!result?.url) throw new Error("Gagal generate gambar");
+
+    const res = await axios.get(result.url, { responseType: "arraybuffer", timeout: 30000 });
+    await sock.sendMessage(m.chat, {
+      image: Buffer.from(res.data),
+      caption: `🌀 *Warp AI*\n◦ Prompt: *${prompt}*`,
+    }, { quoted: m });
+
+    const info =
+      alyaHeader("Warp", "🌀") +
       "\n\n" +
-      bracketBox("🚀", "ɪɴꜰᴏ", [
-        `◦ Status: *${warpInfo.status}*`,
-        `◦ Config: *${warpInfo.config}*`,
-        "◦ Note: *Integrasi API warp aktif*",
+      bracketBox("🌀", "ʀᴇꜱᴜʟᴛ", [
+        `◦ Prompt: *${prompt}*`,
+        "◦ Status: *Berhasil*",
       ]) +
       "\n\n" +
       separator() +
       "\n" +
-      tipText(`Ketik ${prefix}menu untuk kembali`);
+      tipText(`Ketik ${prefix}warp <deskripsi> untuk gambar lain`);
 
-    await m.reply(text);
+    await m.reply(info);
   } catch (error) {
     const prefix = botConfig.command?.prefix || ".";
     const text =
@@ -68,29 +80,13 @@ async function handler(m, { sock, config: botConfig }) {
       "\n\n" +
       separator() +
       "\n" +
-      tipText(`Coba lagi nanti atau hubungi owner`);
+      tipText(`Coba lagi nanti`);
 
     await m.reply(text);
   }
 
   return { handled: true };
 }
-
-const pluginConfig = {
-  name: "warp",
-  alias: ["warp", "warp+", "warpkey", "warpconfig"],
-  category: "tools",
-  description: "Generate/cek Warp config/key",
-  usage: ".warp",
-  example: ".warp",
-  isOwner: false,
-  isPremium: false,
-  isGroup: true,
-  isPrivate: false,
-  cooldown: 10,
-  energi: 0,
-  isEnabled: true,
-};
 
 export default {
   config: pluginConfig,

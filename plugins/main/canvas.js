@@ -1,6 +1,4 @@
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
+import axios from "axios";
 import {
   alyaHeader,
   bracketBox,
@@ -8,18 +6,21 @@ import {
   tipText,
 } from "../../src/lib/clara-menu-style.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const TMP_DIR = path.join(process.cwd(), "tmp");
-
-function ensureTmp() {
-  if (!fs.existsSync(TMP_DIR)) fs.mkdirSync(TMP_DIR, { recursive: true });
-}
-
-function tempPath(ext) {
-  ensureTmp();
-  return path.join(TMP_DIR, `canvas_${Date.now()}_${Math.random().toString(16).slice(2)}${ext}`);
-}
+const pluginConfig = {
+  name: "canvas",
+  alias: ["canvas", "cv"],
+  category: "maker",
+  description: "Buat gambar dengan canvas (quote pada background)",
+  usage: ".canvas <teks>",
+  example: ".canvas Follow your dreams",
+  isOwner: false,
+  isPremium: false,
+  isGroup: true,
+  isPrivate: false,
+  cooldown: 10,
+  energi: 0,
+  isEnabled: true,
+};
 
 async function handler(m, { sock, config: botConfig }) {
   try {
@@ -27,51 +28,92 @@ async function handler(m, { sock, config: botConfig }) {
     const text = m.text?.trim();
 
     if (!text) {
-      const out =
+      const reply =
         alyaHeader("Cara Pakai", "🎨") +
         "\n\n" +
         bracketBox("📋", "ɪɴꜰᴏ", [
           `◦ Penggunaan: *${prefix}canvas <teks>*`,
-          `◦ Contoh: *${prefix}canvas Hello World*`,
+          `◦ Contoh: *${prefix}canvas Follow your dreams*`,
         ]) +
         "\n\n" +
         separator() +
         "\n" +
         tipText(`Ketik ${prefix}menu untuk kembali`);
 
-      await m.reply(out);
+      await m.reply(reply);
       return { handled: true };
     }
 
-    const apiUrl = `https://api.miaou.xyz/api/canvas?text=${encodeURIComponent(text)}`;
-    const res = await fetch(apiUrl);
-    if (!res.ok) throw new Error("Gagal generate canvas");
+    const { createCanvas } = await import("@napi-rs/canvas");
 
-    const buffer = Buffer.from(await res.arrayBuffer());
-    const filePath = tempPath(".png");
-    fs.writeFileSync(filePath, buffer);
+    const canvas = createCanvas(800, 600);
+    const ctx = canvas.getContext("2d");
 
-    await sock.sendMessage(m.chat, {
-      image: fs.readFileSync(filePath),
-      caption: `Canvas: ${text.slice(0, 200)}`,
+    // Gradient background
+    const gradient = ctx.createLinearGradient(0, 0, 800, 600);
+    gradient.addColorStop(0, "#667eea");
+    gradient.addColorStop(1, "#764ba2");
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, 800, 600);
+
+    // Text shadow
+    ctx.shadowColor = "rgba(0,0,0,0.5)";
+    ctx.shadowBlur = 10;
+    ctx.shadowOffsetX = 2;
+    ctx.shadowOffsetY = 2;
+
+    // White text
+    ctx.fillStyle = "#FFFFFF";
+    ctx.font = "bold 48px sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    // Word wrap
+    const maxWidth = 700;
+    const words = text.split(" ");
+    const lines = [];
+    let currentLine = "";
+
+    for (const word of words) {
+      const testLine = currentLine ? `${currentLine} ${word}` : word;
+      if (ctx.measureText(testLine).width > maxWidth && currentLine) {
+        lines.push(currentLine);
+        currentLine = word;
+      } else {
+        currentLine = testLine;
+      }
+    }
+    if (currentLine) lines.push(currentLine);
+
+    const lineHeight = 60;
+    const startY = 300 - ((lines.length - 1) * lineHeight) / 2;
+
+    lines.forEach((line, i) => {
+      ctx.fillText(line, 400, startY + i * lineHeight);
     });
 
-    const out =
+    // Reset shadow
+    ctx.shadowColor = "transparent";
+
+    const buffer = canvas.toBuffer("image/png");
+    await sock.sendMessage(m.chat, {
+      image: buffer,
+      caption: `🎨 *Canvas*\n◦ Teks: *${text}*`,
+    }, { quoted: m });
+
+    const info =
       alyaHeader("Canvas", "🎨") +
       "\n\n" +
-      bracketBox("🎨", "ʜᴀꜱɪʟ", [
-        `◦ Teks: *${text.slice(0, 50)}${text.length > 50 ? "..." : ""}*`,
-        "◦ Ukuran: *1080x1080*",
-        "◦ Format: *PNG*",
+      bracketBox("🎨", "ʀᴇꜱᴜʟᴛ", [
+        `◦ Teks: *${text}*`,
+        "◦ Status: *Berhasil*",
       ]) +
       "\n\n" +
       separator() +
       "\n" +
-      tipText(`Ketik ${prefix}canvas <teks> untuk desain lain`) +
-      "\n" +
-      tipText(`Ketik ${prefix}menu untuk kembali ke menu utama`);
+      tipText(`Ketik ${prefix}canvas <teks> untuk canvas lain`);
 
-    await m.reply(out);
+    await m.reply(info);
   } catch (error) {
     const prefix = botConfig.command?.prefix || ".";
     const text =
@@ -84,29 +126,13 @@ async function handler(m, { sock, config: botConfig }) {
       "\n\n" +
       separator() +
       "\n" +
-      tipText(`Coba lagi nanti atau hubungi owner`);
+      tipText(`Coba lagi nanti`);
 
     await m.reply(text);
   }
 
   return { handled: true };
 }
-
-const pluginConfig = {
-  name: "canvas",
-  alias: ["canvas", "draw", "design", "art"],
-  category: "maker",
-  description: "Buat desain/grafis",
-  usage: ".canvas <teks>",
-  example: ".canvas Hello World",
-  isOwner: false,
-  isPremium: false,
-  isGroup: true,
-  isPrivate: false,
-  cooldown: 10,
-  energi: 0,
-  isEnabled: true,
-};
 
 export default {
   config: pluginConfig,

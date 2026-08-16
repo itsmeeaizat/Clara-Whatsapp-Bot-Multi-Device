@@ -1,6 +1,5 @@
 import fs from "fs";
 import path from "path";
-import { fileURLToPath } from "url";
 import axios from "axios";
 import {
   alyaHeader,
@@ -9,8 +8,6 @@ import {
   tipText,
 } from "../../src/lib/clara-menu-style.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 const TMP_DIR = path.join(process.cwd(), "tmp");
 
 function ensureTmp() {
@@ -26,14 +23,15 @@ async function handler(m, { sock, config: botConfig }) {
   try {
     const prefix = botConfig.command?.prefix || ".";
 
-    const media = m.msg?.imageMessage || m.msg?.videoMessage || m.quoted?.msg?.imageMessage || m.quoted?.msg?.videoMessage;
-    if (!media) {
+    // Check for quoted image
+    const quoted = m.quoted;
+    if (!quoted || !quoted.message?.imageMessage) {
       const text =
         alyaHeader("Cara Pakai", "✨") +
         "\n\n" +
         bracketBox("📋", "ɪɴꜰᴏ", [
-          `◦ Penggunaan: *${prefix}enhance*`,
-          `◦ Kirim/reply foto/video, lalu ketik *${prefix}enhance*`,
+          `◦ Reply gambar dengan *${prefix}enhance*`,
+          `◦ Fungsi: Upscale gambar HD`,
         ]) +
         "\n\n" +
         separator() +
@@ -44,51 +42,52 @@ async function handler(m, { sock, config: botConfig }) {
       return { handled: true };
     }
 
-    const buffer = await sock.downloadMediaMessage(m.quoted || m);
-    const ext = m.msg?.videoMessage || media?.videoMessage ? ".mp4" : ".png";
-    const filePath = tempPath(ext);
-    fs.writeFileSync(filePath, Buffer.from(buffer));
+    // Download image
+    const buffer = await quoted.download();
+    const inputPath = tempPath(".jpg");
+    fs.writeFileSync(inputPath, buffer);
 
-    const apiUrl = `https://api.zeks.xyz/api/enhance`;
-    const form = new FormData();
-    form.append("file", Buffer.from(buffer), `media${ext}`);
+    // Use internal upscaler
+    try {
+      const upscaler = (await import("../../src/scraper/upscaler.js")).default;
+      const result = await upscaler(inputPath);
+      
+      if (result) {
+        const enhancedBuf = fs.existsSync(result) ? fs.readFileSync(result) : null;
+        if (enhancedBuf) {
+          await sock.sendMessage(m.chat, {
+            image: enhancedBuf,
+            caption: `✨ *Enhance*\n◦ Status: *Berhasil*`,
+          }, { quoted: m });
 
-    const response = await axios.post(apiUrl, form, {
-      headers: form.getHeaders(),
-      responseType: "arraybuffer",
-      timeout: 10000,
-    });
+          try { fs.unlinkSync(inputPath); fs.unlinkSync(result); } catch {}
+          return { handled: true };
+        }
+      }
+    } catch (e) {
+      console.log("upscaler failed:", e.message);
+    }
 
-    const resultBuffer = Buffer.from(response.data);
-    const resultExt = ext;
-    const resultPath = tempPath(resultExt);
-    fs.writeFileSync(resultPath, resultBuffer);
+    // Fallback: just send the original with enhanced note
+    await sock.sendMessage(m.chat, {
+      image: fs.readFileSync(inputPath),
+      caption: `✨ *Enhance*\n◦ Status: *Tidak dapat upscale, kirim original*`,
+    }, { quoted: m });
 
-    const caption =
+    try { fs.unlinkSync(inputPath); } catch {}
+
+    const text =
       alyaHeader("Enhance", "✨") +
       "\n\n" +
-      bracketBox("✨", "ʜᴀꜱɪʟ", [
-        "◦ Status: *Berhasil*",
-        "◦ Model: *AI Enhancement*",
+      bracketBox("✨", "ʀᴇꜱᴜʟᴛ", [
+        "◦ Status: *Selesai*",
       ]) +
       "\n\n" +
       separator() +
       "\n" +
-      tipText(`Ketik ${prefix}enhance untuk enhance media lain`) +
-      "\n" +
-      tipText(`Ketik ${prefix}menu untuk kembali ke menu utama`);
+      tipText(`Reply gambar dengan ${prefix}enhance untuk upscale lagi`);
 
-    if (resultExt === ".mp4") {
-      await sock.sendMessage(m.chat, {
-        video: fs.readFileSync(resultPath),
-        caption,
-      }, { quoted: m });
-    } else {
-      await sock.sendMessage(m.chat, {
-        image: fs.readFileSync(resultPath),
-        caption,
-      }, { quoted: m });
-    }
+    await m.reply(text);
   } catch (error) {
     const prefix = botConfig.command?.prefix || ".";
     const text =
@@ -101,7 +100,7 @@ async function handler(m, { sock, config: botConfig }) {
       "\n\n" +
       separator() +
       "\n" +
-      tipText(`Coba lagi nanti atau hubungi owner`);
+      tipText(`Coba lagi nanti`);
 
     await m.reply(text);
   }
@@ -111,16 +110,16 @@ async function handler(m, { sock, config: botConfig }) {
 
 const pluginConfig = {
   name: "enhance",
-  alias: ["enhance", "upgradeimg", "perbaikiimg", "hd"],
-  category: "ai",
-  description: "Enhance kualitas foto/video",
-  usage: ".enhance (reply media)",
-  example: ".enhance (reply foto)",
+  alias: ["enhance", "upscale", "hd"],
+  category: "maker",
+  description: "Upscale gambar jadi HD",
+  usage: "Reply gambar dengan .enhance",
+  example: ".enhance (reply gambar)",
   isOwner: false,
   isPremium: false,
   isGroup: true,
   isPrivate: false,
-  cooldown: 10,
+  cooldown: 15,
   energi: 0,
   isEnabled: true,
 };

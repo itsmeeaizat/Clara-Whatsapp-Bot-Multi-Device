@@ -1,6 +1,3 @@
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
 import {
   alyaHeader,
   bracketBox,
@@ -8,18 +5,21 @@ import {
   tipText,
 } from "../../src/lib/clara-menu-style.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const TMP_DIR = path.join(process.cwd(), "tmp");
-
-function ensureTmp() {
-  if (!fs.existsSync(TMP_DIR)) fs.mkdirSync(TMP_DIR, { recursive: true });
-}
-
-function tempPath(ext) {
-  ensureTmp();
-  return path.join(TMP_DIR, `nulis_${Date.now()}_${Math.random().toString(16).slice(2)}${ext}`);
-}
+const pluginConfig = {
+  name: "nulis",
+  alias: ["nulis", "tulis", "nulismbok"],
+  category: "maker",
+  description: "Ubah teks jadi gambar tulisan di buku",
+  usage: ".nulis <teks>",
+  example: ".nulis Hari ini aku belajar",
+  isOwner: false,
+  isPremium: false,
+  isGroup: true,
+  isPrivate: false,
+  cooldown: 5,
+  energi: 0,
+  isEnabled: true,
+};
 
 async function handler(m, { sock, config: botConfig }) {
   try {
@@ -27,51 +27,99 @@ async function handler(m, { sock, config: botConfig }) {
     const text = m.text?.trim();
 
     if (!text) {
-      const out =
-        alyaHeader("Cara Pakai", "✍️") +
+      const reply =
+        alyaHeader("Cara Pakai", "✏️") +
         "\n\n" +
         bracketBox("📋", "ɪɴꜰᴏ", [
           `◦ Penggunaan: *${prefix}nulis <teks>*`,
-          `◦ Contoh: *${prefix}nulis Halo dunia*`,
+          `◦ Contoh: *${prefix}nulis Hari ini aku belajar*`,
         ]) +
         "\n\n" +
         separator() +
         "\n" +
         tipText(`Ketik ${prefix}menu untuk kembali`);
 
-      await m.reply(out);
+      await m.reply(reply);
       return { handled: true };
     }
 
-    const apiUrl = `https://api.miaou.xyz/api/nulis?text=${encodeURIComponent(text)}`;
-    const res = await fetch(apiUrl);
-    if (!res.ok) throw new Error("Gagal generate nulis");
+    const { createCanvas } = await import("@napi-rs/canvas");
 
-    const buffer = Buffer.from(await res.arrayBuffer());
-    const filePath = tempPath(".png");
-    fs.writeFileSync(filePath, buffer);
+    // Create canvas resembling lined paper
+    const canvas = createCanvas(800, 1000);
+    const ctx = canvas.getContext("2d");
 
+    // White paper background
+    ctx.fillStyle = "#FFFFFF";
+    ctx.fillRect(0, 0, 800, 1000);
+
+    // Red margin line
+    ctx.strokeStyle = "#FF4444";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(100, 0);
+    ctx.lineTo(100, 1000);
+    ctx.stroke();
+
+    // Blue horizontal lines
+    ctx.strokeStyle = "#4444FF";
+    ctx.lineWidth = 1;
+    const lineHeight = 50;
+    for (let y = 80; y < 1000; y += lineHeight) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(800, y);
+      ctx.stroke();
+    }
+
+    // Write text
+    ctx.fillStyle = "#222222";
+    ctx.font = "32px serif";
+    ctx.textAlign = "left";
+    ctx.textBaseline = "alphabetic";
+
+    const maxWidth = 800 - 120;
+    const words = text.split(" ");
+    const lines = [];
+    let currentLine = "";
+
+    for (const word of words) {
+      const testLine = currentLine ? `${currentLine} ${word}` : word;
+      if (ctx.measureText(testLine).width > maxWidth && currentLine) {
+        lines.push(currentLine);
+        currentLine = word;
+      } else {
+        currentLine = testLine;
+      }
+    }
+    if (currentLine) lines.push(currentLine);
+
+    let y = 70;
+    for (const line of lines) {
+      ctx.fillText(line, 120, y);
+      y += lineHeight;
+      if (y > 980) break;
+    }
+
+    const buffer = canvas.toBuffer("image/png");
     await sock.sendMessage(m.chat, {
-      image: fs.readFileSync(filePath),
-      caption: `Nulis: ${text.slice(0, 200)}`,
-    });
+      image: buffer,
+      caption: `✏️ *Nulis*\n◦ Teks: *${text}*`,
+    }, { quoted: m });
 
-    const out =
-      alyaHeader("Nulis", "✍️") +
+    const info =
+      alyaHeader("Nulis", "✏️") +
       "\n\n" +
-      bracketBox("✍️", "ʜᴀꜱɪʟ", [
-        `◦ Teks: *${text.slice(0, 50)}${text.length > 50 ? "..." : ""}*`,
-        "◦ Format: *PNG*",
+      bracketBox("✏️", "ʀᴇꜱᴜʟᴛ", [
+        `◦ Teks: *${text}*`,
         "◦ Status: *Berhasil*",
       ]) +
       "\n\n" +
       separator() +
       "\n" +
-      tipText(`Ketik ${prefix}nulis <teks> untuk menulis lagi`) +
-      "\n" +
-      tipText(`Ketik ${prefix}menu untuk kembali ke menu utama`);
+      tipText(`Ketik ${prefix}nulis <teks> untuk nulis lagi`);
 
-    await m.reply(out);
+    await m.reply(info);
   } catch (error) {
     const prefix = botConfig.command?.prefix || ".";
     const text =
@@ -84,29 +132,13 @@ async function handler(m, { sock, config: botConfig }) {
       "\n\n" +
       separator() +
       "\n" +
-      tipText(`Coba lagi nanti atau hubungi owner`);
+      tipText(`Coba lagi nanti`);
 
     await m.reply(text);
   }
 
   return { handled: true };
 }
-
-const pluginConfig = {
-  name: "nulis",
-  alias: ["nulis", "tulis", "handwrite", "write"],
-  category: "tools",
-  description: "Tulis teks jadi gambar tulisan tangan",
-  usage: ".nulis <teks>",
-  example: ".nulis Halo dunia",
-  isOwner: false,
-  isPremium: false,
-  isGroup: true,
-  isPrivate: false,
-  cooldown: 10,
-  energi: 0,
-  isEnabled: true,
-};
 
 export default {
   config: pluginConfig,

@@ -9,8 +9,6 @@ import {
   tipText,
 } from "../../src/lib/clara-menu-style.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 const TMP_DIR = path.join(process.cwd(), "tmp");
 
 function ensureTmp() {
@@ -44,26 +42,51 @@ async function handler(m, { sock, config: botConfig }) {
       return { handled: true };
     }
 
-    const apiUrl = `https://api.zeks.xyz/api/instagram?url=${encodeURIComponent(url)}`;
-    const response = await axios.get(apiUrl, { timeout: 10000 });
-    const data = response.data;
-    const result = data?.result || data;
-    const mediaUrl = result?.url || result?.link || url;
+    const { igdl } = await import("btch-downloader");
+    const data = await igdl(url);
+
+    if (!data?.status || (!data?.[0]?.url && !data?.[0]?.thumbnail))
+      throw new Error("Instagram API returned no data");
+
+    const mediaList = Array.isArray(data) ? data : [data];
+    for (const media of mediaList) {
+      const mediaUrl = media.url || media.download_link;
+      if (!mediaUrl) continue;
+
+      const isVideo = media.type === "video" || mediaUrl.includes(".mp4");
+      const ext = isVideo ? ".mp4" : ".jpg";
+      const filePath = tempPath(ext);
+      const res = await axios.get(mediaUrl, { responseType: "arraybuffer", timeout: 60000 });
+      fs.writeFileSync(filePath, Buffer.from(res.data));
+
+      if (isVideo) {
+        await sock.sendMessage(m.chat, {
+          video: fs.readFileSync(filePath),
+          caption: `📸 *Instagram Download*\n◦ Status: *Berhasil*`,
+          mimetype: "video/mp4",
+        }, { quoted: m });
+      } else {
+        await sock.sendMessage(m.chat, {
+          image: fs.readFileSync(filePath),
+          caption: `📸 *Instagram Download*\n◦ Status: *Berhasil*`,
+        }, { quoted: m });
+      }
+
+      try { fs.unlinkSync(filePath); } catch {}
+    }
 
     const text =
       alyaHeader("Instagram", "📸") +
       "\n\n" +
       bracketBox("📸", "ᴅᴏᴡɴʟᴏᴀᴅ", [
         `◦ Link: *${url}*`,
-        `◦ Result: *${mediaUrl}*`,
+        `◦ Total: *${mediaList.length} media*`,
         "◦ Status: *Berhasil*",
       ]) +
       "\n\n" +
       separator() +
       "\n" +
-      tipText(`Ketik ${prefix}instagram <link> untuk download media lain`) +
-      "\n" +
-      tipText(`Ketik ${prefix}menu untuk kembali ke menu utama`);
+      tipText(`Ketik ${prefix}instagram <link> untuk download media lain`);
 
     await m.reply(text);
   } catch (error) {

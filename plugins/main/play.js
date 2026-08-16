@@ -1,7 +1,5 @@
 import fs from "fs";
 import path from "path";
-import { fileURLToPath } from "url";
-import axios from "axios";
 import {
   alyaHeader,
   bracketBox,
@@ -9,8 +7,6 @@ import {
   tipText,
 } from "../../src/lib/clara-menu-style.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 const TMP_DIR = path.join(process.cwd(), "tmp");
 
 function ensureTmp() {
@@ -21,27 +17,6 @@ function tempPath(ext) {
   ensureTmp();
   return path.join(TMP_DIR, `play_${Date.now()}_${Math.random().toString(16).slice(2)}${ext}`);
 }
-
-const ENDPOINTS = [
-  "https://api.zeks.xyz/api/ytmp3",
-  "https://api.zeks.xyz/api/play",
-];
-
-const pluginConfig = {
-  name: "play",
-  alias: ["play", "music", "song", "lagu"],
-  category: "music",
-  description: "Putar lagu dari query",
-  usage: ".play <judul lagu>",
-  example: ".play Lagu Favorit",
-  isOwner: false,
-  isPremium: false,
-  isGroup: true,
-  isPrivate: false,
-  cooldown: 10,
-  energi: 0,
-  isEnabled: true,
-};
 
 async function handler(m, { sock, config: botConfig }) {
   try {
@@ -65,49 +40,47 @@ async function handler(m, { sock, config: botConfig }) {
       return { handled: true };
     }
 
-    let buffer = null;
-    let source = "";
+    // Search YouTube
+    const yts = (await import("yt-search")).default;
+    const searchResults = await yts(query);
+    const video = searchResults.all?.[0];
+    if (!video) throw new Error("Lagu tidak ditemukan");
 
-    for (const baseUrl of ENDPOINTS) {
-      try {
-        const res = await axios.get(baseUrl, {
-          params: { query },
-          responseType: "arraybuffer",
-          timeout: 60000,
-        });
-        if (res.status === 200 && res.data && res.data.length > 1000) {
-          buffer = Buffer.from(res.data);
-          source = baseUrl;
-          break;
-        }
-      } catch {}
-    }
+    // Download audio using btch-downloader
+    const { youtube } = await import("btch-downloader");
+    const data = await youtube(video.url);
 
-    if (!buffer) throw new Error("Gagal mengambil audio dari semua endpoint.");
+    if (!data?.status) throw new Error("Gagal download audio");
+
+    const audioUrl = data.audio || data.mp3 || data.url;
+    if (!audioUrl) throw new Error("No audio URL found");
 
     const filePath = tempPath(".mp3");
-    fs.writeFileSync(filePath, buffer);
+    const axios = (await import("axios")).default;
+    const res = await axios.get(audioUrl, { responseType: "arraybuffer", timeout: 120000 });
+    fs.writeFileSync(filePath, Buffer.from(res.data));
 
     await sock.sendMessage(m.chat, {
       audio: fs.readFileSync(filePath),
       mimetype: "audio/mpeg",
       ptt: false,
-      fileName: `${query}.mp3`,
+      fileName: `${video.title}.mp3`,
     }, { quoted: m });
+
+    try { fs.unlinkSync(filePath); } catch {}
 
     const text =
       alyaHeader("Play", "🎶") +
       "\n\n" +
       bracketBox("🎶", "ᴘʟᴀʏʟɪꜱᴛ", [
-        `◦ Query: *${query}*`,
+        `◦ Judul: *${video.title}*`,
+        `◦ Duration: *${video.timestamp || "-"}*`,
         "◦ Status: *Berhasil*",
       ]) +
       "\n\n" +
       separator() +
       "\n" +
-      tipText(`Ketik ${prefix}play <judul> untuk lagu lain`) +
-      "\n" +
-      tipText(`Ketik ${prefix}menu untuk kembali ke menu utama`);
+      tipText(`Ketik ${prefix}play <judul> untuk lagu lain`);
 
     await m.reply(text);
   } catch (error) {
@@ -129,6 +102,22 @@ async function handler(m, { sock, config: botConfig }) {
 
   return { handled: true };
 }
+
+const pluginConfig = {
+  name: "play",
+  alias: ["play", "music", "song", "lagu"],
+  category: "music",
+  description: "Putar lagu dari YouTube",
+  usage: ".play <judul lagu>",
+  example: ".play Lagu Favorit",
+  isOwner: false,
+  isPremium: false,
+  isGroup: true,
+  isPrivate: false,
+  cooldown: 10,
+  energi: 0,
+  isEnabled: true,
+};
 
 export default {
   config: pluginConfig,

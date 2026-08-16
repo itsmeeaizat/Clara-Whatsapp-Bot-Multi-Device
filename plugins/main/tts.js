@@ -1,7 +1,5 @@
 import fs from "fs";
 import path from "path";
-import { fileURLToPath } from "url";
-import axios from "axios";
 import {
   alyaHeader,
   bracketBox,
@@ -9,8 +7,6 @@ import {
   tipText,
 } from "../../src/lib/clara-menu-style.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 const TMP_DIR = path.join(process.cwd(), "tmp");
 
 function ensureTmp() {
@@ -44,23 +40,21 @@ async function handler(m, { sock, config: botConfig }) {
       return { handled: true };
     }
 
-    const apiUrl = `https://api.zeks.xyz/api/tts?text=${encodeURIComponent(text)}`;
+    const { getAudioUrl } = await import("google-tts-api");
+    const audioUrl = getAudioUrl(text, { lang: "id", slow: false });
+
     const filePath = tempPath(".mp3");
+    const axios = (await import("axios")).default;
+    const res = await axios.get(audioUrl, { responseType: "arraybuffer", timeout: 15000 });
+    fs.writeFileSync(filePath, Buffer.from(res.data));
 
-    try {
-      const response = await axios.get(apiUrl, { responseType: "arraybuffer", timeout: 10000 });
-      fs.writeFileSync(filePath, Buffer.from(response.data));
+    await sock.sendMessage(m.chat, {
+      audio: fs.readFileSync(filePath),
+      mimetype: "audio/mpeg",
+      ptt: false,
+    }, { quoted: m });
 
-      await sock.sendMessage(m.chat, {
-        audio: fs.readFileSync(filePath),
-        mimetype: "audio/mpeg",
-        ptt: false,
-      }, { quoted: m });
-    } catch {
-      await sock.sendMessage(m.chat, {
-        text: `🔊 *TTS*\n\n◦ Teks: *${text}*\n◦ Status: *Gagal generate audio*`,
-      }, { quoted: m });
-    }
+    try { fs.unlinkSync(filePath); } catch {}
 
     const info =
       alyaHeader("TTS", "🔊") +
@@ -72,9 +66,7 @@ async function handler(m, { sock, config: botConfig }) {
       "\n\n" +
       separator() +
       "\n" +
-      tipText(`Ketik ${prefix}tts <teks> untuk audio lain`) +
-      "\n" +
-      tipText(`Ketik ${prefix}menu untuk kembali ke menu utama`);
+      tipText(`Ketik ${prefix}tts <teks> untuk audio lain`);
 
     await m.reply(info);
   } catch (error) {
@@ -101,7 +93,7 @@ const pluginConfig = {
   name: "tts",
   alias: ["tts", "texttospeech", "suara", "speak"],
   category: "tools",
-  description: "Ubah teks menjadi audio",
+  description: "Ubah teks menjadi audio (Google TTS)",
   usage: ".tts <teks>",
   example: ".tts Halo dunia",
   isOwner: false,

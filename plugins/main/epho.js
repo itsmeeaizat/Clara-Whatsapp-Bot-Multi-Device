@@ -1,38 +1,23 @@
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
 import axios from "axios";
-import { alyaHeader, bracketBox, separator, tipText } from "../../src/lib/clara-menu-style.js";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const TMP_DIR = path.join(process.cwd(), "tmp");
-
-function ensureTmp() {
-  if (!fs.existsSync(TMP_DIR)) fs.mkdirSync(TMP_DIR, { recursive: true });
-}
-
-function tempPath(ext) {
-  ensureTmp();
-  return path.join(TMP_DIR, `epho_${Date.now()}_${Math.random().toString(16).slice(2)}${ext}`);
-}
-
-const ENDPOINTS = [
-  "https://api.zeks.xyz/api/ephoto",
-];
+import {
+  alyaHeader,
+  bracketBox,
+  separator,
+  tipText,
+} from "../../src/lib/clara-menu-style.js";
 
 const pluginConfig = {
   name: "epho",
-  alias: ["epho", "ephoto", "edit", "fx"],
+  alias: ["epho", "ephoto"],
   category: "maker",
-  description: "Efek foto/image editor",
-  usage: ".epho",
-  example: ".epho (kirim/reply gambar)",
+  description: "Generate ephoto dari teks",
+  usage: ".epho <teks>",
+  example: ".epho Clara",
   isOwner: false,
   isPremium: false,
   isGroup: true,
   isPrivate: false,
-  cooldown: 10,
+  cooldown: 15,
   energi: 0,
   isEnabled: true,
 };
@@ -40,74 +25,50 @@ const pluginConfig = {
 async function handler(m, { sock, config: botConfig }) {
   try {
     const prefix = botConfig.command?.prefix || ".";
+    const text = m.text?.trim();
 
-    const media = m.msg?.imageMessage || m.quoted?.msg?.imageMessage;
-    if (!media) {
-      const text =
-        alyaHeader("Cara Pakai", "🎨") +
+    if (!text) {
+      const reply =
+        alyaHeader("Cara Pakai", "📝") +
         "\n\n" +
-        bracketBox("🎨", "ɪɴꜱᴛʀᴜᴋsɪ", [
-          "◦ Kirim gambar + caption .epho",
-          "◦ Atau reply gambar dengan .epho",
-          "◦ Format: JPG, PNG, WEBP",
+        bracketBox("📋", "ɪɴꜰᴏ", [
+          `◦ Penggunaan: *${prefix}ephoto <teks>*`,
+          `◦ Contoh: *${prefix}ephoto Clara*`,
         ]) +
         "\n\n" +
         separator() +
         "\n" +
         tipText(`Ketik ${prefix}menu untuk kembali`);
 
-      await m.reply(text);
+      await m.reply(reply);
       return { handled: true };
     }
 
-    const buffer = await sock.downloadMediaMessage(m.quoted || m);
-    const filePath = tempPath(".png");
-    fs.writeFileSync(filePath, buffer);
+    // Use AI image generation as ephoto replacement
+    const { fluxImage } = await import("../../src/scraper/seaart.js");
+    const result = await fluxImage(`elegant text typography design with text "${text}", professional, high quality, golden letters on dark background`);
 
-    let resultBuffer = null;
-    for (const baseUrl of ENDPOINTS) {
-      try {
-        const form = new FormData();
-        form.append("image", new Blob([buffer], { type: "image/png" }));
-        const res = await axios.post(baseUrl, form, {
-          headers: form.getHeaders(),
-          responseType: "arraybuffer",
-          timeout: 60000,
-        });
-        if (res.status === 200 && res.data && res.data.length > 1000) {
-          resultBuffer = Buffer.from(res.data);
-          break;
-        }
-      } catch {}
-    }
+    if (!result?.url) throw new Error("Gagal generate ephoto");
 
-    if (!resultBuffer) {
-      const text =
-        alyaHeader("Ephoto", "🎨") +
-        "\n\n" +
-        bracketBox("🎨", "ꜱᴛᴀᴛᴜꜱ", [
-          "◦ Efek: *Photo Effect*",
-          "◦ Status: *Berhasil tanpa API*",
-        ]) +
-        "\n\n" +
-        separator() +
-        "\n" +
-        tipText(`Ketik ${prefix}menu untuk kembali`);
-
-      await m.reply(text);
-      return { handled: true };
-    }
-
+    const res = await axios.get(result.url, { responseType: "arraybuffer", timeout: 30000 });
     await sock.sendMessage(m.chat, {
-      image: resultBuffer,
-      caption:
-        alyaHeader("Ephoto", "🎨") +
-        "\n\n" +
-        bracketBox("🎨", "ꜱᴛᴀᴛᴜꜱ", [
-          "◦ Efek: *Photo Effect*",
-          "◦ Status: *Berhasil*",
-        ]),
+      image: Buffer.from(res.data),
+      caption: `📝 *Ephoto*\n◦ Teks: *${text}*\n◦ Engine: *AI Flux*`,
     }, { quoted: m });
+
+    const info =
+      alyaHeader("Ephoto", "📝") +
+      "\n\n" +
+      bracketBox("📝", "ʀᴇꜱᴜʟᴛ", [
+        `◦ Teks: *${text}*`,
+        "◦ Status: *Berhasil*",
+      ]) +
+      "\n\n" +
+      separator() +
+      "\n" +
+      tipText(`Ketik ${prefix}ephoto <teks> untuk ephoto lain`);
+
+    await m.reply(info);
   } catch (error) {
     const prefix = botConfig.command?.prefix || ".";
     const text =
@@ -120,7 +81,7 @@ async function handler(m, { sock, config: botConfig }) {
       "\n\n" +
       separator() +
       "\n" +
-      tipText(`Coba lagi nanti atau hubungi owner`);
+      tipText(`Coba lagi nanti`);
 
     await m.reply(text);
   }

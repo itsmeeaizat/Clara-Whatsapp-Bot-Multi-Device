@@ -1,6 +1,4 @@
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
+import axios from "axios";
 import {
   alyaHeader,
   bracketBox,
@@ -8,95 +6,61 @@ import {
   tipText,
 } from "../../src/lib/clara-menu-style.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const TMP_DIR = path.join(process.cwd(), "tmp");
-
-function ensureTmp() {
-  if (!fs.existsSync(TMP_DIR)) fs.mkdirSync(TMP_DIR, { recursive: true });
-}
-
-function tempPath(ext) {
-  ensureTmp();
-  return path.join(TMP_DIR, `wallpaper_${Date.now()}_${Math.random().toString(16).slice(2)}${ext}`);
-}
+const pluginConfig = {
+  name: "wallpaper",
+  alias: ["wallpaper", "wp", "wall"],
+  category: "search",
+  description: "Cari wallpaper",
+  usage: ".wallpaper <query>",
+  example: ".wallpaper anime",
+  isOwner: false,
+  isPremium: false,
+  isGroup: true,
+  isPrivate: false,
+  cooldown: 10,
+  energi: 0,
+  isEnabled: true,
+};
 
 async function handler(m, { sock, config: botConfig }) {
   try {
     const prefix = botConfig.command?.prefix || ".";
-    const query = m.text?.trim();
+    const query = m.text?.trim() || "wallpaper hd";
 
-    if (!query) {
-      const text =
-        alyaHeader("Cara Pakai", "🖼️") +
-        "\n\n" +
-        bracketBox("📋", "ɪɴꜰᴏ", [
-          `◦ Penggunaan: *${prefix}wallpaper <query>*`,
-          `◦ Contoh: *${prefix}wallpaper aesthetic*`,
-        ]) +
-        "\n\n" +
-        separator() +
-        "\n" +
-        tipText(`Ketik ${prefix}menu untuk kembali`);
+    const { pinterest } = await import("btch-downloader");
+    const data = await pinterest(`${query} wallpaper hd`);
 
-      await m.reply(text);
-      return { handled: true };
+    if (!data?.status) throw new Error("Gagal mencari wallpaper");
+
+    const images = Array.isArray(data) ? data : [data];
+    if (!images.length) throw new Error("Tidak ada wallpaper ditemukan");
+
+    const selected = images.slice(0, 3);
+    for (const item of selected) {
+      const imageUrl = item?.url || item?.image || item;
+      if (typeof imageUrl !== "string") continue;
+
+      try {
+        const res = await axios.get(imageUrl, { responseType: "arraybuffer", timeout: 15000 });
+        await sock.sendMessage(m.chat, {
+          image: Buffer.from(res.data),
+          caption: `🖼️ *Wallpaper*\n◦ Query: *${query}*`,
+        }, { quoted: m });
+      } catch {}
     }
-
-    const apiUrl = `https://api.zeks.xyz/api/wallpaper?q=${encodeURIComponent(query)}`;
-    let imageUrl = null;
-    try {
-      const res = await fetch(apiUrl);
-      const json = await res.json();
-      if (json.status && json.result?.image) {
-        imageUrl = json.result.image;
-      }
-    } catch {}
-
-    if (!imageUrl) {
-      const text =
-        alyaHeader("Wallpaper", "🖼️") +
-        "\n\n" +
-        bracketBox("🖼️", "ʜᴀꜱɪʟ", [
-          `◦ Query: *${query}*`,
-          "◦ Status: *Tidak ada wallpaper ditemukan*",
-        ]) +
-        "\n\n" +
-        separator() +
-        "\n" +
-        tipText(`Ketik ${prefix}wallpaper <query> untuk mencari lagi`) +
-        "\n" +
-        tipText(`Ketik ${prefix}menu untuk kembali ke menu utama`);
-
-      await m.reply(text);
-      return { handled: true };
-    }
-
-    const imgRes = await fetch(imageUrl);
-    const buffer = Buffer.from(await imgRes.arrayBuffer());
-    const ext = path.extname(new URL(imageUrl).pathname) || ".jpg";
-    const filePath = tempPath(ext);
-    fs.writeFileSync(filePath, buffer);
-
-    await sock.sendMessage(m.chat, {
-      image: fs.readFileSync(filePath),
-      caption: `Wallpaper: ${query}`,
-    });
 
     const text =
       alyaHeader("Wallpaper", "🖼️") +
       "\n\n" +
       bracketBox("🖼️", "ʜᴀꜱɪʟ", [
-        `◦ Judul: *${query}*`,
-        `◦ Source: *${imageUrl}*`,
+        `◦ Query: *${query}*`,
+        `◦ Total: *${selected.length} wallpaper*`,
         "◦ Status: *Berhasil*",
       ]) +
       "\n\n" +
       separator() +
       "\n" +
-      tipText(`Ketik ${prefix}wallpaper <query> untuk mencari lagi`) +
-      "\n" +
-      tipText(`Ketik ${prefix}menu untuk kembali ke menu utama`);
+      tipText(`Ketik ${prefix}wallpaper <query> untuk cari lagi`);
 
     await m.reply(text);
   } catch (error) {
@@ -111,29 +75,13 @@ async function handler(m, { sock, config: botConfig }) {
       "\n\n" +
       separator() +
       "\n" +
-      tipText(`Coba lagi nanti atau hubungi owner`);
+      tipText(`Coba lagi nanti`);
 
     await m.reply(text);
   }
 
   return { handled: true };
 }
-
-const pluginConfig = {
-  name: "wallpaper",
-  alias: ["wall", "wp", "wallpapersearch", "wallpapersearch"],
-  category: "search",
-  description: "Cari wallpaper HD",
-  usage: ".wallpaper <query>",
-  example: ".wallpaper aesthetic",
-  isOwner: false,
-  isPremium: false,
-  isGroup: true,
-  isPrivate: false,
-  cooldown: 10,
-  energi: 0,
-  isEnabled: true,
-};
 
 export default {
   config: pluginConfig,

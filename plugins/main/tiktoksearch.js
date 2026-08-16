@@ -1,6 +1,3 @@
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
 import axios from "axios";
 import {
   alyaHeader,
@@ -9,18 +6,21 @@ import {
   tipText,
 } from "../../src/lib/clara-menu-style.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const TMP_DIR = path.join(process.cwd(), "tmp");
-
-function ensureTmp() {
-  if (!fs.existsSync(TMP_DIR)) fs.mkdirSync(TMP_DIR, { recursive: true });
-}
-
-function tempPath(ext) {
-  ensureTmp();
-  return path.join(TMP_DIR, `ttsearch_${Date.now()}_${Math.random().toString(16).slice(2)}${ext}`);
-}
+const pluginConfig = {
+  name: "tiktoksearch",
+  alias: ["tiktoksearch", "ttsearch", "tiktoksrc"],
+  category: "search",
+  description: "Cari video TikTok berdasarkan query",
+  usage: ".tiktoksearch <query>",
+  example: ".tiktoksearch dance challenge",
+  isOwner: false,
+  isPremium: false,
+  isGroup: true,
+  isPrivate: false,
+  cooldown: 10,
+  energi: 0,
+  isEnabled: true,
+};
 
 async function handler(m, { sock, config: botConfig }) {
   try {
@@ -29,11 +29,11 @@ async function handler(m, { sock, config: botConfig }) {
 
     if (!query) {
       const text =
-        alyaHeader("Cara Pakai", "🎵") +
+        alyaHeader("Cara Pakai", "🔍") +
         "\n\n" +
         bracketBox("📋", "ɪɴꜰᴏ", [
           `◦ Penggunaan: *${prefix}tiktoksearch <query>*`,
-          `◦ Contoh: *${prefix}tiktoksearch dance trend*`,
+          `◦ Contoh: *${prefix}tiktoksearch dance challenge*`,
         ]) +
         "\n\n" +
         separator() +
@@ -44,29 +44,37 @@ async function handler(m, { sock, config: botConfig }) {
       return { handled: true };
     }
 
-    const apiUrl = `https://api.zeks.xyz/api/tiktoksearch?q=${encodeURIComponent(query)}`;
-    const response = await axios.get(apiUrl, { timeout: 10000 });
-    const data = response.data;
-    const result = data?.result || data;
-    const items = Array.isArray(result) ? result.slice(0, 10) : [];
-    const title = items[0]?.title || query;
-    const url = items[0]?.url || items[0]?.link || "Tidak ada";
+    // Try internal scraper
+    try {
+      const { tiktokSearchVideo } = await import("../../src/scraper/tiktoksearch.js");
+      const results = await tiktokSearchVideo(query);
 
-    const text =
-      alyaHeader("TikTok Search", "🎵") +
-      "\n\n" +
-      bracketBox("🎵", "ʜᴀꜱɪʟ", [
-        `◦ Query: *${query}*`,
-        `◦ Judul: *${title}*`,
-        `◦ Link: *${url}*`,
-        "◦ Status: *Berhasil*",
-      ]) +
-      "\n\n" +
-      separator() +
-      "\n" +
-      tipText(`Ketik ${prefix}menu untuk kembali`);
+      if (results && results.length > 0) {
+        const topResults = results.slice(0, 5);
+        const list = topResults.map((v, i) =>
+          `${i + 1}. *${v.title || v.desc || "No title"}*\n   ${v.url || v.link || ""}`
+        ).join("\n\n");
 
-    await m.reply(text);
+        const text =
+          alyaHeader("TikTok Search", "🔍") +
+          "\n\n" +
+          bracketBox("🔍", "ʜᴀꜱɪʟ", [
+            `◦ Query: *${query}*`,
+            `◦ Total: *${topResults.length} video*`,
+          ]) +
+          "\n\n" +
+          list +
+          "\n\n" +
+          separator() +
+          "\n" +
+          tipText(`Ketik ${prefix}tiktoksearch <query> untuk cari lagi`);
+
+        await m.reply(text);
+        return { handled: true };
+      }
+    } catch {}
+
+    throw new Error("TikTok search sedang tidak tersedia, coba lagi nanti");
   } catch (error) {
     const prefix = botConfig.command?.prefix || ".";
     const text =
@@ -79,29 +87,13 @@ async function handler(m, { sock, config: botConfig }) {
       "\n\n" +
       separator() +
       "\n" +
-      tipText(`Coba lagi nanti atau hubungi owner`);
+      tipText(`Coba lagi nanti`);
 
     await m.reply(text);
   }
 
   return { handled: true };
 }
-
-const pluginConfig = {
-  name: "tiktoksearch",
-  alias: ["ttsearch", "tiktoksearch", "searchtiktok"],
-  category: "search",
-  description: "Cari video TikTok",
-  usage: ".tiktoksearch <query>",
-  example: ".tiktoksearch dance trend",
-  isOwner: false,
-  isPremium: false,
-  isGroup: true,
-  isPrivate: false,
-  cooldown: 10,
-  energi: 0,
-  isEnabled: true,
-};
 
 export default {
   config: pluginConfig,

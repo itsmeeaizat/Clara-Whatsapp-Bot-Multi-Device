@@ -1,6 +1,3 @@
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
 import axios from "axios";
 import {
   alyaHeader,
@@ -9,29 +6,11 @@ import {
   tipText,
 } from "../../src/lib/clara-menu-style.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const TMP_DIR = path.join(process.cwd(), "tmp");
-
-function ensureTmp() {
-  if (!fs.existsSync(TMP_DIR)) fs.mkdirSync(TMP_DIR, { recursive: true });
-}
-
-function tempPath(ext) {
-  ensureTmp();
-  return path.join(TMP_DIR, `cecan_${Date.now()}_${Math.random().toString(16).slice(2)}${ext}`);
-}
-
-const ENDPOINTS = [
-  "https://api.zeks.xyz/api/cecan",
-  "https://api.zeks.xyz/api/cecanindo",
-];
-
 const pluginConfig = {
   name: "cecan",
-  alias: ["cecan", "cecanindo", "indoc", "cecanind"],
+  alias: ["cecan", "cewek", "cewe"],
   category: "search",
-  description: "Cari cecan Indonesia",
+  description: "Cari gambar cewek cantik",
   usage: ".cecan",
   example: ".cecan",
   isOwner: false,
@@ -47,61 +26,34 @@ async function handler(m, { sock, config: botConfig }) {
   try {
     const prefix = botConfig.command?.prefix || ".";
 
-    let buffer = null;
-    let source = "";
+    const { pinterest } = await import("btch-downloader");
+    const data = await pinterest("cewek cantik indonesia");
 
-    for (const baseUrl of ENDPOINTS) {
-      try {
-        const res = await axios.get(baseUrl, {
-          responseType: "arraybuffer",
-          timeout: 15000,
-        });
-        if (res.status === 200 && res.data && res.data.length > 1000) {
-          buffer = Buffer.from(res.data);
-          source = baseUrl;
-          break;
-        }
-      } catch {}
-    }
+    if (!data?.status) throw new Error("Gagal mencari gambar");
 
-    if (!buffer) {
-      const text =
-        alyaHeader("Cecan", "🧑") +
-        "\n\n" +
-        bracketBox("🧑", "ʀᴇꜱᴜʟᴛ", [
-          "◦ Status: *Gagal*",
-          "◦ Alasan: *Endpoint cecan saat ini tidak merespons.*",
-        ]) +
-        "\n\n" +
-        separator() +
-        "\n" +
-        tipText(`Ketik ${prefix}menu untuk kembali`);
+    const images = Array.isArray(data) ? data : [data];
+    if (!images.length) throw new Error("Tidak ada gambar ditemukan");
 
-      await m.reply(text);
-      return { handled: true };
-    }
+    const selected = images[Math.floor(Math.random() * Math.min(images.length, 10))];
+    const imageUrl = selected?.url || selected?.image || selected;
+    if (typeof imageUrl !== "string") throw new Error("No image URL");
 
-    const filePath = tempPath(".jpg");
-    fs.writeFileSync(filePath, buffer);
-
+    const res = await axios.get(imageUrl, { responseType: "arraybuffer", timeout: 15000 });
     await sock.sendMessage(m.chat, {
-      image: fs.readFileSync(filePath),
-      caption: "Cecan Indonesia 🧑",
+      image: Buffer.from(res.data),
+      caption: `🌸 *Cecan*\n◦ Status: *Berhasil*`,
     }, { quoted: m });
 
     const text =
-      alyaHeader("Cecan", "🧑") +
+      alyaHeader("Cecan", "🌸") +
       "\n\n" +
-      bracketBox("🧑", "ʀᴇꜱᴜʟᴛ", [
-        "◦ Sumber: *API*",
+      bracketBox("🌸", "ʜᴀꜱɪʟ", [
         "◦ Status: *Berhasil*",
       ]) +
       "\n\n" +
       separator() +
       "\n" +
-      tipText(`Ketik ${prefix}cecan untuk hasil lain`) +
-      "\n" +
-      tipText(`Ketik ${prefix}menu untuk kembali ke menu utama`);
+      tipText(`Ketik ${prefix}cecan untuk gambar lain`);
 
     await m.reply(text);
   } catch (error) {
@@ -116,7 +68,7 @@ async function handler(m, { sock, config: botConfig }) {
       "\n\n" +
       separator() +
       "\n" +
-      tipText(`Coba lagi nanti atau hubungi owner`);
+      tipText(`Coba lagi nanti`);
 
     await m.reply(text);
   }

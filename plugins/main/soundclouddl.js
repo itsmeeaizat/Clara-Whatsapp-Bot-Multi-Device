@@ -1,7 +1,5 @@
 import fs from "fs";
 import path from "path";
-import { fileURLToPath } from "url";
-import axios from "axios";
 import {
   alyaHeader,
   bracketBox,
@@ -9,8 +7,6 @@ import {
   tipText,
 } from "../../src/lib/clara-menu-style.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 const TMP_DIR = path.join(process.cwd(), "tmp");
 
 function ensureTmp() {
@@ -19,7 +15,7 @@ function ensureTmp() {
 
 function tempPath(ext) {
   ensureTmp();
-  return path.join(TMP_DIR, `sc_${Date.now()}_${Math.random().toString(16).slice(2)}${ext}`);
+  return path.join(TMP_DIR, `scdl_${Date.now()}_${Math.random().toString(16).slice(2)}${ext}`);
 }
 
 async function handler(m, { sock, config: botConfig }) {
@@ -44,27 +40,39 @@ async function handler(m, { sock, config: botConfig }) {
       return { handled: true };
     }
 
-    const apiUrl = `https://api.zeks.xyz/api/soundcloud?url=${encodeURIComponent(url)}`;
-    const response = await axios.get(apiUrl, { timeout: 10000 });
-    const data = response.data;
-    const result = data?.result || data;
-    const title = result?.title || result?.name || url;
-    const downloadUrl = result?.url || result?.download || url;
+    const { soundcloud } = await import("btch-downloader");
+    const data = await soundcloud(url);
+
+    if (!data?.status) throw new Error("SoundCloud API returned no data");
+
+    const downloadUrl = data.url || data.download || data.link;
+    if (!downloadUrl) throw new Error("No download URL found");
+
+    const filePath = tempPath(".mp3");
+    const axios = (await import("axios")).default;
+    const res = await axios.get(downloadUrl, { responseType: "arraybuffer", timeout: 60000 });
+    fs.writeFileSync(filePath, Buffer.from(res.data));
+
+    await sock.sendMessage(m.chat, {
+      audio: fs.readFileSync(filePath),
+      mimetype: "audio/mpeg",
+      ptt: false,
+      fileName: `${data.title || "soundcloud"}.mp3`,
+    }, { quoted: m });
+
+    try { fs.unlinkSync(filePath); } catch {}
 
     const text =
       alyaHeader("SoundCloud DL", "🎵") +
       "\n\n" +
       bracketBox("🎵", "ᴅᴏᴡɴʟᴏᴀᴅ", [
-        `◦ Judul: *${title}*`,
-        `◦ Link: *${downloadUrl}*`,
+        `◦ Judul: *${data.title || url}*`,
         "◦ Status: *Berhasil*",
       ]) +
       "\n\n" +
       separator() +
       "\n" +
-      tipText(`Ketik ${prefix}soundclouddl <link> untuk download lagu lain`) +
-      "\n" +
-      tipText(`Ketik ${prefix}menu untuk kembali ke menu utama`);
+      tipText(`Ketik ${prefix}soundclouddl <link> untuk download lagu lain`);
 
     await m.reply(text);
   } catch (error) {
@@ -90,7 +98,7 @@ async function handler(m, { sock, config: botConfig }) {
 export default {
   config: {
     name: "soundclouddl",
-    alias: ["soundclouddl", "scdl", "soundclouddl"],
+    alias: ["soundclouddl", "scdl"],
     category: "music",
     description: "Download lagu SoundCloud",
     usage: ".soundclouddl <link>",

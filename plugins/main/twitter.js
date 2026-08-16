@@ -9,8 +9,6 @@ import {
   tipText,
 } from "../../src/lib/clara-menu-style.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 const TMP_DIR = path.join(process.cwd(), "tmp");
 
 function ensureTmp() {
@@ -19,7 +17,7 @@ function ensureTmp() {
 
 function tempPath(ext) {
   ensureTmp();
-  return path.join(TMP_DIR, `twitter_${Date.now()}_${Math.random().toString(16).slice(2)}${ext}`);
+  return path.join(TMP_DIR, `tw_${Date.now()}_${Math.random().toString(16).slice(2)}${ext}`);
 }
 
 async function handler(m, { sock, config: botConfig }) {
@@ -44,26 +42,51 @@ async function handler(m, { sock, config: botConfig }) {
       return { handled: true };
     }
 
-    const apiUrl = `https://api.zeks.xyz/api/twitter?url=${encodeURIComponent(url)}`;
-    const response = await axios.get(apiUrl, { timeout: 10000 });
-    const data = response.data;
-    const result = data?.result || data;
-    const videoUrl = result?.url || result?.link || url;
+    const { twitter } = await import("btch-downloader");
+    const data = await twitter(url);
+
+    if (!data?.status) throw new Error("Twitter API returned no data");
+
+    if (data.HD || data.SD || data.video) {
+      const videoUrl = data.HD || data.SD || data.video;
+      const filePath = tempPath(".mp4");
+      const res = await axios.get(videoUrl, { responseType: "arraybuffer", timeout: 60000 });
+      fs.writeFileSync(filePath, Buffer.from(res.data));
+
+      await sock.sendMessage(m.chat, {
+        video: fs.readFileSync(filePath),
+        caption: `🐦 *Twitter/X Download*\n◦ Quality: *${data.HD ? "HD" : "SD"}*`,
+        mimetype: "video/mp4",
+      }, { quoted: m });
+
+      try { fs.unlinkSync(filePath); } catch {}
+    }
+
+    if (data.audio) {
+      const filePath = tempPath(".mp3");
+      const res = await axios.get(data.audio, { responseType: "arraybuffer", timeout: 60000 });
+      fs.writeFileSync(filePath, Buffer.from(res.data));
+
+      await sock.sendMessage(m.chat, {
+        audio: fs.readFileSync(filePath),
+        mimetype: "audio/mpeg",
+        ptt: false,
+      }, { quoted: m });
+
+      try { fs.unlinkSync(filePath); } catch {}
+    }
 
     const text =
       alyaHeader("Twitter", "🐦") +
       "\n\n" +
       bracketBox("🐦", "ᴅᴏᴡɴʟᴏᴀᴅ", [
         `◦ Link: *${url}*`,
-        `◦ Result: *${videoUrl}*`,
         "◦ Status: *Berhasil*",
       ]) +
       "\n\n" +
       separator() +
       "\n" +
-      tipText(`Ketik ${prefix}twitter <link> untuk download video lain`) +
-      "\n" +
-      tipText(`Ketik ${prefix}menu untuk kembali ke menu utama`);
+      tipText(`Ketik ${prefix}twitter <link> untuk download video lain`);
 
     await m.reply(text);
   } catch (error) {

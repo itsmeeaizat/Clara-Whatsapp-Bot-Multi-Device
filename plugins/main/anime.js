@@ -1,3 +1,4 @@
+import axios from "axios";
 import {
   alyaHeader,
   bracketBox,
@@ -7,11 +8,11 @@ import {
 
 const pluginConfig = {
   name: "anime",
-  alias: ["anime", "ani", "kawaii", "waifu"],
-  category: "fun",
-  description: "Cari gambar anime",
-  usage: ".anime <query>",
-  example: ".anime naruto",
+  alias: ["anime", "animeimg", "waifu"],
+  category: "search",
+  description: "Random gambar anime/waifu",
+  usage: ".anime",
+  example: ".anime",
   isOwner: false,
   isPremium: false,
   isGroup: true,
@@ -24,77 +25,27 @@ const pluginConfig = {
 async function handler(m, { sock, config: botConfig }) {
   try {
     const prefix = botConfig.command?.prefix || ".";
-    const query = m.text?.trim();
 
-    if (!query) {
-      const text =
-        alyaHeader("Cara Pakai", "🎌") +
-        "\n\n" +
-        bracketBox("📋", "ɪɴꜰᴏ", [
-          `◦ Penggunaan: *${prefix}anime <query>*`,
-          `◦ Contoh: *${prefix}anime naruto*`,
-        ]) +
-        "\n\n" +
-        separator() +
-        "\n" +
-        tipText(`Ketik ${prefix}menu untuk kembali`);
+    const res = await axios.get("https://nekos.life/api/v2/img/waifu", { timeout: 10000 });
+    const imageUrl = res.data?.url;
+    if (!imageUrl) throw new Error("Gagal mengambil gambar");
 
-      await m.reply(text);
-      return { handled: true };
-    }
-
-    const apiUrl = `https://api.zeks.xyz/api/anime?q=${encodeURIComponent(query)}`;
-    let images = [];
-    try {
-      const res = await fetch(apiUrl);
-      const json = await res.json();
-      if (json.status && Array.isArray(json.result)) {
-        images = json.result.map((item) => item.url || item.image).filter(Boolean);
-      }
-    } catch {}
-
-    if (!images.length) {
-      const text =
-        alyaHeader("Anime", "🎌") +
-        "\n\n" +
-        bracketBox("🎌", "ʜᴀꜱɪʟ", [
-          `◦ Query: *${query}*`,
-          "◦ Status: *Tidak ada hasil ditemukan*",
-        ]) +
-        "\n\n" +
-        separator() +
-        "\n" +
-        tipText(`Ketik ${prefix}anime <query> untuk cari lagi`) +
-        "\n" +
-        tipText(`Ketik ${prefix}menu untuk kembali ke menu utama`);
-
-      await m.reply(text);
-      return { handled: true };
-    }
-
-    const selected = images.slice(0, 10);
-    const body =
-      `🎌 *ANIME*\n` +
-      `┃ ◦ Query: *${query}*\n` +
-      `┃ ◦ Total: *${selected.length}*\n\n` +
-      selected.map((url, i) => `${i + 1}. ${url}`).join("\n");
-
-    await m.reply(body);
+    const imgRes = await axios.get(imageUrl, { responseType: "arraybuffer", timeout: 15000 });
+    await sock.sendMessage(m.chat, {
+      image: Buffer.from(imgRes.data),
+      caption: `🌸 *Anime*\n◦ Source: *nekos.life*`,
+    }, { quoted: m });
 
     const text =
-      alyaHeader("Anime", "🎌") +
+      alyaHeader("Anime", "🌸") +
       "\n\n" +
-      bracketBox("🎌", "ʜᴀꜱɪʟ", [
-        `◦ Query: *${query}*`,
-        `◦ Total: *${selected.length}*`,
-        "◦ Status: *SUCCESS*",
+      bracketBox("🌸", "ʜᴀꜱɪʟ", [
+        "◦ Status: *Berhasil*",
       ]) +
       "\n\n" +
       separator() +
       "\n" +
-      tipText(`Ketik ${prefix}anime <query> untuk cari lagi`) +
-      "\n" +
-      tipText(`Ketik ${prefix}menu untuk kembali ke menu utama`);
+      tipText(`Ketik ${prefix}anime untuk gambar lain`);
 
     await m.reply(text);
   } catch (error) {
@@ -109,7 +60,7 @@ async function handler(m, { sock, config: botConfig }) {
       "\n\n" +
       separator() +
       "\n" +
-      tipText(`Coba lagi nanti atau hubungi owner`);
+      tipText(`Coba lagi nanti`);
 
     await m.reply(text);
   }

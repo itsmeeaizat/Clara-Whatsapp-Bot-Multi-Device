@@ -44,26 +44,38 @@ async function handler(m, { sock, config: botConfig }) {
       return { handled: true };
     }
 
-    const apiUrl = `https://api.zeks.xyz/api/facebook?url=${encodeURIComponent(url)}`;
-    const response = await axios.get(apiUrl, { timeout: 10000 });
-    const data = response.data;
-    const result = data?.result || data;
-    const videoUrl = result?.url || result?.link || url;
+    const { fbdown } = await import("btch-downloader");
+    const data = await fbdown(url);
+
+    if (!data?.status) throw new Error("Facebook API returned no data");
+
+    const videoUrl = data.HD || data.Normal_video || data.sd || null;
+    if (!videoUrl) throw new Error("No video URL found");
+
+    const filePath = tempPath(".mp4");
+    const res = await axios.get(videoUrl, { responseType: "arraybuffer", timeout: 60000 });
+    fs.writeFileSync(filePath, Buffer.from(res.data));
+
+    await sock.sendMessage(m.chat, {
+      video: fs.readFileSync(filePath),
+      caption: `📘 *Facebook Download*\n◦ Status: *Berhasil*`,
+      mimetype: "video/mp4",
+    }, { quoted: m });
+
+    try { fs.unlinkSync(filePath); } catch {}
 
     const text =
       alyaHeader("Facebook", "📘") +
       "\n\n" +
       bracketBox("📘", "ᴅᴏᴡɴʟᴏᴀᴅ", [
         `◦ Link: *${url}*`,
-        `◦ Result: *${videoUrl}*`,
+        `◦ Quality: *${data.HD ? "HD" : "SD"}*`,
         "◦ Status: *Berhasil*",
       ]) +
       "\n\n" +
       separator() +
       "\n" +
-      tipText(`Ketik ${prefix}facebook <link> untuk download video lain`) +
-      "\n" +
-      tipText(`Ketik ${prefix}menu untuk kembali ke menu utama`);
+      tipText(`Ketik ${prefix}facebook <link> untuk download video lain`);
 
     await m.reply(text);
   } catch (error) {

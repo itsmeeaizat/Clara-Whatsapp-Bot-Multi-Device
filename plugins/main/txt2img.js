@@ -1,6 +1,4 @@
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
+import axios from "axios";
 import {
   alyaHeader,
   bracketBox,
@@ -8,31 +6,18 @@ import {
   tipText,
 } from "../../src/lib/clara-menu-style.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const TMP_DIR = path.join(process.cwd(), "tmp");
-
-function ensureTmp() {
-  if (!fs.existsSync(TMP_DIR)) fs.mkdirSync(TMP_DIR, { recursive: true });
-}
-
-function tempPath(ext) {
-  ensureTmp();
-  return path.join(TMP_DIR, `txt2img_${Date.now()}_${Math.random().toString(16).slice(2)}${ext}`);
-}
-
 const pluginConfig = {
   name: "txt2img",
-  alias: ["texttoimage", "generateimage", "aiimage"],
-  category: "maker",
-  description: "Generate gambar dari teks menggunakan AI",
-  usage: ".txt2img <prompt>",
-  example: ".txt2img cyberpunk city neon lights",
+  alias: ["txt2img", "texttoimage", "text2img"],
+  category: "ai",
+  description: "Generate gambar dari teks (AI)",
+  usage: ".txt2img <deskripsi>",
+  example: ".txt2img a cute cat wearing glasses",
   isOwner: false,
   isPremium: false,
-  isGroup: false,
+  isGroup: true,
   isPrivate: false,
-  cooldown: 10,
+  cooldown: 15,
   energi: 0,
   isEnabled: true,
 };
@@ -44,11 +29,11 @@ async function handler(m, { sock, config: botConfig }) {
 
     if (!prompt) {
       const text =
-        alyaHeader("Cara Pakai", "🖌️") +
+        alyaHeader("Cara Pakai", "🎨") +
         "\n\n" +
         bracketBox("📋", "ɪɴꜰᴏ", [
-          `◦ Penggunaan: *${prefix}txt2img <prompt>*`,
-          `◦ Contoh: *${prefix}txt2img cyberpunk city neon lights*`,
+          `◦ Penggunaan: *${prefix}txt2img <deskripsi>*`,
+          `◦ Contoh: *${prefix}txt2img a cute cat*`,
         ]) +
         "\n\n" +
         separator() +
@@ -59,33 +44,29 @@ async function handler(m, { sock, config: botConfig }) {
       return { handled: true };
     }
 
-    const apiUrl = `https://api.miaou.xyz/api/txt2img?prompt=${encodeURIComponent(prompt)}`;
-    const res = await fetch(apiUrl);
-    if (!res.ok) throw new Error("Gagal generate gambar");
+    const { fluxImage } = await import("../../src/scraper/seaart.js");
+    const result = await fluxImage(prompt);
 
-    const buffer = Buffer.from(await res.arrayBuffer());
-    const filePath = tempPath(".png");
-    fs.writeFileSync(filePath, buffer);
+    if (!result?.url) throw new Error("Gagal generate gambar");
 
+    const res = await axios.get(result.url, { responseType: "arraybuffer", timeout: 30000 });
     await sock.sendMessage(m.chat, {
-      image: fs.readFileSync(filePath),
-      caption: `Text to Image: ${prompt.slice(0, 200)}`,
-    });
+      image: Buffer.from(res.data),
+      caption: `🎨 *Text to Image*\n◦ Prompt: *${prompt}*\n◦ Engine: *Flux AI*`,
+    }, { quoted: m });
 
     const text =
-      alyaHeader("Text to Image", "🖌️") +
+      alyaHeader("Text to Image", "🎨") +
       "\n\n" +
-      bracketBox("🖌️", "ʜᴀꜱɪʟ", [
-        `◦ Prompt: *${prompt.slice(0, 50)}${prompt.length > 50 ? "..." : ""}*`,
-        "◦ Model: *AI Image Generator*",
-        "◦ Resolution: *1024x1024*",
+      bracketBox("🎨", "ʀᴇꜱᴜʟᴛ", [
+        `◦ Prompt: *${prompt}*`,
+        "◦ Engine: *Flux AI*",
+        "◦ Status: *Berhasil*",
       ]) +
       "\n\n" +
       separator() +
       "\n" +
-      tipText(`Ketik ${prefix}txt2img <prompt> untuk generate gambar lain`) +
-      "\n" +
-      tipText(`Ketik ${prefix}menu untuk kembali ke menu utama`);
+      tipText(`Ketik ${prefix}txt2img <deskripsi> untuk gambar lain`);
 
     await m.reply(text);
   } catch (error) {
@@ -100,7 +81,7 @@ async function handler(m, { sock, config: botConfig }) {
       "\n\n" +
       separator() +
       "\n" +
-      tipText(`Coba lagi nanti atau hubungi owner`);
+      tipText(`Coba lagi nanti`);
 
     await m.reply(text);
   }

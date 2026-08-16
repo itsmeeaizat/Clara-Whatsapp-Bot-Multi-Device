@@ -8,7 +8,7 @@ import {
 const pluginConfig = {
   name: "pinterest",
   alias: ["pinterest", "pin", "pins", "image"],
-  category: "download",
+  category: "search",
   description: "Cari gambar dari Pinterest",
   usage: ".pinterest <query>",
   example: ".pinterest anime",
@@ -43,58 +43,40 @@ async function handler(m, { sock, config: botConfig }) {
       return { handled: true };
     }
 
-    const apiUrl = `https://api.zeks.xyz/api/pinterest?q=${encodeURIComponent(query)}`;
-    let images = [];
-    try {
-      const res = await fetch(apiUrl);
-      const json = await res.json();
-      if (json.status && Array.isArray(json.result)) {
-        images = json.result.map((item) => item.url || item.image).filter(Boolean);
-      }
-    } catch {}
+    const { pinterest } = await import("btch-downloader");
+    const data = await pinterest(query);
 
-    if (!images.length) {
-      const text =
-        alyaHeader("Pinterest", "📌") +
-        "\n\n" +
-        bracketBox("📌", "ʜᴀꜱɪʟ", [
-          `◦ Query: *${query}*`,
-          "◦ Status: *Tidak ada gambar ditemukan*",
-        ]) +
-        "\n\n" +
-        separator() +
-        "\n" +
-        tipText(`Ketik ${prefix}pinterest <query> untuk cari lagi`) +
-        "\n" +
-        tipText(`Ketik ${prefix}menu untuk kembali ke menu utama`);
+    if (!data?.status) throw new Error("Pinterest API returned no data");
 
-      await m.reply(text);
-      return { handled: true };
+    const images = Array.isArray(data) ? data : [data];
+    const selected = images.slice(0, 5);
+
+    for (const item of selected) {
+      const imageUrl = item.url || item.image || item;
+      if (typeof imageUrl !== "string") continue;
+
+      try {
+        const axios = (await import("axios")).default;
+        const res = await axios.get(imageUrl, { responseType: "arraybuffer", timeout: 15000 });
+        await sock.sendMessage(m.chat, {
+          image: Buffer.from(res.data),
+          caption: `📌 *Pinterest*\n◦ Query: *${query}*`,
+        }, { quoted: m });
+      } catch {}
     }
-
-    const selected = images.slice(0, 10);
-    const body =
-      `📌 *PINTEREST*\n` +
-      `┃ ◦ Query: *${query}*\n` +
-      `┃ ◦ Total: *${selected.length}*\n\n` +
-      selected.map((url, i) => `${i + 1}. ${url}`).join("\n");
-
-    await m.reply(body);
 
     const text =
       alyaHeader("Pinterest", "📌") +
       "\n\n" +
       bracketBox("📌", "ʜᴀꜱɪʟ", [
         `◦ Query: *${query}*`,
-        `◦ Total: *${selected.length}*`,
-        "◦ Status: *SUCCESS*",
+        `◦ Total: *${selected.length} gambar*`,
+        "◦ Status: *Berhasil*",
       ]) +
       "\n\n" +
       separator() +
       "\n" +
-      tipText(`Ketik ${prefix}pinterest <query> untuk cari lagi`) +
-      "\n" +
-      tipText(`Ketik ${prefix}menu untuk kembali ke menu utama`);
+      tipText(`Ketik ${prefix}pinterest <query> untuk cari lagi`);
 
     await m.reply(text);
   } catch (error) {

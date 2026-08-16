@@ -1,27 +1,16 @@
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
 import axios from "axios";
-import { alyaHeader, bracketBox, separator, tipText } from "../../src/lib/clara-menu-style.js";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const TMP_DIR = path.join(process.cwd(), "tmp");
-
-function ensureTmp() {
-  if (!fs.existsSync(TMP_DIR)) fs.mkdirSync(TMP_DIR, { recursive: true });
-}
-
-function tempPath(ext) {
-  ensureTmp();
-  return path.join(TMP_DIR, `quote_${Date.now()}_${Math.random().toString(16).slice(2)}${ext}`);
-}
+import {
+  alyaHeader,
+  bracketBox,
+  separator,
+  tipText,
+} from "../../src/lib/clara-menu-style.js";
 
 const pluginConfig = {
   name: "quote",
-  alias: ["quote", "quotes", "motivation", "quoterandom"],
-  category: "fun",
-  description: "Dapatkan quote motivasi acak",
+  alias: ["quote", "quotes", "katabijak"],
+  category: "info",
+  description: "Random quote/kata bijak",
   usage: ".quote",
   example: ".quote",
   isOwner: false,
@@ -33,40 +22,25 @@ const pluginConfig = {
   isEnabled: true,
 };
 
-const LOCAL_QUOTES = [
-  "Hidup itu seperti sepeda, agar tetap seimbang kamu harus terus bergerak.",
-  "Jangan tunggu kesempatan, buatlah kesempatan itu sendiri.",
-  "Kegagalan adalah kesempatan untuk mulai lagi dengan lebih bijak.",
-];
-
 async function handler(m, { sock, config: botConfig }) {
   try {
     const prefix = botConfig.command?.prefix || ".";
-    let quote = null;
-    let source = "";
 
-    try {
-      const res = await axios.get("https://api.zeks.xyz/api/quote", { timeout: 15000 });
-      quote = res.data?.result || res.data?.quote || res.data?.message || null;
-      source = "API";
-    } catch {}
-
-    if (!quote) quote = LOCAL_QUOTES[Math.floor(Math.random() * LOCAL_QUOTES.length)];
-    if (!source) source = "Local";
+    const res = await axios.get("https://zenquotes.io/api/random", { timeout: 10000 });
+    const data = res.data?.[0];
+    if (!data?.q) throw new Error("Gagal mengambil quote");
 
     const text =
-      alyaHeader("Quote", "✨") +
+      alyaHeader("Quote", "💬") +
       "\n\n" +
-      bracketBox("✨", "ǫᴜᴏᴛᴇ", [
-        `◦ *${quote}*`,
-        `◦ Sumber: *${source}*`,
+      bracketBox("💬", "ǫᴜᴏᴛᴇ", [
+        `◦ Quote: *"${data.q}"*`,
+        `◦ Author: *${data.a || "Unknown"}*`,
       ]) +
       "\n\n" +
       separator() +
       "\n" +
-      tipText(`Ketik ${prefix}quote untuk quote lain`) +
-      "\n" +
-      tipText(`Ketik ${prefix}menu untuk kembali ke menu utama`);
+      tipText(`Ketik ${prefix}quote untuk quote lain`);
 
     await m.reply(text);
   } catch (error) {
@@ -81,7 +55,7 @@ async function handler(m, { sock, config: botConfig }) {
       "\n\n" +
       separator() +
       "\n" +
-      tipText(`Coba lagi nanti atau hubungi owner`);
+      tipText(`Coba lagi nanti`);
 
     await m.reply(text);
   }

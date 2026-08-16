@@ -1,0 +1,77 @@
+import {
+  alyaHeader,
+  bracketBox,
+  separator,
+  tipText,
+} from "../../src/lib/clara-menu-style.js";
+
+const pluginConfig = {
+  name: "event",
+  alias: ["event", "events", "acara", "eventrank"],
+  category: "game",
+  description: "Lihat event RPG yang sedang berlangsung",
+  usage: ".event",
+  example: ".event",
+  isOwner: false,
+  isPremium: false,
+  isGroup: true,
+  isPrivate: false,
+  cooldown: 5,
+  energi: 0,
+  isEnabled: true,
+};
+
+async function handler(m, { sock, config: botConfig, db }) {
+  try {
+    const prefix = botConfig.command?.prefix || ".";
+
+    // Placeholder: ganti dengan data event RPG kamu
+    const active = [
+      { title: "Weekend Mythic", reward: "Mythic Scroll", end: "2 days" },
+      { title: "Gold Rush", reward: "2x Gold", end: "5 hours" },
+    ];
+
+    const ended = [
+      { title: "Double EXP", reward: "2x EXP", status: "Ended" },
+    ];
+
+    const text =
+      alyaHeader("Event", "📅") +
+      "\n\n" +
+      bracketBox("📅", "ᴀᴋᴛɪꜰ", [
+        `◦ Active: *${active.length} event*`,
+        "◦ Next Reset: *Senin 00:00*",
+      ]) +
+      "\n\n" +
+      bracketBox("📜", "ᴅᴀꜰᴛᴀʀ ᴇᴠᴇɴᴛ", active.map((e) => `◦ ${e.title} - ${e.reward} (${e.end})`)) +
+      "\n\n" +
+      bracketBox("✅", "ᴇɴᴅᴇᴅ", ended.map((e) => `◦ ${e.title} - ${e.status}`)) +
+      "\n\n" +
+      separator() +
+      "\n" +
+      tipText(`Ketik ${prefix}menu untuk kembali`);
+
+    await m.reply(text);
+  } catch (error) {
+    const text =
+      alyaHeader("Gagal", "❌") +
+      "\n\n" +
+      bracketBox("❌", "ᴇʀʀᴏʀ", [
+        `◦ Status: *Gagal*`,
+        `◦ Alasan: *${error.message}*`,
+      ]) +
+      "\n\n" +
+      separator() +
+      "\n" +
+      tipText(`Coba lagi nanti atau hubungi owner`);
+
+    await m.reply(text);
+  }
+
+  return { handled: true };
+}
+
+export default {
+  config: pluginConfig,
+  handler,
+};

@@ -1,0 +1,123 @@
+import {
+  alyaHeader,
+  bracketBox,
+  separator,
+  tipText,
+} from "../../src/lib/clara-menu-style.js";
+
+const pluginConfig = {
+  name: "pinterest",
+  alias: ["pinterest", "pin", "pins", "image"],
+  category: "download",
+  description: "Cari gambar dari Pinterest",
+  usage: ".pinterest <query>",
+  example: ".pinterest anime",
+  isOwner: false,
+  isPremium: false,
+  isGroup: true,
+  isPrivate: false,
+  cooldown: 10,
+  energi: 0,
+  isEnabled: true,
+};
+
+async function handler(m, { sock, config: botConfig }) {
+  try {
+    const prefix = botConfig.command?.prefix || ".";
+    const query = m.text?.trim();
+
+    if (!query) {
+      const text =
+        alyaHeader("Cara Pakai", "📌") +
+        "\n\n" +
+        bracketBox("📋", "ɪɴꜰᴏ", [
+          `◦ Penggunaan: *${prefix}pinterest <query>*`,
+          `◦ Contoh: *${prefix}pinterest anime*`,
+        ]) +
+        "\n\n" +
+        separator() +
+        "\n" +
+        tipText(`Ketik ${prefix}menu untuk kembali`);
+
+      await m.reply(text);
+      return { handled: true };
+    }
+
+    const apiUrl = `https://api.zeks.xyz/api/pinterest?q=${encodeURIComponent(query)}`;
+    let images = [];
+    try {
+      const res = await fetch(apiUrl);
+      const json = await res.json();
+      if (json.status && Array.isArray(json.result)) {
+        images = json.result.map((item) => item.url || item.image).filter(Boolean);
+      }
+    } catch {}
+
+    if (!images.length) {
+      const text =
+        alyaHeader("Pinterest", "📌") +
+        "\n\n" +
+        bracketBox("📌", "ʜᴀꜱɪʟ", [
+          `◦ Query: *${query}*`,
+          "◦ Status: *Tidak ada gambar ditemukan*",
+        ]) +
+        "\n\n" +
+        separator() +
+        "\n" +
+        tipText(`Ketik ${prefix}pinterest <query> untuk cari lagi`) +
+        "\n" +
+        tipText(`Ketik ${prefix}menu untuk kembali ke menu utama`);
+
+      await m.reply(text);
+      return { handled: true };
+    }
+
+    const selected = images.slice(0, 10);
+    const body =
+      `📌 *PINTEREST*\n` +
+      `┃ ◦ Query: *${query}*\n` +
+      `┃ ◦ Total: *${selected.length}*\n\n` +
+      selected.map((url, i) => `${i + 1}. ${url}`).join("\n");
+
+    await m.reply(body);
+
+    const text =
+      alyaHeader("Pinterest", "📌") +
+      "\n\n" +
+      bracketBox("📌", "ʜᴀꜱɪʟ", [
+        `◦ Query: *${query}*`,
+        `◦ Total: *${selected.length}*`,
+        "◦ Status: *SUCCESS*",
+      ]) +
+      "\n\n" +
+      separator() +
+      "\n" +
+      tipText(`Ketik ${prefix}pinterest <query> untuk cari lagi`) +
+      "\n" +
+      tipText(`Ketik ${prefix}menu untuk kembali ke menu utama`);
+
+    await m.reply(text);
+  } catch (error) {
+    const prefix = botConfig.command?.prefix || ".";
+    const text =
+      alyaHeader("Gagal", "❌") +
+      "\n\n" +
+      bracketBox("❌", "ᴇʀʀᴏʀ", [
+        `◦ Status: *Gagal*`,
+        `◦ Alasan: *${error.message}*`,
+      ]) +
+      "\n\n" +
+      separator() +
+      "\n" +
+      tipText(`Coba lagi nanti atau hubungi owner`);
+
+    await m.reply(text);
+  }
+
+  return { handled: true };
+}
+
+export default {
+  config: pluginConfig,
+  handler,
+};

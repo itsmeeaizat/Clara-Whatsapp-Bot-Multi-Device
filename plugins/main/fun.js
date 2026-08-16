@@ -17,7 +17,7 @@ const COMMANDS = [
 const pluginConfig = {
   name: "fun",
   alias: ["fun", "funmenu", "games", "main"],
-  category: "menu",
+  category: "main",
   description: "Menu game seru",
   usage: ".fun",
   example: ".fun",

@@ -9,7 +9,7 @@ import { getDatabase } from "../../src/lib/clara-database.js";
 const pluginConfig = {
   name: "team",
   alias: ["team", "guild", "klan", "group"],
-  category: "rpg",
+  category: "game",
   description: "Buat atau kelola tim/guild",
   usage: ".team <nama>",
   example: ".team ClaraSquad",

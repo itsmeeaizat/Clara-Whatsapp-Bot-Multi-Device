@@ -8,7 +8,7 @@ import {
 const pluginConfig = {
   name: "ephoto",
   alias: ["ephoto", "photo", "editphoto", "photoeffect"],
-  category: "tools",
+  category: "maker",
   description: "Edit foto dengan efek",
   usage: ".ephoto <teks>",
   example: ".ephoto Hello World",

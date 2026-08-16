@@ -3,7 +3,7 @@ import { alyaHeader, bracketBox, separator, tipText } from "../../src/lib/clara-
 const pluginConfig = {
   name: "donasi",
   alias: ["donasi", "donate", "donation", "dukung"],
-  category: "info",
+  category: "main",
   description: "Lihat info donasi untuk owner",
   usage: ".donasi",
   example: ".donasi",

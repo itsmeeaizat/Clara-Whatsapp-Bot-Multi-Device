@@ -10,7 +10,7 @@ import fs from "fs";
 const pluginConfig = {
   name: "removebg",
   alias: ["removebg", "rmbg", "nobg"],
-  category: "tools",
+  category: "maker",
   description: "Hapus background gambar secara otomatis",
   usage: ".removebg",
   example: ".removebg (kirim gambar dengan caption .removebg)",

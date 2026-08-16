@@ -101,7 +101,7 @@ async function handler(m, { sock, config: botConfig }) {
 const pluginConfig = {
   name: "upimg",
   alias: ["upimg", "imageup", "uploadimg", "imageupload"],
-  category: "tools",
+  category: "maker",
   description: "Upload gambar ke server",
   usage: ".upimg",
   example: ".upimg (kirim gambar dengan caption .upimg)",

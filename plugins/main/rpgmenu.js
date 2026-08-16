@@ -8,7 +8,7 @@ import {
 const pluginConfig = {
   name: "rpgmenu",
   alias: ["rpgmenu", "rmenu", "rpghelp", "gamehelp"],
-  category: "rpg",
+  category: "game",
   description: "Menu panduan RPG",
   usage: ".rpgmenu",
   example: ".rpgmenu",

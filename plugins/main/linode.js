@@ -8,7 +8,7 @@ import {
 const pluginConfig = {
   name: "linode",
   alias: ["linode", "server", "vps", "cloud"],
-  category: "info",
+  category: "owner",
   description: "Cek status server/info VPS",
   usage: ".linode",
   example: ".linode",

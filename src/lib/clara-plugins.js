@@ -117,6 +117,11 @@ const CATEGORY_EMOJIS = {
   premium: "💎",
   pushkontak: "📩",
   store: "🏪",
+  menu: "📋",
+  music: "🎵",
+  image: "🖼️",
+  event: "🎉",
+  maker: "🎨",
 };
 
 const CATEGORY_ORDER = [
@@ -145,6 +150,8 @@ const CATEGORY_ORDER = [
   "pushkontak",
   "panel",
   "store",
+  "maker",
+  "music",
 ];
 
 function getSortedCategories(m = {}) {

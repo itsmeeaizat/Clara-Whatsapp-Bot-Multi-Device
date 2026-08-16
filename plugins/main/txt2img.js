@@ -24,7 +24,7 @@ function tempPath(ext) {
 const pluginConfig = {
   name: "txt2img",
   alias: ["texttoimage", "generateimage", "aiimage"],
-  category: "media",
+  category: "maker",
   description: "Generate gambar dari teks menggunakan AI",
   usage: ".txt2img <prompt>",
   example: ".txt2img cyberpunk city neon lights",

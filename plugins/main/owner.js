@@ -8,7 +8,7 @@ import {
 const pluginConfig = {
   name: "owner",
   alias: ["owner", "creator", "author", "dev"],
-  category: "info",
+  category: "owner",
   description: "Lihat info owner bot",
   usage: ".owner",
   example: ".owner",

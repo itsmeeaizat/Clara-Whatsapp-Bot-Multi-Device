@@ -95,7 +95,7 @@ async function handler(m, { sock, config: botConfig }) {
 const pluginConfig = {
   name: "canvas",
   alias: ["canvas", "draw", "design", "art"],
-  category: "tools",
+  category: "maker",
   description: "Buat desain/grafis",
   usage: ".canvas <teks>",
   example: ".canvas Hello World",

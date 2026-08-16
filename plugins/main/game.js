@@ -17,7 +17,7 @@ const COMMANDS = [
 const pluginConfig = {
   name: "game",
   alias: ["game", "games", "rpgmenu", "main"],
-  category: "menu",
+  category: "main",
   description: "Menu game RPG",
   usage: ".game",
   example: ".game",

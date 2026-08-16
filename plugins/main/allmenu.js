@@ -132,19 +132,13 @@ async function handler(m, { sock, config: botConfig }) {
   // Handle All Kategori button - show popup with all categories
   if (m.body && m.body.toLowerCase().includes('allkategori')) {
     const allCategories = getSortedCategories(m);
-    let categoryText = '📂 *All Kategori Menu*
-
-';
+    let categoryText = '📂 *All Kategori Menu*\n\n';
     for (const cat of allCategories) {
       const emoji = cat.emoji || '📁';
       const cmds = cat.commands.map(cmd => `${prefix}${cmd}`).join(', ');
-      categoryText += `${emoji} *${cat.name.toUpperCase()}* (${cat.commands.length} cmd)
-${cmds}
-
-`;
+      categoryText += `${emoji} *${cat.name.toUpperCase()}* (${cat.commands.length} cmd)\n${cmds}\n\n`;
     }
-    categoryText += `${separator()}
-💡 Ketik ${prefix}menucat <kategori> untuk lihat detail`;
+    categoryText += `${separator()}\n💡 Ketik ${prefix}menucat <kategori> untuk lihat detail`;
     await sock.sendMessage(m.chat, { text: categoryText });
   }
 

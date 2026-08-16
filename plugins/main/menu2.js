@@ -17,7 +17,7 @@ const COMMANDS = [
 const pluginConfig = {
   name: "menu2",
   alias: ["menu2", "menu2", "extra", "moremenu"],
-  category: "menu",
+  category: "main",
   description: "Menu tambahan bot",
   usage: ".menu2",
   example: ".menu2",

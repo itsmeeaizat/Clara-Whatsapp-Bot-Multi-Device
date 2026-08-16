@@ -95,7 +95,7 @@ async function handler(m, { sock, config: botConfig }) {
 const pluginConfig = {
   name: "ttp",
   alias: ["ttp", "texttopic", "ttp"],
-  category: "tools",
+  category: "sticker",
   description: "Ubah teks menjadi gambar",
   usage: ".ttp <teks>",
   example: ".ttp Alya",

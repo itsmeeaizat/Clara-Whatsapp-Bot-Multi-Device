@@ -24,7 +24,7 @@ const ENDPOINTS = [
 const pluginConfig = {
   name: "epho",
   alias: ["epho", "ephoto", "edit", "fx"],
-  category: "image",
+  category: "maker",
   description: "Efek foto/image editor",
   usage: ".epho",
   example: ".epho (kirim/reply gambar)",

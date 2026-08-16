@@ -266,6 +266,35 @@ async function handler(m, { sock, config: botConfig, db, uptime }) {
                     id: `${prefix}allmenu`,
                   }),
                 },
+                {
+                  name: "quick_reply",
+                  buttonParamsJson: JSON.stringify({
+                    display_text: "🔙 Kembali",
+                    id: `${prefix}menu`,
+                  }),
+                },
+                {
+                  name: "single_select",
+                  buttonParamsJson: JSON.stringify({
+                    title: "📂 All Kategori",
+                    sections,
+                    icon: "DEFAULT",
+                  }),
+                },
+                {
+                  name: "quick_reply",
+                  buttonParamsJson: JSON.stringify({
+                    display_text: "💝 Donasi",
+                    id: `${prefix}donasi`,
+                  }),
+                },
+                {
+                  name: "quick_reply",
+                  buttonParamsJson: JSON.stringify({
+                    display_text: "👑 Owner",
+                    id: `${prefix}owner`,
+                  }),
+                },
               ],
             },
           },

@@ -6,6 +6,9 @@ import {
 } from "../../src/lib/clara-menu-style.js";
 import {
   getSortedCategories,
+  getCategories,
+  getCommandsByCategory,
+  CATEGORY_EMOJIS,
 } from "../../src/lib/clara-plugins.js";
 
 const pluginConfig = {
@@ -82,6 +85,30 @@ async function handler(m, { sock, config: botConfig }) {
           buttonId: `help_allmenu_${Date.now()}`,
           buttonText: { displayText: "📌 Help" },
           value: "help"
+        },
+        {
+          type: 1,
+          buttonId: `back_${Date.now()}`,
+          buttonText: { displayText: "🔙 Kembali" },
+          value: "menu"
+        },
+        {
+          type: 1,
+          buttonId: `allkategori_${Date.now()}`,
+          buttonText: { displayText: "📂 All Kategori" },
+          value: "allkategori"
+        },
+        {
+          type: 1,
+          buttonId: `donasi_${Date.now()}`,
+          buttonText: { displayText: "💝 Donasi" },
+          value: "donasi"
+        },
+        {
+          type: 1,
+          buttonId: `owner_${Date.now()}`,
+          buttonText: { displayText: "👑 Owner" },
+          value: "owner"
         }
       ],
       headerType: 1
@@ -100,6 +127,25 @@ async function handler(m, { sock, config: botConfig }) {
       tipText(`Coba lagi nanti atau hubungi owner`);
 
     await m.reply(text);
+  }
+
+  // Handle All Kategori button - show popup with all categories
+  if (m.body && m.body.toLowerCase().includes('allkategori')) {
+    const allCategories = getSortedCategories(m);
+    let categoryText = '📂 *All Kategori Menu*
+
+';
+    for (const cat of allCategories) {
+      const emoji = cat.emoji || '📁';
+      const cmds = cat.commands.map(cmd => `${prefix}${cmd}`).join(', ');
+      categoryText += `${emoji} *${cat.name.toUpperCase()}* (${cat.commands.length} cmd)
+${cmds}
+
+`;
+    }
+    categoryText += `${separator()}
+💡 Ketik ${prefix}menucat <kategori> untuk lihat detail`;
+    await sock.sendMessage(m.chat, { text: categoryText });
   }
 
   return { handled: true };

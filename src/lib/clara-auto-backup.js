@@ -142,7 +142,7 @@ function parseInterval(str) {
   if (!match) return null;
   const value = parseInt(match[1]);
   const unit = match[2].toLowerCase();
-  let ms = 0;
+  let ms;
   switch (unit) {
     case "m":
       ms = value * 60 * 1000;

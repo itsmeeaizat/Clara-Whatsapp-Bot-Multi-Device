@@ -803,7 +803,7 @@ async function serialize(sock, msg, store = {}) {
       }
     } catch (e) { }
 
-    let replyVariant = 1;
+    let replyVariant;
     try {
       replyVariant =
         db?.setting?.("replyVariant") ||

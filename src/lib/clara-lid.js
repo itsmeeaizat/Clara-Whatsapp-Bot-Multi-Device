@@ -63,8 +63,8 @@ process.on("uncaughtException", (err) => {
  */
 function cacheParticipantLids(participants = []) {
   for (const p of participants) {
-    let pLid = "";
-    let pJid = "";
+    let pLid;
+    let pJid;
 
     if (p.lid && p.lid.endsWith("@lid")) {
       pLid = p.lid;
@@ -321,8 +321,8 @@ function resolveLidFromParticipants(jid, participants = []) {
   const lidFormat = lidNumber + "@lid";
 
   for (const p of participants) {
-    let pLid = "";
-    let pJid = "";
+    let pLid;
+    let pJid;
 
     if (p.lid && p.lid.endsWith("@lid")) {
       pLid = p.lid;
@@ -391,8 +391,8 @@ function resolveAnyLidToJid(jid, participants = []) {
     const lidNumber = jid.replace("@s.whatsapp.net", "");
     const lidFormat = lidNumber + "@lid";
     for (const p of participants) {
-      let pLid = "";
-      let pJid = "";
+      let pLid;
+      let pJid;
 
       if (p.lid && p.lid.endsWith("@lid")) {
         pLid = p.lid;

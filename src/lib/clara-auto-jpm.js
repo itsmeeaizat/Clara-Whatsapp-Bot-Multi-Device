@@ -118,7 +118,7 @@ async function sendAutoJpm(cfg) {
   const message = cfg.message || {};
   if (!message.text && !message.media) return;
   const contextInfo = buildContextInfo();
-  let groupIds = [];
+  let groupIds;
   global.statusautojpm = true;
   try {
     global.isFetchingGroups = true;

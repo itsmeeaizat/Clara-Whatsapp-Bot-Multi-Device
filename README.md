@@ -177,10 +177,73 @@ Agent menyimpan 12 giliran percakapan terakhir per user di database
 (`setting.agentMemory`). Hapus dengan `.agent reset`. Bila modul database
 tidak tersedia, agent tetap jalan — hanya tanpa ingatan.
 
+## 🛡️ Fitur Grup & Moderasi
+
+Empat plugin di bawah ini **hook-nya sudah lama terpasang** di `src/connection.js`
+dan `index.js`, tetapi file plugin-nya belum pernah dibuat — sehingga fiturnya
+diam-diam tidak pernah aktif. Sekarang sudah terisi.
+
+### `.anticulik` — cegah bot "diculik"
+
+Bot otomatis keluar bila ditarik ke grup asing oleh orang yang tidak berhak.
+
+```
+.anticulik on / off
+.anticulik mode owner|whitelist
+.anticulik add 628xxx      .anticulik del 628xxx
+.anticulik list            .anticulik log
+```
+
+| Mode | Perilaku |
+|---|---|
+| `owner` *(default)* | Hanya owner yang boleh menambahkan bot |
+| `whitelist` | Owner + nomor pada daftar putih |
+| `off` | Nonaktif |
+
+Bila penambah tidak berhak: bot kirim pesan sopan, keluar, lalu lapor ke owner.
+Bila info penambah tidak tersedia, bot **tidak** bertindak (menghindari false positive).
+
+### `.giveaway` — undian grup otomatis
+
+```
+.giveaway start 30m 1 Voucher 50rb
+.giveaway info        .giveaway peserta
+.giveaway cancel      .giveaway draw
+```
+
+- Durasi: `90s`, `30m`, `2h`, `1d` (maks 7 hari)
+- Peserta cukup ketik `ikut` / `join` / `gas` / `hadir` / `daftar` — bot memberi reaksi 🎉
+- Pemenang diundi **otomatis** saat waktu habis (checker tiap 30 detik)
+- Hanya admin grup yang bisa membuka, membatalkan, atau mengundi
+
+### `.notifgantitag` — notifikasi perubahan label member
+
+Mengumumkan saat tag/label member grup diubah (WhatsApp `protocolMessage` type 30).
+
+```
+.notifgantitag on / off
+```
+
+Nonaktif secara default per grup; hanya admin yang bisa mengubah.
+
+### `.autosahur` — pengingat sahur otomatis
+
+Memakai **jadwal imsak asli** dari `api.myquran.com` sesuai kota, bukan jam statis.
+
+```
+.autosahur on jakarta
+.autosahur off
+.autosahur jadwal            # lihat imsak hari ini
+.autosahur menit 60 30 10    # atur tahap pengingat
+```
+
+Default mengingatkan pada 60, 30, dan 10 menit sebelum imsak, dengan pesan
+bervariasi dan anti-duplikat (satu pengingat per tahap per hari).
+
 ## 📝 Catatan Pengembangan
 
 - Basis kode ini sebelumnya menggunakan penamaan internal berbeda dan sudah di-rename penuh menjadi `clara-*` di seluruh file/modul.
-- Beberapa plugin opsional (auto-sahur, anti-culik, notif-ganti-tag) belum tersedia di basis ini — bot tetap berjalan normal tanpanya, fitur terkait saja yang nonaktif sampai plugin-nya dibuat.
+- Plugin `auto-sahur`, `anti-culik`, `notif-ganti-tag`, dan `giveaway` kini **sudah tersedia**. Sebelumnya `src/connection.js` dan `index.js` sudah memanggil keempatnya, tapi file plugin-nya tidak ada sehingga fitur diam-diam tidak aktif.
 - Desain UI menu menggunakan sistem style terpusat di `src/lib/clara-menu-style.js`, dipakai konsisten di seluruh command agar tampilan seragam.
 
 ## ⚠️ Disclaimer

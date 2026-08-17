@@ -97,6 +97,25 @@ async function handleMessage(m, sock, botConfig, db, uptime) {
 
   const handled = await handleCommand(m, sock, botConfig, db, uptime);
 
+  // Pendaftaran giveaway lewat keyword biasa (ikut/join/gas) — bukan command,
+  // jadi diproses hanya bila pesan tidak cocok dengan plugin mana pun.
+  if (!handled && m.isGroup) {
+    try {
+      const { tryJoin } = await import("../plugins/group/giveaway.js");
+      const joined = await tryJoin(m, db);
+      if (joined) {
+        try {
+          await sock.sendMessage(m.chat, { react: { text: "🎉", key: m.key } });
+        } catch {
+          // reaksi opsional
+        }
+        return true;
+      }
+    } catch {
+      // plugin giveaway tidak tersedia — abaikan
+    }
+  }
+
   if (!handled && botConfig.registration?.enabled && !m.isOwner && !isRegistered(userId)) {
     // optional: prompt registration
   }

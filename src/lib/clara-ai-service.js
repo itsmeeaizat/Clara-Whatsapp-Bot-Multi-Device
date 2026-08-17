@@ -35,8 +35,14 @@ const DEFAULT_PROVIDERS = {
   },
   anthropic: {
     name: "Anthropic Claude",
-    models: ["claude-sonnet-4-20250514", "claude-3-5-haiku-20241022", "claude-3-haiku-20240307"],
-    defaultModel: "claude-3-5-haiku-20241022",
+    models: [
+      "claude-sonnet-5",
+      "claude-opus-5",
+      "claude-haiku-4-5",
+      "claude-sonnet-4-6",
+      "claude-sonnet-4-20250514",
+    ],
+    defaultModel: "claude-sonnet-5",
     chatEndpoint: "https://api.anthropic.com/v1/messages",
     authHeader: (key) => ({
       "x-api-key": key,

@@ -11,6 +11,7 @@ WhatsApp Multi-Device Bot berbasis [Baileys](https://github.com/WhiskeySockets/B
 - Proteksi grup: antilink, antispam, antitoxic, antiraid, antidelete, dan lainnya
 - Scheduler bawaan: jadwal sholat, notifikasi cuaca, info loker, broadcast terjadwal
 - Menu interaktif dengan tombol/list picker (bukan sekadar teks polos)
+- **AI Agent dengan tool-use** (`.agent`) — bukan sekadar chat, tapi bisa memanggil tool sendiri
 
 ## 📦 Requirement
 
@@ -93,6 +94,88 @@ export default { config: pluginConfig, handler };
 ```
 
 Saat `dev.watchPlugins` aktif di `config.js`, file baru di folder `plugins/` otomatis ter-load tanpa restart.
+
+## 🤖 AI Agent (`.agent`)
+
+Berbeda dengan plugin AI biasa yang sekali-tanya-sekali-jawab, `.agent` menjalankan
+**agentic loop**: model memilih tool → tool dieksekusi → hasilnya dikembalikan ke model →
+diulang sampai tugas selesai (maksimal 6 langkah).
+
+### Tool yang tersedia
+
+| Tool | Fungsi |
+|---|---|
+| `cari_web` | Cari info terkini via DuckDuckGo |
+| `baca_halaman` | Ambil & bersihkan isi teks dari sebuah URL |
+| `hitung` | Kalkulator aman (whitelist karakter, bukan `eval` bebas) |
+| `waktu_sekarang` | Tanggal/jam sekarang, zona waktu bisa diatur |
+| `info_grup` | Nama grup, jumlah member, daftar admin, deskripsi |
+| `profil_user` | Level, exp, koin, energi, status premium dari database bot |
+| `daftar_command` | Cari fitur bot berdasarkan kata kunci |
+
+### Penggunaan
+
+```
+.agent <tugas>                  # jalankan agent
+.agent sonnet-5 <tugas>         # pilih model spesifik
+.agent model                    # daftar provider + status API key
+.agent tools                    # daftar tool
+.agent memory                   # lihat riwayat percakapan
+.agent reset                    # hapus ingatan
+```
+
+Contoh:
+
+```
+.agent kurs dolar hari ini berapa?
+.agent ringkas https://example.com
+.agent 12.5% dari 3.400.000 berapa
+.agent siapa aja admin grup ini
+.agent ada fitur buat download tiktok?
+```
+
+### Model yang didukung
+
+| Alias | Model | Provider |
+|---|---|---|
+| `sonnet-5` *(default)* | `claude-sonnet-5` | anthropic |
+| `opus-5` | `claude-opus-5` | anthropic |
+| `haiku` | `claude-haiku-4-5` | anthropic |
+| `4o` / `mini` | `gpt-4o` / `gpt-4o-mini` | openai |
+| `llama` | `llama-3.3-70b-versatile` | groq |
+| `deepseek`, `mistral`, `together` | model default masing-masing | — |
+
+Provider Anthropic memakai tool-use native; provider lain memakai format
+function-calling ala OpenAI. Provider yang tidak mendukung tool akan tetap
+menjawab, hanya tanpa kemampuan memanggil tool.
+
+### Konfigurasi API key
+
+Urutan prioritas pembacaan key:
+
+1. Environment variable — **disarankan**
+   ```bash
+   export ANTHROPIC_API_KEY="sk-ant-..."
+   export OPENAI_API_KEY="sk-..."
+   export GROQ_API_KEY="gsk_..."
+   ```
+2. `config.js` → `APIkey.anthropic`, `APIkey.openai`, dst.
+3. `config.js` → `aiHelp.apiKey` (bila `aiHelp.provider` cocok)
+
+Opsional, atur default agent di `config.js`:
+
+```js
+agent: {
+  provider: "anthropic",
+  model: "claude-sonnet-5",
+},
+```
+
+### Memory
+
+Agent menyimpan 12 giliran percakapan terakhir per user di database
+(`setting.agentMemory`). Hapus dengan `.agent reset`. Bila modul database
+tidak tersedia, agent tetap jalan — hanya tanpa ingatan.
 
 ## 📝 Catatan Pengembangan
 

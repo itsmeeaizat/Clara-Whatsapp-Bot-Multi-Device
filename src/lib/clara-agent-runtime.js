@@ -315,11 +315,20 @@ const TOOLS = [
       },
       required: ["kata_kunci"],
     },
-    async run({ kata_kunci }, { db, botConfig }) {
+    async run({ kata_kunci }, { botConfig }) {
       const prefix = botConfig?.command?.prefix || ".";
       const kw = String(kata_kunci || "").toLowerCase();
 
-      const all = db?.plugins ? Array.from(db.plugins.values()) : [];
+      // Plugin registry ada di clara-plugins.js (pluginStore), bukan di
+      // instance Database. Lazy import supaya modul ini tetap bisa diuji
+      // tanpa menarik seluruh dependency chain bot.
+      let all = [];
+      try {
+        const mod = await import("./clara-plugins.js");
+        all = mod.getAllPlugins ? mod.getAllPlugins() : [];
+      } catch {
+        return "Registry plugin tidak bisa diakses saat ini.";
+      }
       const seen = new Set();
       const hits = [];
 

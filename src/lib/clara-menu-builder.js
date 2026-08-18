@@ -1,10 +1,11 @@
 /**
- * Clara Menu Builder
+ * Clara Menu Builder — Enhanced
  * ---------------------------------------------------------------
  * Penyusun teks menu untuk DUA gaya tampilan:
  *
  *   buildMenuModern()  — gaya repo ini (✧ header, ╭─ box, small caps)
- *   buildMenuKlasik()  — gaya Clara-MD orisinal (╔┈┈「 」, ╎❏, ╎ぎ)
+ *   buildMenuKlasik()  — gaya Clara-MD orisinal + sentuhan enhanced
+ *                        (emoji per section, greeting, footer)
  *
  * Dipisah dari plugin supaya .menu dan .allmenu bisa memakai keduanya
  * tanpa menyalin kode, dan supaya gampang diuji.
@@ -36,6 +37,9 @@ import {
   tanggalLengkap,
   jamWib,
   READ_MORE,
+  getGreeting,
+  headerBanner,
+  footerBanner,
 } from "./clara-classic-style.js";
 import { getRole } from "./clara-level.js";
 
@@ -50,9 +54,6 @@ const EXP_PER_LEVEL = 10000;
 
 /**
  * Normalkan uptime ke milidetik.
- * Sumbernya tidak konsisten: connection.getUptime() memberi milidetik,
- * sementara pemanggil lain kadang memberi detik. Angka kecil (< 1 juta,
- * setara ~11 hari bila detik) diperlakukan sebagai detik.
  */
 function uptimeMs(uptime) {
   const n = Number(uptime) || 0;
@@ -96,7 +97,7 @@ function formatRAM() {
   return `${(used / 1024 / 1024).toFixed(0)}MB / ${(total / 1024 / 1024 / 1024).toFixed(1)}GB`;
 }
 
-/** Baca data user dengan aman — menu tidak boleh mati karena database. */
+/** Baca data user dengan aman */
 function ambilUser(db, jid) {
   try {
     return (db?.getUser ? db.getUser(jid) : null) || {};
@@ -114,7 +115,7 @@ function totalPengguna(db) {
 }
 
 /* ================================================================== */
-/* GAYA KLASIK — meniru Clara-MD orisinal                             */
+/* GAYA KLASIK — Clara-MD orisinal + enhanced                           */
 /* ================================================================== */
 
 function buildHeaderKlasik(m, botConfig, uptime, db) {
@@ -136,8 +137,6 @@ function buildHeaderKlasik(m, botConfig, uptime, db) {
         baris("Nama", m.pushName || "Tanpa Nama"),
         baris("Nomor", `@${nomor}`),
         baris("Premium", user.isPremium ? "Premium" : "Free"),
-        // Clara lama memakai istilah Limit & Money; di basis ini
-        // field-nya bernama energi & koin.
         baris("Limit", user.energi === -1 ? "∞" : (user.energi ?? 0)),
         baris("Money", user.koin ?? 0),
         baris("Role", role),
@@ -184,19 +183,38 @@ function buildKategoriKlasik(m, prefix, hanyaKategori = null) {
     if (!cmds.length) continue;
     out.push(blokKategori(labelKategori(cat), cmds, prefix));
   }
-  return out.join("\n");
+  return out.join("\n\n");
 }
 
 /**
- * Menu lengkap gaya klasik: header + readmore + seluruh kategori.
+ * Menu lengkap gaya klasik: banner + header + readmore + kategori + footer.
  */
 function buildMenuKlasik(m, botConfig, uptime, db, opsi = {}) {
   const { pakaiReadMore = true, hanyaKategori = null } = opsi;
   const prefix = botConfig.command?.prefix || ".";
+  const namaBot = botConfig.bot?.name || "Clara";
+  const nomor = String(m.sender || "").split("@")[0];
+
+  // Banner pembuka
+  const banner = headerBanner(namaBot, nomor);
+
+  // Header info
   const header = buildHeaderKlasik(m, botConfig, uptime, db);
-  const kategori = buildKategoriKlasik(m, prefix, hanyaKategori);
+
+  // Footer
+  const footer = footerBanner(namaBot, prefix);
+
+  // Kalau hanya satu kategori (dari .menucat), tampilkan tanpa readmore
+  if (hanyaKategori) {
+    const kategori = buildKategoriKlasik(m, prefix, hanyaKategori);
+    return `${banner}${header}\n\n${kategori}\n${footer}`;
+  }
+
+  // Menu lengkap dengan readmore
+  const kategori = buildKategoriKlasik(m, prefix);
   const sambungan = pakaiReadMore ? READ_MORE : "\n";
-  return `${header}\n${sambungan}\n${kategori}`;
+
+  return `${banner}${header}\n${sambungan}\n${kategori}\n${footer}`;
 }
 
 /* ================================================================== */

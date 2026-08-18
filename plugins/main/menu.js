@@ -5,10 +5,10 @@
  *
  *   klasik (default) — meniru Clara-MD orisinal (Zeltoria) yang sudah
  *                      berhenti dikembangkan; repo ini penerusnya
+ *                      dipercantik dengan emoji section, greeting, footer
  *   modern           — gaya khas repo ini: ✧ header, ╭─ box, small caps
  *
- * Penyusunan teksnya ada di src/lib/clara-menu-builder.js supaya
- * .menu dan .allmenu bisa memakai keduanya tanpa menyalin kode.
+ * Enhanced: ditambah audio PTT & externalAdReply seperti aslinya.
  */
 
 import { prepareWAMessageMedia } from "ourin";
@@ -20,6 +20,20 @@ import {
   CATEGORY_EMOJIS,
 } from "../../src/lib/clara-plugins.js";
 import fs from "fs";
+
+// Thumbnail default (sama dengan Clara-MD aslinya)
+const DEFAULT_THUMBNAIL = "https://telegra.ph/file/c5170017e92f837e28d5f.jpg";
+
+// Audio PTT untuk menu (dari Clara-MD aslinya)
+const MENU_AUDIO = [
+  "https://bucin-livid.vercel.app/audio/yowaimo.mp3",
+  "https://bucin-livid.vercel.app/audio/summer.mp3",
+  "https://bucin-livid.vercel.app/audio/one.m4a",
+];
+
+function pickRandom(list) {
+  return list[Math.floor(Math.random() * list.length)];
+}
 
 const pluginConfig = {
   name: "menu",
@@ -61,6 +75,10 @@ async function handler(m, { sock, config: botConfig, db, uptime }) {
   const teksLengkap = buildMenu(mode, m, botConfig, uptime, db);
   const mentions = [m.sender];
 
+  // Thumbnail untuk externalAdReply
+  const thumbnailUrl =
+    botConfig.assets?.thumbnailUrl || DEFAULT_THUMBNAIL;
+
   // --- Coba kirim versi interaktif ---
   try {
     let media = null;
@@ -89,8 +107,12 @@ async function handler(m, { sock, config: botConfig, db, uptime }) {
       { title: `${namaBot} | DAFTAR KATEGORI`, rows: categoryRows },
     ];
 
+    // Quoted message: contact message seperti Clara-MD aslinya
     const quoted = {
-      key: { participant: "0@s.whatsapp.net", remoteJid: "status@broadcast" },
+      key: {
+        participant: "0@s.whatsapp.net",
+        remoteJid: "status@broadcast",
+      },
       message: {
         contactMessage: {
           displayName: `🪸 ${namaBot}`,
@@ -121,6 +143,14 @@ async function handler(m, { sock, config: botConfig, db, uptime }) {
                 isForwarded: true,
                 forwardingScore: 9,
                 mentionedJid: mentions,
+                externalAdReply: {
+                  title: namaBot,
+                  body: botConfig.bot?.author || "Clara Bot",
+                  thumbnailUrl: thumbnailUrl,
+                  sourceUrl: botConfig.bot?.website || "https://wa.me",
+                  mediaType: 1,
+                  renderLargerThumbnail: true,
+                },
                 ...(botConfig.saluran?.id ? {
                   forwardedNewsletterMessageInfo: {
                     newsletterJid: botConfig.saluran?.id,
@@ -169,9 +199,47 @@ async function handler(m, { sock, config: botConfig, db, uptime }) {
       },
       { quoted },
     );
+
+    // --- Kirim audio PTT (seperti Clara-MD aslinya) ---
+    try {
+      const audioUrl = pickRandom(MENU_AUDIO);
+      await sock.sendMessage(
+        m.chat,
+        {
+          audio: { url: audioUrl },
+          mimetype: "audio/mp4",
+          ptt: true,
+        },
+        { quoted: m }
+      );
+    } catch {
+      // Audio opsional, gagal tidak masalah
+    }
   } catch {
-    // Fallback: teks polos, isinya sudah lengkap
-    await m.reply(teksLengkap, { mentions });
+    // Fallback: teks polos dengan externalAdReply
+    try {
+      await sock.sendMessage(
+        m.chat,
+        {
+          text: teksLengkap,
+          contextInfo: {
+            mentionedJid: mentions,
+            externalAdReply: {
+              title: namaBot,
+              body: botConfig.bot?.author || "Clara Bot",
+              thumbnailUrl: thumbnailUrl,
+              sourceUrl: botConfig.bot?.website || "https://wa.me",
+              mediaType: 1,
+              renderLargerThumbnail: true,
+            },
+          },
+        },
+        { quoted: m }
+      );
+    } catch {
+      // Last resort: plain reply
+      await m.reply(teksLengkap, { mentions });
+    }
   }
 
   try {

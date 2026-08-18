@@ -1,26 +1,60 @@
 /**
- * Clara Classic Style
+ * Clara Classic Style — Enhanced
  * ---------------------------------------------------------------
  * Tampilan menu bergaya Clara-MD orisinal (Zeltoria, 2023) yang sudah
- * tidak dikembangkan lagi. Repo ini melanjutkannya, jadi tampilan menunya
- * disamakan dengan yang lama supaya pengguna lama tetap familier.
+ * tidak dikembangkan lagi. Repo ini melanjutkannya.
  *
- * Bentuk asli yang ditiru:
+ * Versi enhanced: tetap pakai ╔┈┈「 」 tapi dengan:
+ *  - Emoji per section header
+ *  - Greeting dinamis di bagian atas
+ *  - Footer decorative dengan bot name
+ *  - Spasi yang lebih rapi
  *
- *   ╔┈┈「 *Info User* 」
+ * Bentuk yang ditiru (dengan sentuhan):
+ *
+ *   ╔┈┈「 👤 *Info User* 」
  *   ╎
  *   ╎❏ *Nama:*  Budi
  *   ╎❏ *Nomor:* @628xxx
- *   ╠┈┈「 *Info Hari* 」
+ *   ╠┈┈「 📅 *Info Hari* 」
  *   ╎❏ *Waktu:* 14:03:22
  *   ╚┈┈┈┈┈┈┈┈┈❖
- *
- *   ╔┈「 Main 」
- *   ╎ぎ .menu
- *   ╚┈┈┈┈┈┈┈┈┈❖
- *
- * Karakter kunci: ╔ ╠ ╚ ╎ ❏ ❖ ぎ ┈ dan pembungkus 「 」
  */
+
+/* ------------------------------------------------------------------ */
+/* Emoji per section                                                    */
+/* ------------------------------------------------------------------ */
+
+const SECTION_EMOJIS = {
+  "Info User": "👤",
+  "Info Hari": "📅",
+  "Info Bot": "🤖",
+  "Statistik Kamu": "📊",
+  "Server": "📊",
+};
+
+const CATEGORY_EMOJIS_CLASSIC = {
+  Main: "📂",
+  AI: "🤖",
+  Animanga: "🌸",
+  Internet: "🌐",
+  Download: "📥",
+  Sticker: "🎨",
+  Tools: "🔧",
+  Islamic: "🕌",
+  Group: "👥",
+  Game: "🎮",
+  RPG: "⚔️",
+  Economy: "💰",
+  Quotes: "💬",
+  Maker: "🖌️",
+  Owner: "👑",
+  Info: "ℹ️",
+  Fun: "🎉",
+  Search: "🔍",
+  Music: "🎵",
+  Media: "🎬",
+};
 
 /* ------------------------------------------------------------------ */
 /* Primitif                                                            */
@@ -28,14 +62,18 @@
 
 const GARIS = "┈".repeat(9);
 
-/** Baris pembuka blok: ╔┈┈「 *Judul* 」 */
+/** Baris pembuka blok: ╔┈┈「 👤 *Judul* 」 */
 function blokAtas(judul) {
-  return `╔┈┈「 *${judul}* 」`;
+  const emoji = SECTION_EMOJIS[judul] || "";
+  const prefix = emoji ? `${emoji} ` : "";
+  return `╔┈┈「 ${prefix}*${judul}* 」`;
 }
 
-/** Baris pemisah antar-bagian dalam satu blok: ╠┈┈「 *Judul* 」 */
+/** Baris pemisah antar-bagian: ╠┈┈「 📅 *Judul* 」 */
 function blokTengah(judul) {
-  return `╠┈┈「 *${judul}* 」`;
+  const emoji = SECTION_EMOJIS[judul] || "";
+  const prefix = emoji ? `${emoji} ` : "";
+  return `╠┈┈「 ${prefix}*${judul}* 」`;
 }
 
 /** Baris penutup blok: ╚┈┈┈┈┈┈┈┈┈❖ */
@@ -62,6 +100,51 @@ function barisCmd(teks) {
 }
 
 /* ------------------------------------------------------------------ */
+/* Greeting dinamis                                                    */
+/* ------------------------------------------------------------------ */
+
+function getGreeting() {
+  const h = new Date().getHours();
+  if (h >= 0 && h < 5) return "🌙 Selamat Subuh";
+  if (h >= 5 && h < 11) return "🌅 Selamat Pagi";
+  if (h >= 11 && h < 15) return "☀️ Selamat Siang";
+  if (h >= 15 && h < 18) return "🌤️ Selamat Sore";
+  if (h >= 18 && h < 24) return "🌙 Selamat Malam";
+  return "👋 Halo";
+}
+
+/* ------------------------------------------------------------------ */
+/* Header decorative                                                   */
+/* ------------------------------------------------------------------ */
+
+/** Banner pembuka menu — tetap ringkas, tidak berlebihan */
+function headerBanner(namaBot, namaUser) {
+  const greet = getGreeting();
+  return [
+    `╭──「 ✨ *${namaBot}* 」`,
+    `│`,
+    `│ ${greet}, *@${namaUser}*!`,
+    `│ Berikut adalah daftar menu yang tersedia.`,
+    `╰─────────────❖`,
+    ``,
+  ].join("\n");
+}
+
+/** Footer decorative dengan bot name */
+function footerBanner(namaBot, prefix) {
+  return [
+    ``,
+    `╭──「 💡 *Tips* 」`,
+    `│ ❏ Ketik *${prefix}menucat <kategori>* untuk detail`,
+    `│ ❏ Ketik *${prefix}modemenu* untuk ganti gaya tampilan`,
+    `│ ❏ Ketik *${prefix}owner* untuk hubungi owner`,
+    `╰─────────────❖`,
+    ``,
+    `✧ ${namaBot} • Multi Device ✧`,
+  ].join("\n");
+}
+
+/* ------------------------------------------------------------------ */
 /* Blok siap pakai                                                     */
 /* ------------------------------------------------------------------ */
 
@@ -82,15 +165,15 @@ function blok(bagian = [], spasiAwal = true) {
 }
 
 /**
- * Blok kategori command:
- *   ╔┈「 Main 」
- *   ╎ぎ .menu
+ * Blok kategori command — dengan emoji per kategori:
+ *   ╔┈「 🤖 AI 」
+ *   ╎ぎ .ai
+ *   ╎ぎ .remini
  *   ╚┈┈┈┈┈┈┈┈┈❖
- *
- * Perhatikan header kategori memakai DUA ┈ lebih pendek (╔┈「) sesuai aslinya.
  */
 function blokKategori(namaKategori, commands = [], prefix = ".") {
-  const out = [`╔┈「 ${namaKategori} 」`];
+  const emoji = CATEGORY_EMOJIS_CLASSIC[namaKategori] || "📁";
+  const out = [`╔┈「 ${emoji} ${namaKategori} 」`];
   for (const c of commands) out.push(barisCmd(`${prefix}${c}`));
   out.push(blokBawah());
   return out.join("\n");
@@ -153,8 +236,6 @@ function tanggalLengkap(d = new Date()) {
 
 /**
  * Jam WIB HH:mm:ss
- * Catatan: locale "id" memformat jam dengan TITIK (08.44.02), sedangkan
- * Clara lama memakai moment.format("HH:mm:ss") yang memakai TITIK DUA.
  * Pakai en-GB agar hasilnya sama persis dengan aslinya.
  */
 function jamWib(d = new Date()) {
@@ -168,6 +249,8 @@ function jamWib(d = new Date()) {
 }
 
 export {
+  SECTION_EMOJIS,
+  CATEGORY_EMOJIS_CLASSIC,
   blok,
   blokAtas,
   blokTengah,
@@ -182,6 +265,9 @@ export {
   namaHari,
   tanggalLengkap,
   jamWib,
+  getGreeting,
+  headerBanner,
+  footerBanner,
   READ_MORE,
   GARIS,
 };

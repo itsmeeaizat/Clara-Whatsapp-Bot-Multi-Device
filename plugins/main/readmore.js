@@ -1,88 +1,45 @@
-import {
-  alyaHeader,
-  bracketBox,
-  separator,
-  tipText,
-} from "../../src/lib/clara-menu-style.js";
+/**
+ * Read More / Spoiler / Hide Text
+ * ---------------------------------------------------------------
+ * Sisipkan karakter zero-width untuk membuat teks tersembunyi
+ * yang baru muncul setelah user klik "Read more".
+ *
+ * Cara pakai: .readmore teks1|teks2
+ */
+
+const MORE_CHAR = String.fromCharCode(8206);
+const READ_MORE = MORE_CHAR.repeat(4001);
 
 const pluginConfig = {
   name: "readmore",
-  alias: ["readmore", "readmore", "expand", "lengkap"],
-  category: "tools",
-  description: "Buat teks read more / expandable",
-  usage: ".readmore <teks singkat> | <teks panjang>",
-  example: ".readmore Klik lanjut | Ini isinya...",
+  alias: ["readmore", "hidetext", "spoiler", "selengkapnya"],
+  category: "main",
+  description: "Sembunyikan teks di balik read more. .readmore terlihat|tersembunyi",
+  usage: ".readmore <teks1>|<teks2>",
+  example: ".readmore Halo|Ini tersembunyi",
   isOwner: false,
   isPremium: false,
-  isGroup: true,
+  isGroup: false,
   isPrivate: false,
-  cooldown: 10,
+  cooldown: 3,
   energi: 0,
   isEnabled: true,
 };
 
-async function handler(m, { sock, config: botConfig }) {
-  try {
-    const prefix = botConfig.command?.prefix || ".";
-    const raw = m.text?.trim() || "";
+async function handler(m) {
+  const text = m.text || "";
 
-    if (!raw.includes("|")) {
-      const text =
-        alyaHeader("Cara Pakai", "📖") +
-        "\n\n" +
-        bracketBox("📋", "ɪɴꜰᴏ", [
-          `◦ Penggunaan: *${prefix}readmore <singkat> | <panjang>*`,
-          `◦ Contoh: *${prefix}readmore Lanjut... | Isi panjangnya*`,
-        ]) +
-        "\n\n" +
-        separator() +
-        "\n" +
-        tipText(`Ketik ${prefix}menu untuk kembali`);
-
-      await m.reply(text);
-      return { handled: true };
-    }
-
-    const [shortText, longText] = raw.split("|").map((s) => s.trim());
-    const body = `${shortText}\n\n▸ Read more:\n${longText}`;
-
-    await m.reply(body);
-
-    const text =
-      alyaHeader("Read More", "📖") +
-      "\n\n" +
-      bracketBox("📖", "ꜱᴛᴀᴛᴜꜱ", [
-        `◦ Singkat: *${shortText}*`,
-        `◦ Panjang: *${longText.slice(0, 50)}${longText.length > 50 ? "..." : ""}*`,
-        "◦ Status: *SUCCESS*",
-      ]) +
-      "\n\n" +
-      separator() +
-      "\n" +
-      tipText(`Ketik ${prefix}menu untuk kembali`);
-
-    await m.reply(text);
-  } catch (error) {
-    const prefix = botConfig.command?.prefix || ".";
-    const text =
-      alyaHeader("Gagal", "❌") +
-      "\n\n" +
-      bracketBox("❌", "ᴇʀʀᴏʀ", [
-        `◦ Status: *Gagal*`,
-        `◦ Alasan: *${error.message}*`,
-      ]) +
-      "\n\n" +
-      separator() +
-      "\n" +
-      tipText(`Coba lagi nanti atau hubungi owner`);
-
-    await m.reply(text);
+  if (!text) {
+    await m.reply(`❌ Gunakan format:\n.readmore teks1|teks2\n\n*Contoh:*\n.readmore Halo|Ini tersembunyi`);
+    return { handled: true };
   }
 
+  const [left, right] = text.split("|");
+
+  const result = `${left || ""}${READ_MORE}${right || ""}`;
+
+  await m.reply(result);
   return { handled: true };
 }
 
-export default {
-  config: pluginConfig,
-  handler,
-};
+export default { config: pluginConfig, handler };

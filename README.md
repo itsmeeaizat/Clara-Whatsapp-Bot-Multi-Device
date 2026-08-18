@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🌸 Clara MD
+# 🌸 Clara Whatsapp Bot - Multi Device
 
 **Bot WhatsApp Multi-Device dengan 290+ command, AI Agent, dan sistem plugin modular**
 

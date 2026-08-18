@@ -734,9 +734,6 @@ async function startConnection(options = {}) {
             groupName = meta.subject || "grup ini";
           } catch (e) {}
 
-          const saluranId = config.saluran?.id || null;
-          const saluranName = config.saluran?.name || config.bot?.name || null;
-
           const welcomeText =
             `👋 *ʜᴀɪ, sᴀʟᴀᴍ ᴋᴇɴᴀʟ!*\n\n` +
             `Aku *${config.bot?.name || "Clara-AI"}* 🤖\n\n` +
@@ -775,6 +772,8 @@ async function startConnection(options = {}) {
         }
       }
 
+      const saluranId = config.saluran?.id || null;
+      const saluranName = config.saluran?.name || config.bot?.name || null;
       const dbForWelcome = await import("./lib/clara-database.js").then(m => m.getDatabase()).catch(() => null);
       const groupData = dbForWelcome?.getGroup(event.id) || {};
 
@@ -836,7 +835,7 @@ async function startConnection(options = {}) {
       }
 
       if (event.action === "remove" && !isBotAdded) {
-        const enabled = groupData.goodbye ?? groupData.leave ?? config.goodbye?.defaultEnabled ?? false;
+        const enabled = groupData.goodbye ?? config.goodbye?.defaultEnabled ?? false;
         if (!enabled) return;
 
         const removedParticipants = event.participants || [];

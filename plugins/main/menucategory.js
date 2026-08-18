@@ -26,12 +26,12 @@ import {
 } from "../../src/lib/clara-menu-style.js";
 
 const pluginConfig = {
-  name: "category",
-  alias: ["kategori", "cat", "listcat"],
+  name: "menucategory",
+  alias: ["menukategori", "menucatall", "catall"],
   category: "main",
   description: "Menampilkan semua kategori beserta commandnya",
-  usage: ".category",
-  example: ".category",
+  usage: ".menucategory",
+  example: ".menucategory",
   isOwner: false,
   isPremium: false,
   isGroup: false,

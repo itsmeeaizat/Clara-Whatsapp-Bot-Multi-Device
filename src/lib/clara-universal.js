@@ -44,9 +44,48 @@ async function prepareThumbnail(sock, preferredPath) {
   }
 }
 
+// --- Sync thumbnail buffer cache ---
+// Cache buffer thumbnail di memory, baca sekali, dipakai berkali-kali
+const _thumbCache = {};
+
+function getThumbnailBuffer(preferredPath) {
+  const imagePath = preferredPath || getGroupThumbnail();
+  if (!imagePath) return null;
+
+  // Return dari cache kalau sudah ada
+  if (_thumbCache[imagePath]) return _thumbCache[imagePath];
+
+  try {
+    if (!fs.existsSync(imagePath)) return null;
+    const buf = fs.readFileSync(imagePath);
+    _thumbCache[imagePath] = buf;
+    return buf;
+  } catch {
+    return null;
+  }
+}
+
+function getWelcomeThumbBuffer() {
+  return getThumbnailBuffer(getWelcomeThumbnail());
+}
+
+function getGoodbyeThumbBuffer() {
+  return getThumbnailBuffer(getGoodbyeThumbnail());
+}
+
+function clearThumbCache() {
+  for (const k of Object.keys(_thumbCache)) {
+    delete _thumbCache[k];
+  }
+}
+
 export {
   getWelcomeThumbnail,
   getGoodbyeThumbnail,
   getGroupThumbnail,
   prepareThumbnail,
+  getThumbnailBuffer,
+  getWelcomeThumbBuffer,
+  getGoodbyeThumbBuffer,
+  clearThumbCache,
 };

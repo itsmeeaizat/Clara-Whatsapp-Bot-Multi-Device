@@ -22,7 +22,7 @@ import {
   isLidConverted,
 } from "./lib/clara-lid.js";
 import { initAutoBackup } from "./lib/clara-auto-backup.js";
-import { getWelcomeThumbnail, getGoodbyeThumbnail, prepareThumbnail } from "./lib/clara-universal.js";
+import { getWelcomeThumbnail, getGoodbyeThumbnail, prepareThumbnail, getWelcomeThumbBuffer, getGoodbyeThumbBuffer } from "./lib/clara-universal.js";
 import { patchSockSendMessage as patchWeatherFooter, unpatchSockSendMessage as unpatchWeatherFooter } from "./lib/clara-weather-footer-patch.js";
 import { separator, tipText } from "./lib/clara-menu-style.js";
 const groupCache = new NodeCache({ stdTTL: 5 * 60, useClones: false });
@@ -813,7 +813,7 @@ async function startConnection(options = {}) {
             separator() + `\n` +
             tipText(`Ketik ${prefix}menu untuk melihat fitur bot`);
 
-          const imageMessage = await prepareThumbnail(sock, getWelcomeThumbnail()).catch(() => null);
+          const welcomeThumb = getWelcomeThumbBuffer();
 
           await sock.sendMessage(event.id, {
             text,
@@ -828,8 +828,8 @@ async function startConnection(options = {}) {
                   serverMessageId: 127,
                 },
               } : {}),
+              ...(welcomeThumb ? { jpegThumbnail: welcomeThumb } : {}),
             },
-            ...(imageMessage ? { image: imageMessage } : {}),
           }).catch(() => {});
         }
       }
@@ -869,7 +869,7 @@ async function startConnection(options = {}) {
             separator() + `\n` +
             tipText(`Ketik ${prefix}menu untuk kembali`);
 
-          const imageMessage = await prepareThumbnail(sock, getGoodbyeThumbnail()).catch(() => null);
+          const goodbyeThumb = getGoodbyeThumbBuffer();
 
           await sock.sendMessage(event.id, {
             text,
@@ -884,8 +884,8 @@ async function startConnection(options = {}) {
                   serverMessageId: 127,
                 },
               } : {}),
+              ...(goodbyeThumb ? { jpegThumbnail: goodbyeThumb } : {}),
             },
-            ...(imageMessage ? { image: imageMessage } : {}),
           }).catch(() => {});
         }
       }

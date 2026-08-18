@@ -48,17 +48,20 @@ function getRandomPraise() {
 }
 
 function _saluranCtx() {
-  const saluranId = config.saluran?.id || "120363400911374213@newsletter";
-  const saluranName = config.saluran?.name || config.bot?.name || "Clara-AI";
-  return {
+  const saluranId = config.saluran?.id || null;
+  const saluranName = config.saluran?.name || config.bot?.name || null;
+  const base = {
     forwardingScore: 9,
     isForwarded: true,
-    forwardedNewsletterMessageInfo: {
+  };
+  if (saluranId) {
+    base.forwardedNewsletterMessageInfo = {
       newsletterJid: saluranId,
       newsletterName: saluranName,
       serverMessageId: 127,
-    },
-  };
+    };
+  }
+  return base;
 }
 
 function getGameContextInfo() {

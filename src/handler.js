@@ -88,6 +88,65 @@ async function ensureUserRegistered(m, db, botConfig) {
   return true;
 }
 
+/**
+ * Jalankan satu hook plugin opsional dengan aman.
+ *
+ * Sebelumnya tiap hook dibungkus `catch {}` berkomentar "plugin tidak
+ * tersedia". Masalahnya, plugin yang HILANG dan plugin yang RUSAK
+ * menghasilkan diam yang sama persis, sehingga bug di dalam plugin grup
+ * tidak pernah kelihatan. Sekarang keduanya dibedakan: modul yang memang
+ * tidak ada dilewati diam-diam, sedangkan error sungguhan dilaporkan.
+ *
+ * @param {string} modul - Path modul plugin, relatif terhadap berkas ini
+ * @param {string} fungsi - Nama fungsi yang diekspor
+ * @param {Function} jalankan - Penerima fungsi tersebut, mengembalikan hasil
+ * @returns {Promise<any>} Hasil hook, atau undefined bila dilewati/gagal
+ */
+async function jalankanHook(modul, fungsi, jalankan) {
+  let mod;
+  try {
+    mod = await import(modul);
+  } catch (error) {
+    // Hanya modul yang benar-benar tidak ada yang boleh lewat tanpa suara.
+    const kode = error?.code;
+    if (kode !== "ERR_MODULE_NOT_FOUND" && kode !== "MODULE_NOT_FOUND") {
+      console.error(`[handler] gagal memuat ${modul}:`, error?.message || error);
+    }
+    return undefined;
+  }
+
+  const fn = mod?.[fungsi];
+  if (typeof fn !== "function") {
+    console.error(`[handler] ${modul} tidak mengekspor ${fungsi}()`);
+    return undefined;
+  }
+
+  try {
+    return await jalankan(fn);
+  } catch (error) {
+    // Error di dalam plugin adalah bug sungguhan — jangan ditelan.
+    console.error(`[handler] ${fungsi}() melempar error:`, error?.message || error);
+    return undefined;
+  }
+}
+
+/**
+ * Kirim reaksi emoji. Reaksi murni kosmetik, jadi kegagalannya tidak
+ * boleh menghentikan apa pun — tetapi tetap dicatat saat debug agar
+ * masalah izin atau rate-limit bisa terlihat.
+ */
+async function beriReaksi(sock, m, emoji) {
+  try {
+    await sock.sendMessage(m.chat, { react: { text: emoji, key: m.key } });
+    return true;
+  } catch (error) {
+    if (process.env.DEBUG) {
+      console.warn("[handler] gagal memberi reaksi:", error?.message || error);
+    }
+    return false;
+  }
+}
+
 async function handleCommand(m, sock, botConfig, db, uptime) {
   /*
    * PENTING soal bentuk pesan.
@@ -154,36 +213,30 @@ async function handleMessage(m, sock, botConfig, db, uptime) {
   // Pencatatan aktivitas & pengecekan AFK berjalan untuk SEMUA pesan grup,
   // termasuk yang berupa command, supaya statistik tetap akurat.
   if (m.isGroup) {
-    try {
-      const { catatPesan } = await import("../plugins/group/rekap.js");
-      await catatPesan(m, db);
-    } catch {
-      // plugin rekap tidak tersedia — abaikan
-    }
+    await jalankanHook("../plugins/group/rekap.js", "catatPesan", (fn) =>
+      fn(m, db),
+    );
 
-    try {
-      const { checkAfk } = await import("../plugins/group/afk.js");
-      const afk = await checkAfk(m, db);
-      if (afk) {
-        await sock.sendMessage(m.chat, {
-          text: afk.text,
-          mentions: afk.mentions,
-        });
-      }
-    } catch {
-      // plugin afk tidak tersedia — abaikan
+    const afk = await jalankanHook("../plugins/group/afk.js", "checkAfk", (fn) =>
+      fn(m, db),
+    );
+    if (afk) {
+      await sock.sendMessage(m.chat, {
+        text: afk.text,
+        mentions: afk.mentions,
+      });
     }
   }
 
   // Spam guard diperiksa SEBELUM command diproses, supaya pelaku flood
   // tidak bisa lolos hanya dengan membanjiri command.
   if (m.isGroup) {
-    try {
-      const { cekSpam } = await import("../plugins/group/spamguard.js");
-      if (await cekSpam(m, sock, db)) return true;
-    } catch {
-      // plugin spamguard tidak tersedia — abaikan
-    }
+    const kenaSpam = await jalankanHook(
+      "../plugins/group/spamguard.js",
+      "cekSpam",
+      (fn) => fn(m, sock, db),
+    );
+    if (kenaSpam) return true;
   }
 
   const handled = await handleCommand(m, sock, botConfig, db, uptime);
@@ -192,67 +245,47 @@ async function handleMessage(m, sock, botConfig, db, uptime) {
   // dengan plugin mana pun, agar tidak bentrok dengan command.
   if (!handled && m.isGroup) {
     // Giveaway: "ikut" / "join" / "gas"
-    try {
-      const { tryJoin } = await import("../plugins/group/giveaway.js");
-      if (await tryJoin(m, db)) {
-        try {
-          await sock.sendMessage(m.chat, { react: { text: "🎉", key: m.key } });
-        } catch {
-          // reaksi opsional
-        }
-        return true;
-      }
-    } catch {
-      // plugin giveaway tidak tersedia — abaikan
+    const ikut = await jalankanHook(
+      "../plugins/group/giveaway.js",
+      "tryJoin",
+      (fn) => fn(m, db),
+    );
+    if (ikut) {
+      await beriReaksi(sock, m, "🎉");
+      return true;
     }
 
     // Absen: "hadir" / "absen"
-    try {
-      const { tryAbsen } = await import("../plugins/group/absen.js");
-      if (await tryAbsen(m, db)) {
-        try {
-          await sock.sendMessage(m.chat, { react: { text: "✅", key: m.key } });
-        } catch {
-          // reaksi opsional
-        }
-        return true;
-      }
-    } catch {
-      // plugin absen tidak tersedia — abaikan
+    const absen = await jalankanHook(
+      "../plugins/group/absen.js",
+      "tryAbsen",
+      (fn) => fn(m, db),
+    );
+    if (absen) {
+      await beriReaksi(sock, m, "✅");
+      return true;
     }
 
     // Voting: angka polos saat sesi berjalan
-    try {
-      const { tryVote } = await import("../plugins/group/voting.js");
-      const voted = await tryVote(m, db);
-      if (voted) {
-        try {
-          await sock.sendMessage(m.chat, {
-            react: { text: voted.ganti ? "🔄" : "🗳️", key: m.key },
-          });
-        } catch {
-          // reaksi opsional
-        }
-        return true;
-      }
-    } catch {
-      // plugin voting tidak tersedia — abaikan
+    const voted = await jalankanHook(
+      "../plugins/group/voting.js",
+      "tryVote",
+      (fn) => fn(m, db),
+    );
+    if (voted) {
+      await beriReaksi(sock, m, voted.ganti ? "🔄" : "🗳️");
+      return true;
     }
 
     // Catatan: pemanggilan cepat "#nama"
-    try {
-      const { tryCatatan } = await import("../plugins/group/catatan.js");
-      const note = await tryCatatan(m, db);
-      if (note) {
-        await sock.sendMessage(
-          m.chat,
-          { text: note.isi },
-          { quoted: m }
-        );
-        return true;
-      }
-    } catch {
-      // plugin catatan tidak tersedia — abaikan
+    const note = await jalankanHook(
+      "../plugins/group/catatan.js",
+      "tryCatatan",
+      (fn) => fn(m, db),
+    );
+    if (note) {
+      await sock.sendMessage(m.chat, { text: note.isi }, { quoted: m });
+      return true;
     }
   }
 

@@ -3,7 +3,8 @@
 Tanggal audit: 18 Agustus 2026 · Commit awal: `97514b7`
 Metode: pembacaan kode + pembuktian lewat eksekusi nyata (bukan dugaan).
 
-> **STATUS: SUDAH DIPERBAIKI.** Seluruh bug di bawah ini telah ditangani.
+> **STATUS: SELESAI SELURUHNYA.** Bug #1-#4 dan #11 diperbaiki pada commit
+> `4557fdb`; bug #5, #6, #7, #8, #10 diperbaiki pada commit lanjutan.
 > Verifikasi: 95 asersi regresi lulus, dan `node index.js` boot bersih
 > dengan 303 plugin termuat tanpa satu pun error.
 >
@@ -444,3 +445,102 @@ ini tidak punya sesi WhatsApp — koneksi ditolak di tahap pairing.
 
 **Mohon uji langsung** setelah menarik perubahan ini: kirim `.menu`, `.ping`,
 dan satu perintah grup, lalu pastikan bot membalas.
+
+
+---
+
+# Lanjutan — Bug #5 dan #10 diperbaiki
+
+## Bug #5 — amplop seragam untuk `onGroupUpdate`
+
+Dua event dengan bentuk data berbeda kini dibungkus amplop yang sama:
+
+```js
+{ tipe: "metadata", grupId, data }  // dari groups.update
+{ tipe: "peserta",  grupId, data }  // dari group-participants.update
+```
+
+Penerima tinggal memeriksa `tipe` lebih dulu. Kontraknya ditulis di JSDoc
+`startConnection()`. Sebelumnya `data.action` sering `undefined` karena
+penerima tidak tahu sedang menangani event yang mana.
+
+### Regresi yang ikut tertangkap
+
+Saat memperbaiki ini saya menemukan **regresi dari commit sebelumnya**.
+Karena `onGroupUpdate` dilepas dari `index.js`, baris penjaga
+
+```js
+if (!options.onGroupUpdate) return;   // <- membunuh penyegaran cache
+```
+
+membuat `groupCache` tidak pernah disegarkan lagi. Cache itu dipakai
+Baileys lewat `cachedGroupMetadata`, jadi **daftar admin akan basi setelah
+promote/demote**. Penjaga dipindah sehingga penyegaran cache berjalan lebih
+dulu, tanpa bergantung pada ada tidaknya callback.
+
+Terverifikasi lewat simulasi: tanpa callback sekalipun, 3 dari 3 grup tetap
+ter-cache; batch 7 grup tetap utuh; event cacat (null / tanpa id) dilewati
+tanpa menjatuhkan antrean.
+
+## Bug #10 — `catch` kosong
+
+### `handler.js`: 11 → 1
+
+Sebelas hook plugin dulu dibungkus `catch {}` berkomentar "plugin tidak
+tersedia". Masalahnya plugin **hilang** dan plugin **rusak** menghasilkan
+diam yang sama persis, sehingga bug di dalam plugin grup mustahil dilacak.
+
+Diganti satu helper `jalankanHook(modul, fungsi, jalankan)` yang:
+
+* melewati modul yang memang tidak terpasang (`ERR_MODULE_NOT_FOUND`) tanpa suara,
+* melaporkan bila modul ada tetapi tidak mengekspor fungsi yang diminta,
+* melaporkan error yang dilempar plugin, lengkap dengan nama fungsinya.
+
+Dibuktikan dengan sengaja merusak `plugins/group/rekap.js`:
+
+```
+[handler] catatPesan() melempar error: BUG SENGAJA di dalam plugin rekap
+handled: true | balasan: 1
+```
+
+Plugin rusak kini **disebut namanya**, sementara bot tetap melayani. Saat
+berkasnya dihapus sama sekali, keluaran kembali senyap — persis seperti
+yang diinginkan.
+
+Reaksi emoji dipisah ke `beriReaksi()` karena murni kosmetik; kegagalannya
+hanya muncul bila `DEBUG` aktif.
+
+### `connection.js`: 20 → 14
+
+Enam yang benar-benar menyembunyikan masalah kini melapor lewat
+`laporHookGagal()`: `anticulik`, `welcomecard`, `goodbyecard`,
+`notifgantitag`, `onRawMessage`, dan percobaan ulang `group-queue`.
+
+Empat belas sisanya **sengaja dibiarkan** karena memang tidak ada yang bisa
+dilakukan: menutup socket yang sudah mati, cache miss yang langsung
+diambilkan ulang, dan pengambilan nama kontak yang sudah punya nilai
+cadangan.
+
+### `index.js`: 6 → 3
+
+`initializeAgent`, `initSahurCron`, dan `otp-poller` kini melapor lewat
+`logger.warn`. Tiga sisanya adalah pencetak error terakhir dan komentar.
+
+---
+
+# Verifikasi akhir
+
+| Pemeriksaan | Hasil |
+|---|---|
+| Regresi bug #5 & #10 (`t9.mjs`) | **59 / 59 lulus** |
+| Regresi jalur pesan (`t8.mjs`, ronde sebelumnya) | 95 / 95 lulus |
+| `node index.js` | boot bersih, **303 plugin**, nol error |
+| Uptime `.menu` | tetap `02 H 15 M 30 S` |
+| 10 plugin batch 6 & 7 | **10 / 10** merespons |
+| Plugin rusak | dilaporkan dengan nama fungsinya |
+| Plugin hilang | dilewati tanpa suara |
+| `groupCache` tanpa callback | tetap disegarkan |
+
+Peringatan yang sama masih berlaku: **sandbox tidak punya sesi WhatsApp**,
+jadi semua ini membuktikan fungsi terpanggil benar — bukan bahwa bot
+menjawab di grup sungguhan. Mohon uji langsung.

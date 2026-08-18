@@ -101,7 +101,7 @@ _startMemoryMonitor = await safeDynamicImport("./src/lib/clara-memory-monitor.js
 _startTempCleaner = await safeDynamicImport("./src/lib/clara-temp-cleaner.js").then((m) => typeof m?.startTempCleaner === "function" ? m.startTempCleaner : null);
 _startDailyPruner = await safeDynamicImport("./src/lib/clara-data-pruner.js").then((m) => typeof m?.startDailyPruner === "function" ? m.startDailyPruner : null);
 
-try { if (_claraAgent?.initializeAgent) await _claraAgent.initializeAgent(); } catch {}
+try { if (_claraAgent?.initializeAgent) await _claraAgent.initializeAgent(); } catch (e) { logger.warn("AGENT", e?.message || String(e)); }
 
 const LOG_NOISE = new Set([
   "Closing",
@@ -409,7 +409,7 @@ async function main() {
           const { initSahurCron } =
             await import("./plugins/religi/autosahur.js");
           initSahurCron(sock);
-        } catch { }
+        } catch (e) { logger.warn("SAHUR", e?.message || String(e)); }
         try {
           const { startOrderPoller } = await import("./src/lib/clara-order-poller.js");
           if (typeof startOrderPoller === "function") {
@@ -428,7 +428,9 @@ async function main() {
           const { startOtpPoller: _startOtp } =
             await import("./src/lib/clara-otp-poller.js");
           _startOtp(sock);
-        } catch { }
+        } catch (e) {
+          if (e?.code !== "ERR_MODULE_NOT_FOUND") logger.warn("OTP", e?.message || String(e));
+        }
 
         try {
           const { getAllJadibotSessions, restartJadibotSession } =

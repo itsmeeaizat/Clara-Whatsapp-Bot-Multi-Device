@@ -26,6 +26,23 @@ import { getWelcomeThumbnail, getGoodbyeThumbnail, prepareThumbnail } from "./li
 import { patchSockSendMessage as patchWeatherFooter, unpatchSockSendMessage as unpatchWeatherFooter } from "./lib/clara-weather-footer-patch.js";
 import { separator, tipText } from "./lib/clara-menu-style.js";
 const groupCache = new NodeCache({ stdTTL: 5 * 60, useClones: false });
+
+/**
+ * Laporkan error dari hook plugin.
+ *
+ * Hook-hook grup di berkas ini dulu dibungkus `catch {}` polos, sehingga
+ * plugin yang RUSAK gagal tanpa suara sedikit pun dan bug di dalamnya
+ * mustahil dilacak. Modul yang memang tidak terpasang tetap dilewati
+ * diam-diam, tetapi error sungguhan sekarang dilaporkan.
+ *
+ * @param {string} namaHook - Nama hook, untuk penanda di log
+ * @param {unknown} error - Error yang tertangkap
+ */
+function laporHookGagal(namaHook, error) {
+  const kode = error?.code;
+  if (kode === "ERR_MODULE_NOT_FOUND" || kode === "MODULE_NOT_FOUND") return;
+  colors.logger.warn(namaHook, error?.message || String(error));
+}
 const processedMessages = new NodeCache({ stdTTL: 30, useClones: false });
 const msgRetryCounterCache = new NodeCache({ stdTTL: 60, useClones: false });
 
@@ -228,7 +245,13 @@ function askQuestion(question) {
  * @param {Object} options - Opsi koneksi
  * @param {Function} [options.onMessage] - Callback untuk pesan baru
  * @param {Function} [options.onConnectionUpdate] - Callback untuk update koneksi
- * @param {Function} [options.onGroupUpdate] - Callback untuk update group
+ * @param {Function} [options.onGroupUpdate] - Callback untuk update group.
+ *   Selalu menerima amplop seragam `({ tipe, grupId, data }, sock)`:
+ *   - `tipe: "metadata"` → dari event `groups.update`,
+ *     `data` berisi `Partial<GroupMetadata>` (nama/deskripsi/setelan berubah)
+ *   - `tipe: "peserta"` → dari event `group-participants.update`,
+ *     `data` berisi `{ id, author, participants, action }`
+ *   Periksa `tipe` lebih dulu sebelum membaca `data`.
  * @returns {Promise<Object>} Socket connection
  * @example
  * const sock = await startConnection({
@@ -597,7 +620,10 @@ async function startConnection(options = {}) {
           await new Promise((r) => setTimeout(r, 5000));
           try {
             await fn(...args);
-          } catch {}
+          } catch (ulang) {
+            // Percobaan kedua pun gagal — laporkan, jangan ditelan.
+            laporHookGagal("group-queue", ulang);
+          }
         }
       }
       await new Promise((r) => setTimeout(r, 2000));
@@ -608,8 +634,12 @@ async function startConnection(options = {}) {
   // Baileys mengirim groups.update sebagai ARRAY. Destrukturisasi
   // ([event]) yang lama hanya mengambil elemen pertama, sehingga saat
   // beberapa grup berubah dalam satu batch sisanya hilang tanpa jejak.
+  //
+  // Penyegaran groupCache HARUS berjalan tanpa bergantung pada ada
+  // tidaknya callback onGroupUpdate. Cache ini dipakai Baileys lewat
+  // cachedGroupMetadata; bila basi, daftar admin ikut salah setelah
+  // promote/demote.
   sock.ev.on("groups.update", async (events) => {
-    if (!options.onGroupUpdate) return;
     for (const event of events || []) {
       if (!event?.id) continue;
       _groupEventQueue.push({
@@ -618,7 +648,13 @@ async function startConnection(options = {}) {
             const m = await s.groupMetadata(ev.id);
             groupCache.set(ev.id, m);
           } catch {}
-          await options.onGroupUpdate(ev, s);
+          // Bentuk data: Partial<GroupMetadata> (metadata grup berubah)
+          if (options.onGroupUpdate) {
+            await options.onGroupUpdate(
+              { tipe: "metadata", grupId: ev.id, data: ev },
+              s,
+            );
+          }
         },
         args: [event, sock],
       });
@@ -667,7 +703,9 @@ async function startConnection(options = {}) {
               await import("../plugins/group/anticulik.js");
             const culikHandled = await handleAntiCulik(event, sock, db);
             if (culikHandled) return;
-          } catch {}
+          } catch (error) {
+            laporHookGagal("anticulik", error);
+          }
 
           const sewaData = db?.db?.data?.sewa;
 
@@ -771,7 +809,9 @@ async function startConnection(options = {}) {
               keluar: false,
             });
             if (terkirim) continue;
-          } catch {}
+          } catch (error) {
+            laporHookGagal("welcomecard", error);
+          }
 
           let pushName = "Member";
           try {
@@ -824,7 +864,9 @@ async function startConnection(options = {}) {
               keluar: true,
             });
             if (terkirim) continue;
-          } catch {}
+          } catch (error) {
+            laporHookGagal("goodbyecard", error);
+          }
 
           let pushName = "Member";
           try {
@@ -965,7 +1007,9 @@ async function startConnection(options = {}) {
             if (handleLabelChange) {
               await handleLabelChange(msg, currentSock);
             }
-          } catch (e) {}
+          } catch (error) {
+            laporHookGagal("notifgantitag", error);
+          }
         }
 
         if (
@@ -1154,7 +1198,9 @@ async function startConnection(options = {}) {
       if (options.onRawMessage) {
         try {
           await options.onRawMessage(msg, currentSock);
-        } catch (error) {}
+        } catch (error) {
+          laporHookGagal("onRawMessage", error);
+        }
       }
 
       const messageBody = (() => {
@@ -1257,14 +1303,22 @@ async function startConnection(options = {}) {
     }
   });
 
+  // Dulu event ini dilempar mentah ke onGroupUpdate, padahal listener
+  // groups.update mengirim Partial<GroupMetadata>. Satu callback menerima
+  // dua bentuk data yang sama sekali berbeda, sehingga penerima harus
+  // menebak sendiri dan event.action kerap undefined.
+  //
+  // Sekarang keduanya dibungkus amplop seragam { tipe, grupId, data }.
   sock.ev.on("group-participants.update", async (update) => {
-    if (options.onGroupUpdate) {
-      _groupEventQueue.push({
-        handler: options.onGroupUpdate,
-        args: [update, sock],
-      });
-      _processGroupQueue();
-    }
+    if (!options.onGroupUpdate || !update?.id) return;
+    _groupEventQueue.push({
+      handler: options.onGroupUpdate,
+      args: [
+        { tipe: "peserta", grupId: update.id, data: update },
+        sock,
+      ],
+    });
+    _processGroupQueue();
   });
 
   sock.ev.on("groups.update", async (updates) => {

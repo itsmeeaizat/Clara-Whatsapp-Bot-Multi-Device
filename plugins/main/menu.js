@@ -121,12 +121,13 @@ async function handler(m, { sock, config: botConfig, db, uptime }) {
                 isForwarded: true,
                 forwardingScore: 9,
                 mentionedJid: mentions,
-                forwardedNewsletterMessageInfo: {
-                  newsletterJid:
-                    botConfig.saluran?.id || "120363400911374213@newsletter",
-                  newsletterName: botConfig.saluran?.name || namaBot,
-                  serverMessageId: 127,
-                },
+                ...(botConfig.saluran?.id ? {
+                  forwardedNewsletterMessageInfo: {
+                    newsletterJid: botConfig.saluran?.id,
+                    newsletterName: botConfig.saluran?.name || namaBot,
+                    serverMessageId: 127,
+                  },
+                } : {}),
               },
               nativeFlowMessage: {
                 messageParamsJson: JSON.stringify({

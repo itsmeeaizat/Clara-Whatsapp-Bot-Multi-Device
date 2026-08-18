@@ -8,10 +8,10 @@ const TQTO_IMAGE = "https://telegra.ph/file/5478e28cc3ace94df0d43.jpg";
 
 const TQTO_CAPTION = `*Thanks To :*
 
-- deraindriyani123
+- Aizat
 
 *Modular Version:*
-deraindriyani123`;
+Aizat`;
 
 const pluginConfig = {
   name: "tqto",

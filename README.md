@@ -376,6 +376,67 @@ Salah eja umum seperti `bukhori` atau `turmudzi` tetap dikenali.
 
 ---
 
+## ⚔️ Sistem RPG
+
+Petualangan lengkap dengan **progres yang benar-benar tersimpan**. Koin hasil bermain
+memakai dompet yang sama dengan `.balance` dan `.shop`, jadi bertarung langsung terasa
+di ekonomi bot.
+
+| Command | Fungsi |
+|---|---|
+| `.petualang` | Kartu karakter: level, kelas, kekuatan, perlengkapan |
+| `.tambangrpg` | Gali bijih — `dalam` untuk hasil besar tapi berisiko runtuh |
+| `.mancing` | Memancing di danau, atau `laut` mulai level 5 |
+| `.bertarung` | Lawan monster liar, HP terkuras dan tersimpan |
+| `.duelrpg @orang 5000` | Duel PvP bertaruh koin (grup) |
+| `.raidbos mulai` | Panggil bos raksasa, dilawan rame-rame segrup |
+| `.tokorpg` | Beli/pakai/jual senjata, armor, dan bahan |
+| `.ramuan` | Pulihkan HP — `istirahat` gratis sekali per jam |
+| `.tasrpg` | Isi tas, dan `buka` untuk membongkar peti harta |
+| `.papanrpg` | Papan peringkat: level, koin, monster, bos, duel |
+
+<details>
+<summary><b>Cara kerja sistemnya</b></summary>
+
+**Empat kelas**, masing-masing punya gaya bertarung berbeda:
+
+| Kelas | Kekuatan | Kelemahan |
+|---|---|---|
+| 🛡️ Ksatria | HP tebal, pertahanan tinggi | Serangan biasa |
+| 🔮 Penyihir | Serangan terbesar | Badan paling rapuh |
+| 🏹 Pemanah | Kritis 25% | HP sedang |
+| 🗡️ Perampok | Seimbang, pandai menjarah | Tidak menonjol |
+
+**Stamina** membatasi permainan supaya tidak bisa di-spam: maksimal 20, pulih 1 tiap
+5 menit. Menambang butuh 1, bertarung 2, dungeon 4.
+
+**HP benar-benar terkuras.** Kalau habis, kamu tidak bisa bertarung sampai minum
+ramuan atau istirahat. Ini yang membuat pilihan terasa ada konsekuensinya.
+
+```bash
+# Mulai dari sini
+.petualang kelas pemanah    # pilih kelas
+.tambangrpg                 # kumpulkan koin
+.tokorpg beli pedang_besi   # belanja
+.tokorpg pakai pedang_besi  # pakai senjatanya
+.bertarung                  # coba kekuatan baru
+.ramuan                     # pulihkan HP
+
+# Rame-rame di grup
+.raidbos mulai              # panggil bos
+.raidbos                    # semua anggota menyerang
+.duelrpg @teman 10rb        # tantang duel
+```
+
+</details>
+
+> **Catatan penting:** sembilan perintah RPG lama (`.hunt`, `.dungeon`, `.boss`,
+> `.explore`, `.arena`, `.equipment`, `.artifact`, dan lainnya) dulu hanya **tampilan
+> kosong** — gold dan exp-nya diacak lalu dibuang, tidak pernah tersimpan. Semuanya
+> kini tersambung ke sistem yang sama, jadi hasilnya nyata.
+
+---
+
 ## 🎨 Dua Mode Tampilan Menu
 
 Bot ini punya **dua gaya menu** yang bisa ditukar kapan saja:
@@ -435,12 +496,14 @@ sehingga bertahan setelah restart.
 ├── config.js                # Konfigurasi utama
 ├── plugins/
 │   ├── main/                # Mayoritas command
+│   ├── game/                # Sistem RPG
 │   ├── group/               # Fitur & moderasi grup
 │   └── religi/              # Command religi
 ├── src/
 │   ├── connection.js        # Koneksi & event Baileys
 │   ├── handler.js           # Router pesan masuk
 │   └── lib/                 # Modul inti
+│       ├── clara-rpg-core.js      # Mesin RPG: level, tempur, barang, ekonomi
 │       ├── clara-media-util.js    # Unduh & konversi gambar/sticker/video
 │       ├── clara-sticker-util.js  # Pembuatan sticker
 │       └── clara-menu-*.js        # Gaya & pembangun menu
@@ -454,7 +517,7 @@ sehingga bertahan setelah restart.
 |---|---|---|---|---|
 | AI | 51 | | Info | 15 |
 | Group | 48 | | Fun | 13 |
-| Game | 41 | | Religi | 13 |
+| Game | 51 | | Religi | 13 |
 | Tools | 20 | | Maker | 13 |
 | Economy | 18 | | Search | 10 |
 | Owner | 17 | | Music | 10 |

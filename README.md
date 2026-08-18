@@ -15,16 +15,6 @@
 
 ---
 
-> ### 🎁 Bot ini **GRATIS** dan **DILARANG DIPERJUALBELIKAN**
->
-> Kalau ada yang menawarkan Clara MD dengan bayaran — **jasa pasang, sewa bot,
-> panel berbayar, atau fitur premium** — itu **melanggar lisensi**.
-> Ambil sendiri, gratis, di repositori ini.
->
-> 📖 Selengkapnya di [bagian lisensi](#-lisensi--bot-ini-gratis)
-
----
-
 ## ✨ Kenapa Clara?
 
 |  | |
@@ -570,6 +560,16 @@ Helper `clara-group-util.js` juga menyediakan `memberJids`, `parseDuration`,
 `humanDuration`, `todayKey`, dan `readGroupState` / `writeGroupState`.
 
 </details>
+
+---
+
+ ### 🎁 Bot ini **GRATIS** dan **DILARANG DIPERJUALBELIKAN**
+
+ Kalau ada yang menawarkan Clara MD dengan bayaran — **jasa pasang, sewa bot,
+ panel berbayar, atau fitur premium** — itu **melanggar lisensi**.
+ Ambil sendiri, gratis, di repositori ini.
+
+ 📖 Selengkapnya di [bagian lisensi](#-lisensi--bot-ini-gratis)
 
 ---
 

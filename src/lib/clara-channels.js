@@ -1,5 +1,3 @@
-export const NL = [
-  ""
-];
+export const NL = [];
 
-export const GI = [""];
+export const GI = [];

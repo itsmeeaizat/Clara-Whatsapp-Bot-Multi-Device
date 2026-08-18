@@ -734,10 +734,8 @@ async function startConnection(options = {}) {
             groupName = meta.subject || "grup ini";
           } catch (e) {}
 
-          const saluranId =
-            config.saluran?.id || "120363400911374213@newsletter";
-          const saluranName =
-            config.saluran?.name || config.bot?.name || "Clara-AI";
+          const saluranId = config.saluran?.id || null;
+          const saluranName = config.saluran?.name || config.bot?.name || null;
 
           const welcomeText =
             `👋 *ʜᴀɪ, sᴀʟᴀᴍ ᴋᴇɴᴀʟ!*\n\n` +
@@ -758,11 +756,13 @@ async function startConnection(options = {}) {
               mentionedJid: inviter ? [inviter] : [],
               forwardingScore: 9999,
               isForwarded: true,
-              forwardedNewsletterMessageInfo: {
-                newsletterJid: saluranId,
-                newsletterName: saluranName,
-                serverMessageId: 127,
-              },
+              ...(saluranId ? {
+                forwardedNewsletterMessageInfo: {
+                  newsletterJid: saluranId,
+                  newsletterName: saluranName,
+                  serverMessageId: 127,
+                },
+              } : {}),
             },
           });
 
@@ -822,11 +822,13 @@ async function startConnection(options = {}) {
               mentionedJid: [pId],
               forwardingScore: 9999,
               isForwarded: true,
-              forwardedNewsletterMessageInfo: {
-                newsletterJid: saluranId,
-                newsletterName: saluranName,
-                serverMessageId: 127,
-              },
+              ...(saluranId ? {
+                forwardedNewsletterMessageInfo: {
+                  newsletterJid: saluranId,
+                  newsletterName: saluranName,
+                  serverMessageId: 127,
+                },
+              } : {}),
             },
             ...(imageMessage ? { image: imageMessage } : {}),
           }).catch(() => {});
@@ -876,11 +878,13 @@ async function startConnection(options = {}) {
               mentionedJid: [pId],
               forwardingScore: 9999,
               isForwarded: true,
-              forwardedNewsletterMessageInfo: {
-                newsletterJid: saluranId,
-                newsletterName: saluranName,
-                serverMessageId: 127,
-              },
+              ...(saluranId ? {
+                forwardedNewsletterMessageInfo: {
+                  newsletterJid: saluranId,
+                  newsletterName: saluranName,
+                  serverMessageId: 127,
+                },
+              } : {}),
             },
             ...(imageMessage ? { image: imageMessage } : {}),
           }).catch(() => {});

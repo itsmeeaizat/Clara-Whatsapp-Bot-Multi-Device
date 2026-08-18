@@ -238,9 +238,73 @@ kepanjangan. Admin & owner kebal.
 .giveaway start 30m 1 Voucher 50rb
 .rekap hari · minggu · sepi
 .afk lagi makan
+.tugas tambah 3h Matematika bab 5
+.tugas selesai 1
 ```
 
 </details>
+
+---
+
+## 🇮🇩 Utilitas Indonesia
+
+Fitur harian yang benar-benar dipakai di Indonesia — semuanya **gratis, tanpa API key**.
+
+| Command | Fungsi | Sumber data |
+|---|---|---|
+| `.gempa` | Gempa terkini + peta guncangan BMKG | data.bmkg.go.id |
+| `.gempa dirasakan` | 15 gempa terakhir yang dirasakan warga | data.bmkg.go.id |
+| `.kurs` | Kurs Rupiah terhadap 8 mata uang populer | frankfurter.dev |
+| `.kurs 1.5jt idr usd` | Konversi nominal, paham `jt` / `rb` / `k` | frankfurter.dev |
+| `.zakat penghasilan 10jt` | Kalkulator zakat profesi, maal, dagang, fitrah | perhitungan lokal |
+| `.zakat nisab` | Ambang nisab emas & beras terkini | perhitungan lokal |
+| `.tugas` | Daftar tugas grup + sisa waktu & status mendesak | lokal |
+| `.countdown 17/8` | Hitung mundur hari besar / acara pribadi | lokal |
+| `.pilih bakso \| sate` | Undi pilihan, koin, dadu, angka, urutan | lokal |
+
+<details>
+<summary><b>Contoh pemakaian lengkap</b></summary>
+
+```bash
+# Gempa
+.gempa                      # terkini + shakemap
+.gempa dirasakan            # yang dirasakan warga
+.gempa list                 # 15 gempa M 5.0+ terakhir
+
+# Kurs
+.kurs                       # Rupiah vs USD, EUR, SGD, MYR, JPY, AUD, GBP
+.kurs usd                   # 1 USD berapa Rupiah
+.kurs 100 usd               # konversi 100 USD ke IDR
+.kurs 50 usd sgd            # antar mata uang asing
+
+# Zakat
+.zakat penghasilan 10jt     # zakat profesi 2,5%
+.zakat maal 100jt           # zakat harta (haul 1 tahun)
+.zakat perdagangan 50jt 10jt 5jt
+.zakat fitrah 4             # 4 jiwa, beras & uang
+.setemas 1650000            # owner: perbarui harga emas/gram
+.setberas 15000             # owner: perbarui harga beras/kg
+
+# Tugas grup
+.tugas tambah 3h Matematika bab 5
+.tugas tambah 25/12 Laporan akhir
+.tugas · .tugas semua · .tugas selesai 1 · .tugas bersih
+
+# Hitung mundur
+.countdown                  # hari besar terdekat
+.countdown 17/8 HUT RI
+.countdown 1/1/2027 Wisuda
+
+# Pengambil keputusan
+.pilih bakso | mie ayam | sate
+.pilih koin · .pilih dadu 2 · .pilih angka 1-100
+.pilih urutan andi, budi, cici
+```
+
+</details>
+
+> Harga emas & beras untuk zakat bisa disesuaikan owner lewat `.setemas` / `.setberas`,
+> jadi hasil hitungnya tetap akurat mengikuti harga pasar.
 
 ---
 
@@ -317,9 +381,9 @@ sehingga bertahan setelah restart.
 
 | Kategori | Jumlah | | Kategori | Jumlah |
 |---|---|---|---|---|
-| AI | 51 | | Info | 12 |
-| Group | 47 | | Fun | 12 |
-| Game | 41 | | Religi | 11 |
+| AI | 51 | | Info | 14 |
+| Group | 48 | | Fun | 13 |
+| Game | 41 | | Religi | 12 |
 | Tools | 20 | | Maker | 11 |
 | Economy | 18 | | Search | 10 |
 | Owner | 16 | | Music | 10 |

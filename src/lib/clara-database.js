@@ -728,6 +728,51 @@ class Database {
   set data(val) {
     this.db.data = val;
   }
+
+  /**
+   * Generic key-value get dari store settings.
+   * Banyak plugin (aichat, ai-addprovider, reward, spy, dll.) memanggil
+   * db.get("key") untuk membaca data arbitrer. Sebelumnya method ini
+   * tidak ada sehingga command-command tersebut crash dengan
+   * "TypeError: db.get is not a function".
+   *
+   * @param {string} key - Kunci data
+   * @param {*} fallback - Nilai default bila kunci tidak ditemukan
+   * @returns {*} Nilai yang tersimpan atau fallback
+   */
+  get(key, fallback = undefined) {
+    if (!key) return fallback;
+    const settings = this.db.data.settings || {};
+    if (key in settings) return settings[key];
+    return fallback;
+  }
+
+  /**
+   * Generic key-value set ke store settings.
+   * @param {string} key - Kunci data
+   * @param {*} value - Nilai untuk disimpan
+   */
+  set(key, value) {
+    if (!key) return;
+    if (!this.db.data.settings) this.db.data.settings = {};
+    this.db.data.settings[key] = value;
+    this.markDirty("settings");
+  }
+
+  /**
+   * Push nilai ke array di store settings.
+   * @param {string} key - Kunci array
+   * @param {*} value - Nilai untuk ditambahkan
+   */
+  push(key, value) {
+    if (!key) return;
+    if (!this.db.data.settings) this.db.data.settings = {};
+    if (!Array.isArray(this.db.data.settings[key])) {
+      this.db.data.settings[key] = [];
+    }
+    this.db.data.settings[key].push(value);
+    this.markDirty("settings");
+  }
 }
 
 let dbInstance = null;

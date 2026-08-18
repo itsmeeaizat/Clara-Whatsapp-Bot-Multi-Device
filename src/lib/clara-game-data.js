@@ -264,7 +264,7 @@ function getProgressiveHint(answer, attempts) {
     }).join('');
 }
 
-setInterval(() => {
+const _cleanupInterval = setInterval(() => {
     const now = Date.now();
     const MAX_AGE = 10 * 60 * 1000;
     for (const [chatId, session] of gameSessions) {
@@ -274,5 +274,6 @@ setInterval(() => {
         }
     }
 }, 5 * 60 * 1000);
+if (_cleanupInterval.unref) _cleanupInterval.unref();
 
 export { loadData, getRandomItem, getItemByIndex, searchItem, getAllData, normalizeAnswer, checkAnswer, checkAnswerAdvanced, getSimilarity, getHint, isSurrender, createSession, setSessionTimer, getSession, endSession, hasActiveSession, getRemainingTime, formatRemainingTime, isReplyToGame, GAME_REWARD, getRandomReward, getProgressiveHint }

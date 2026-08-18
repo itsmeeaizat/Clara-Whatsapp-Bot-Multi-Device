@@ -1,0 +1,84 @@
+Clara MD — Lisensi Penggunaan Non-Komersial
+Clara MD — Non-Commercial Use License
+
+Hak Cipta (c) 2026 Aizat (itsmeeaizat)
+Copyright (c) 2026 Aizat (itsmeeaizat)
+
+===============================================================================
+BAHASA INDONESIA
+===============================================================================
+
+Perangkat lunak ini GRATIS dan disediakan apa adanya untuk dipakai,
+dipelajari, dimodifikasi, dan dibagikan ulang secara cuma-cuma.
+
+DIIZINKAN
+  1. Menggunakan bot ini untuk keperluan pribadi maupun komunitas.
+  2. Mempelajari, memodifikasi, dan mengembangkan kode sumbernya.
+  3. Membagikan ulang, baik asli maupun hasil modifikasi, SELAMA gratis
+     dan tetap menyertakan berkas lisensi ini beserta atribusi penulis asli.
+  4. Menerima donasi sukarela yang tidak mengikat, sepanjang bot tetap
+     dapat dipakai penuh tanpa membayar.
+
+DILARANG
+  1. Menjual, menyewakan, atau melisensikan ulang perangkat lunak ini,
+     baik seluruhnya maupun sebagian, dalam bentuk apa pun.
+  2. Menjadikannya bagian dari produk atau layanan berbayar, termasuk
+     "jasa pasang bot", "sewa bot", panel berbayar, atau paket berlangganan.
+  3. Mengunci fitur di balik pembayaran (paywall), termasuk fitur premium
+     berbayar di dalam bot hasil turunan.
+  4. Menghapus, mengganti, atau mengaburkan atribusi penulis asli maupun
+     berkas lisensi ini.
+  5. Mengklaim perangkat lunak ini sebagai karya sendiri.
+
+CATATAN
+  Larangan menjual berlaku pada perangkat lunak ini. Biaya pihak ketiga yang
+  wajar dan di luar kendali penulis — misalnya sewa VPS milik pengguna sendiri
+  atau kuota API berbayar — bukan termasuk penjualan perangkat lunak ini.
+
+TANPA JAMINAN
+  PERANGKAT LUNAK INI DISEDIAKAN "APA ADANYA", TANPA JAMINAN DALAM BENTUK
+  APA PUN. PENULIS TIDAK BERTANGGUNG JAWAB ATAS KERUGIAN, KERUSAKAN, ATAU
+  KONSEKUENSI APA PUN YANG TIMBUL DARI PENGGUNAAN PERANGKAT LUNAK INI,
+  TERMASUK NAMUN TIDAK TERBATAS PADA PEMBLOKIRAN NOMOR WHATSAPP.
+
+===============================================================================
+ENGLISH
+===============================================================================
+
+This software is FREE and provided as-is for personal and community use,
+study, modification, and non-commercial redistribution.
+
+YOU MAY
+  1. Use this bot for personal or community purposes.
+  2. Study, modify, and build upon the source code.
+  3. Redistribute it, original or modified, PROVIDED it remains free of
+     charge and retains this license file and original attribution.
+  4. Accept voluntary, non-binding donations, provided the bot remains
+     fully usable without payment.
+
+YOU MAY NOT
+  1. Sell, rent, or sublicense this software, in whole or in part, in any form.
+  2. Include it in any paid product or service, including paid setup services,
+     bot rentals, paid panels, or subscription bundles.
+  3. Place any feature behind a paywall, including paid "premium" tiers in
+     derivative works.
+  4. Remove, replace, or obscure the original attribution or this license file.
+  5. Claim this software as your own work.
+
+NOTE
+  The prohibition on selling applies to this software. Reasonable third-party
+  costs outside the author's control — such as a user's own VPS rental or paid
+  API quota — do not constitute selling this software.
+
+NO WARRANTY
+  THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND. THE AUTHOR
+  SHALL NOT BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY ARISING FROM
+  THE USE OF THIS SOFTWARE, INCLUDING BUT NOT LIMITED TO WHATSAPP NUMBER BANS.
+
+===============================================================================
+
+Dependensi pihak ketiga (Baileys, dan paket lain di package.json) memiliki
+lisensinya masing-masing dan tidak tercakup oleh lisensi ini.
+
+Third-party dependencies (Baileys and other packages in package.json) are
+covered by their own respective licenses, not by this license.

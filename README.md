@@ -1,140 +1,97 @@
-# Clara MD
+<div align="center">
 
-WhatsApp Multi-Device Bot berbasis [Baileys](https://github.com/WhiskeySockets/Baileys), dengan arsitektur plugin modular. Dilanjutkan dan dikembangkan secara mandiri dari basis script pribadi — bukan fork langsung dari repo `Clara-MD` (Zeltoria) yang sudah tidak aktif dikembangkan.
+# 🌸 Clara MD
 
-## ✨ Tentang
+**Bot WhatsApp Multi-Device dengan 290+ command, AI Agent, dan sistem plugin modular**
 
-- **235+ command** tersebar di belasan kategori (owner, main, tools, fun, game, downloader, AI, group, religi, economy, RPG, dan lainnya)
-- Sistem plugin **hot-reload** — command baru langsung terdeteksi tanpa restart bot saat mode development aktif
-- Database lokal berbasis JSON (`lowdb`) — tidak butuh setup database eksternal
-- Sistem energi/limit, level & exp, koin, dan status premium per user
-- Proteksi grup: antilink, antispam, antitoxic, antiraid, antidelete, dan lainnya
-- Scheduler bawaan: jadwal sholat, notifikasi cuaca, info loker, broadcast terjadwal
-- Menu interaktif dengan tombol/list picker (bukan sekadar teks polos)
-- **AI Agent dengan tool-use** (`.agent`) — bukan sekadar chat, tapi bisa memanggil tool sendiri
+[![Gratis](https://img.shields.io/badge/Harga-GRATIS%20Selamanya-brightgreen?style=for-the-badge)](#-lisensi--bot-ini-gratis)
+[![Dilarang Dijual](https://img.shields.io/badge/Dilarang-DIPERJUALBELIKAN-red?style=for-the-badge)](#-lisensi--bot-ini-gratis)
+[![Node](https://img.shields.io/badge/Node.js-%E2%89%A522-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org)
+[![Baileys](https://img.shields.io/badge/Baileys-Multi--Device-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://github.com/WhiskeySockets/Baileys)
 
-## 📦 Requirement
+**290 command · 799 alias · 1.089 total trigger · 15 kategori**
 
-- **Node.js ≥ 22.0.0**
-- NPM
-- Nomor WhatsApp aktif untuk pairing bot (disarankan bukan nomor utama)
+</div>
 
-## 🚀 Instalasi
+---
+
+> ### 🎁 Bot ini **GRATIS** dan **DILARANG DIPERJUALBELIKAN**
+>
+> Kalau ada yang menawarkan Clara MD dengan bayaran — **jasa pasang, sewa bot,
+> panel berbayar, atau fitur premium** — itu **melanggar lisensi**.
+> Ambil sendiri, gratis, di repositori ini.
+>
+> 📖 Selengkapnya di [bagian lisensi](#-lisensi--bot-ini-gratis)
+
+---
+
+## ✨ Kenapa Clara?
+
+|  | |
+|---|---|
+| 🤖 **AI Agent sungguhan** | Bukan sekadar chatbot — bisa memakai *tool*: cari web, baca halaman, hitung, cek data grup. Default **Claude Sonnet 5** |
+| 🧩 **290+ command** | 15 kategori: AI, grup, game, ekonomi, RPG, downloader, religi, tools, dan lainnya |
+| ⚡ **Hot-reload plugin** | Tambah command baru tanpa restart bot |
+| 🛡️ **Proteksi grup lengkap** | Antilink, antispam, spamguard, anticulik, antiraid, antidelete |
+| 💾 **Tanpa setup database** | JSON lokal via `lowdb` — tinggal jalan |
+| 🕌 **Ramah lokal** | Jadwal sholat, auto-sahur, kas grup, piket, absensi — dibuat untuk pengguna Indonesia |
+| 🎨 **Kartu sambutan** | Welcome card bergambar untuk member baru |
+| ⏰ **Terjadwal otomatis** | Buka/tutup grup, pengingat, notifikasi cuaca, info loker |
+
+---
+
+## 🚀 Mulai Cepat
 
 ```bash
-git clone <url-repo-kamu>
-cd clara-md
+git clone https://github.com/itsmeeaizat/Clara-Whatsapp-Bot-Multi-Device.git
+cd Clara-Whatsapp-Bot-Multi-Device
 npm install
 ```
 
-### Konfigurasi
-
-Edit `config.js` sebelum menjalankan bot:
+Edit `config.js` seperlunya:
 
 | Bagian | Keterangan |
 |---|---|
-| `owner.number` | Nomor WhatsApp owner bot (format `62xxxxxxxxxx`, tanpa `+`) |
-| `session.pairingNumber` | Nomor yang dipakai bot untuk pairing |
+| `owner.number` | Nomor owner, format `62xxx` tanpa `+` |
+| `session.pairingNumber` | Nomor yang dipakai bot |
 | `bot.name` | Nama tampilan bot |
 | `command.prefix` | Prefix command (default `.`) |
-| `APIkey.*` | API key pihak ketiga untuk fitur-fitur tertentu |
-
-> ⚠️ **Penting:** jangan commit `config.js` yang sudah berisi API key asli ke repo publik. Disarankan pindahkan key sensitif ke environment variable sebelum di-push.
-
-### Menjalankan bot
 
 ```bash
-npm start        # mode production
-npm run dev       # mode development (hot-reload plugin aktif)
+npm start      # production
+npm run dev    # development + hot-reload plugin
 ```
 
-Saat pertama kali jalan, bot akan meminta **pairing code** di terminal — masukkan kode tersebut di WhatsApp: **Perangkat Tertaut → Tautkan dengan nomor telepon**.
+Bot akan menampilkan **pairing code** di terminal. Masukkan di WhatsApp:
+**Perangkat Tertaut → Tautkan dengan nomor telepon**.
 
-## 🗂️ Struktur Proyek
+> ⚠️ **Jangan commit `config.js` yang sudah berisi API key asli.**
+> Pakai environment variable untuk kunci sensitif.
 
-```
-├── index.js              # Entry point
-├── config.js              # Konfigurasi utama bot
-├── plugins/
-│   ├── main/               # Mayoritas command (234 file)
-│   └── religi/              # Command bertema religi
-├── src/
-│   ├── connection.js         # Koneksi & event handler Baileys
-│   ├── handler.js            # Router pesan masuk ke plugin
-│   └── lib/                  # Modul inti (database, scheduler, plugin loader, dll.)
-├── database/main/          # Data JSON lokal (users, groups, settings, dll.)
-└── assets/                # Gambar, font, audio, video bawaan bot
-```
+**Butuh:** Node.js ≥ 22 · nomor WhatsApp aktif (disarankan bukan nomor utama)
 
-## 🧩 Menambah Command Baru
+---
 
-Buat file baru di `plugins/main/`, contoh minimal:
+## 🤖 AI Agent
 
-```js
-const pluginConfig = {
-  name: "ping",
-  alias: ["p"],
-  category: "main",
-  description: "Cek respon bot",
-  usage: ".ping",
-  isOwner: false,
-  isPremium: false,
-  isGroup: false,
-  isPrivate: false,
-  cooldown: 5,
-  energi: 0,
-  isEnabled: true,
-};
+Berbeda dari plugin AI biasa yang sekali-tanya-sekali-jawab, `.agent`
+menjalankan **agentic loop**: model memilih *tool* → tool dieksekusi →
+hasilnya dikembalikan → diulang sampai tugas selesai (maks 6 langkah).
 
-async function handler(m, { sock }) {
-  await m.reply("Pong! 🏓");
-}
-
-export default { config: pluginConfig, handler };
-```
-
-Saat `dev.watchPlugins` aktif di `config.js`, file baru di folder `plugins/` otomatis ter-load tanpa restart.
-
-## 🤖 AI Agent (`.agent`)
-
-Berbeda dengan plugin AI biasa yang sekali-tanya-sekali-jawab, `.agent` menjalankan
-**agentic loop**: model memilih tool → tool dieksekusi → hasilnya dikembalikan ke model →
-diulang sampai tugas selesai (maksimal 6 langkah).
-
-### Tool yang tersedia
-
-| Tool | Fungsi |
-|---|---|
-| `cari_web` | Cari info terkini via DuckDuckGo |
-| `baca_halaman` | Ambil & bersihkan isi teks dari sebuah URL |
-| `hitung` | Kalkulator aman (whitelist karakter, bukan `eval` bebas) |
-| `waktu_sekarang` | Tanggal/jam sekarang, zona waktu bisa diatur |
-| `info_grup` | Nama grup, jumlah member, daftar admin, deskripsi |
-| `profil_user` | Level, exp, koin, energi, status premium dari database bot |
-| `daftar_command` | Cari fitur bot berdasarkan kata kunci |
-
-### Penggunaan
-
-```
-.agent <tugas>                  # jalankan agent
-.agent sonnet-5 <tugas>         # pilih model spesifik
-.agent model                    # daftar provider + status API key
-.agent tools                    # daftar tool
-.agent memory                   # lihat riwayat percakapan
-.agent reset                    # hapus ingatan
-```
-
-Contoh:
-
-```
+```bash
 .agent kurs dolar hari ini berapa?
 .agent ringkas https://example.com
 .agent 12.5% dari 3.400.000 berapa
 .agent siapa aja admin grup ini
-.agent ada fitur buat download tiktok?
 ```
 
-### Model yang didukung
+**7 tool:** `cari_web` · `baca_halaman` · `hitung` · `waktu_sekarang` ·
+`info_grup` · `profil_user` · `daftar_command`
+
+<details>
+<summary><b>Model, konfigurasi API key, dan memory</b></summary>
+
+### Model
 
 | Alias | Model | Provider |
 |---|---|---|
@@ -143,276 +100,302 @@ Contoh:
 | `haiku` | `claude-haiku-4-5` | anthropic |
 | `4o` / `mini` | `gpt-4o` / `gpt-4o-mini` | openai |
 | `llama` | `llama-3.3-70b-versatile` | groq |
-| `deepseek`, `mistral`, `together` | model default masing-masing | — |
 
-Provider Anthropic memakai tool-use native; provider lain memakai format
-function-calling ala OpenAI. Provider yang tidak mendukung tool akan tetap
-menjawab, hanya tanpa kemampuan memanggil tool.
+Anthropic memakai tool-use native; provider lain memakai format
+function-calling ala OpenAI.
 
-### Konfigurasi API key
+```bash
+.agent sonnet-5 <tugas>    # pilih model
+.agent model               # daftar + status API key
+.agent tools               # daftar tool
+.agent reset               # hapus ingatan
+```
 
-Urutan prioritas pembacaan key:
+### API key
 
-1. Environment variable — **disarankan**
+Urutan prioritas pembacaan:
+
+1. **Environment variable** — disarankan
    ```bash
    export ANTHROPIC_API_KEY="sk-ant-..."
    export OPENAI_API_KEY="sk-..."
    export GROQ_API_KEY="gsk_..."
    ```
 2. `config.js` → `APIkey.anthropic`, `APIkey.openai`, dst.
-3. `config.js` → `aiHelp.apiKey` (bila `aiHelp.provider` cocok)
+3. `config.js` → `aiHelp.apiKey`
 
-Opsional, atur default agent di `config.js`:
+Opsional, atur default di `config.js`:
 
 ```js
-agent: {
-  provider: "anthropic",
-  model: "claude-sonnet-5",
-},
+agent: { provider: "anthropic", model: "claude-sonnet-5" },
 ```
 
 ### Memory
 
-Agent menyimpan 12 giliran percakapan terakhir per user di database
-(`setting.agentMemory`). Hapus dengan `.agent reset`. Bila modul database
-tidak tersedia, agent tetap jalan — hanya tanpa ingatan.
+Menyimpan 12 giliran terakhir per user di `setting.agentMemory`.
+Hapus dengan `.agent reset`. Bila database tidak tersedia, agent tetap
+jalan — hanya tanpa ingatan.
 
-## 🛡️ Fitur Grup & Moderasi
+</details>
 
-Empat plugin di bawah ini **hook-nya sudah lama terpasang** di `src/connection.js`
-dan `index.js`, tetapi file plugin-nya belum pernah dibuat — sehingga fiturnya
-diam-diam tidak pernah aktif. Sekarang sudah terisi.
+---
 
-### `.anticulik` — cegah bot "diculik"
+## 👥 Fitur Grup Unggulan
 
-Bot otomatis keluar bila ditarik ke grup asing oleh orang yang tidak berhak.
+<table>
+<tr><td width="50%" valign="top">
 
-```
-.anticulik on / off
+**📋 `.absen` — absensi**
+Member cukup ketik `hadir` (bot beri reaksi ✅).
+`.absen belum` me-mention yang belum absen.
+
+**🗳️ `.voting` — polling**
+Pilih cukup ketik **angka**. Hasil bar visual
+`████░░░░░░ 4 (67%)`, deteksi seri.
+
+**💤 `.afk` — sedang pergi**
+Di-mention saat AFK → bot balas alasan + durasi.
+Lepas otomatis saat chat lagi.
+
+**📊 `.rekap` — statistik chat**
+Peringkat 🥇🥈🥉 dan `.rekap sepi` untuk
+anggota paling pendiam.
+
+**⏰ `.reminder` — pengingat**
+Sekali atau harian, jalan di grup & chat pribadi.
+
+**🎁 `.giveaway` — undian**
+Peserta ketik `ikut`, pemenang diundi
+**otomatis** saat waktu habis.
+
+</td><td width="50%" valign="top">
+
+**⚠️ `.autowarn` — peringatan menindak**
+Kick/mute otomatis saat batas tercapai.
+Warn per grup, hangus 30 hari.
+
+**💰 `.kas` — kas & iuran**
+`.kas belum` me-mention penunggak beserta
+kekurangannya. Format `50rb`, `1.5jt`.
+
+**🧹 `.piket` — giliran bergilir**
+Berputar otomatis, urutan tetap konsisten.
+
+**📝 `.catatan` — catatan bersama**
+Panggil cepat dengan `#aturan`.
+
+**🎨 `.welcomecard` — kartu sambutan**
+Kartu bergambar untuk member baru & keluar.
+
+**🛡️ `.spamguard` — anti flood**
+Deteksi flood, pesan berulang, dan pesan
+kepanjangan. Admin & owner kebal.
+
+</td></tr>
+</table>
+
+<details>
+<summary><b>Lihat semua perintah grup lengkap</b></summary>
+
+### Keamanan
+
+```bash
+.anticulik on              # bot keluar bila ditarik orang tak berhak
 .anticulik mode owner|whitelist
-.anticulik add 628xxx      .anticulik del 628xxx
-.anticulik list            .anticulik log
+.spamguard on
+.spamguard limit 5 7       # maks 5 pesan / 7 detik
+.spamguard aksi warn|delete|kick
+.autowarn @user <alasan>
+.autowarn limit 3 · aksi kick|mute|notify
 ```
 
-| Mode | Perilaku |
-|---|---|
-| `owner` *(default)* | Hanya owner yang boleh menambahkan bot |
-| `whitelist` | Owner + nomor pada daftar putih |
-| `off` | Nonaktif |
+### Administrasi
 
-Bila penambah tidak berhak: bot kirim pesan sopan, keluar, lalu lapor ke owner.
-Bila info penambah tidak tersedia, bot **tidak** bertindak (menghindari false positive).
-
-### `.giveaway` — undian grup otomatis
-
-```
-.giveaway start 30m 1 Voucher 50rb
-.giveaway info        .giveaway peserta
-.giveaway cancel      .giveaway draw
+```bash
+.absen buka <judul> · cek · belum · tutup
+.izin sakit demam tinggi   # member mengajukan
+.izin list · setuju 1 · tolak 1
+.piket tambah @user · now · next · list
+.kas set 50rb · bayar @user · keluar 30rb <ket> · belum
+.catatan simpan aturan <isi>   →  panggil: #aturan
 ```
 
-- Durasi: `90s`, `30m`, `2h`, `1d` (maks 7 hari)
-- Peserta cukup ketik `ikut` / `join` / `gas` / `hadir` / `daftar` — bot memberi reaksi 🎉
-- Pemenang diundi **otomatis** saat waktu habis (checker tiap 30 detik)
-- Hanya admin grup yang bisa membuka, membatalkan, atau mengundi
+### Otomatis & terjadwal
 
-### `.notifgantitag` — notifikasi perubahan label member
-
-Mengumumkan saat tag/label member grup diubah (WhatsApp `protocolMessage` type 30).
-
-```
-.notifgantitag on / off
-```
-
-Nonaktif secara default per grup; hanya admin yang bisa mengubah.
-
-### `.autosahur` — pengingat sahur otomatis
-
-Memakai **jadwal imsak asli** dari `api.myquran.com` sesuai kota, bukan jam statis.
-
-```
-.autosahur on jakarta
-.autosahur off
-.autosahur jadwal            # lihat imsak hari ini
-.autosahur menit 60 30 10    # atur tahap pengingat
-```
-
-Default mengingatkan pada 60, 30, dan 10 menit sebelum imsak, dengan pesan
-bervariasi dan anti-duplikat (satu pengingat per tahap per hari).
-
-## 👥 Fitur Grup Lanjutan
-
-### `.absen` — absensi grup
-
-```
-.absen buka <judul>     .absen cek
-.absen belum            .absen tutup
-```
-
-Member cukup ketik `hadir` / `absen` / `ada` (bot beri reaksi ✅).
-`.absen belum` me-mention siapa saja yang belum absen. Buka/tutup khusus admin.
-
-### `.voting` — polling dengan bar visual
-
-```
-.voting buat Makan dimana? | Padang | Sunda | Bakso
-.voting buat 30m Libur besok? | Ya | Tidak     # dengan batas waktu
-.voting hasil     .voting tutup     .voting batal
-```
-
-Member memilih cukup dengan mengetik **angka**. Bisa ganti pilihan (reaksi 🔄),
-hasil ditampilkan sebagai bar `████░░░░░░ 4 (67%)`, dan hasil seri terdeteksi.
-Maksimal 10 opsi.
-
-### `.afk` — tandai sedang pergi
-
-```
-.afk lagi makan       .afk list
-```
-
-Kalau ada yang mention atau reply ke user yang AFK, bot memberi tahu alasan dan
-sudah berapa lama. Status otomatis lepas begitu user itu chat lagi.
-
-### `.rekap` — statistik aktivitas grup
-
-```
-.rekap hari      .rekap minggu
-.rekap sepi      .rekap reset      # reset khusus admin
-```
-
-Papan peringkat member paling aktif (🥇🥈🥉) dan `.rekap sepi` menampilkan
-anggota paling pendiam. Hanya menyimpan **hitungan angka per hari**, bukan isi
-pesan, dan otomatis dipangkas ke 8 hari terakhir.
-
-### `.reminder` — pengingat terjadwal
-
-```
+```bash
+.jadwalgrup set 07:00 22:00    # buka/tutup grup otomatis
+.autosahur on jakarta          # pengingat imsak per kota
+.notifgantitag on              # notif perubahan label member
+.welcomecard on · gaya v4|discord
 .reminder 30m rapat tim
 .reminder harian 8h minum obat
-.reminder list        .reminder hapus 1
 ```
 
-Berjalan di grup maupun chat pribadi, dicek tiap 20 detik. Maksimal 20 pengingat
-per chat.
+### Interaksi
 
-## 🛠️ Moderasi & Administrasi Grup
-
-### `.autowarn` — peringatan yang benar-benar menindak
-
-Plugin `.warn` lama menampilkan "Warn Count: 1/3" tapi tidak pernah melakukan
-apa pun saat mencapai 3. `.autowarn` melengkapinya:
-
-```
-.autowarn @user <alasan>      .autowarn cabut @user
-.autowarn limit 3             .autowarn aksi kick|mute|notify
-.autowarn list                .autowarn reset @user
+```bash
+.voting buat Makan dimana? | Padang | Sunda
+.giveaway start 30m 1 Voucher 50rb
+.rekap hari · minggu · sepi
+.afk lagi makan
 ```
 
-Warn disimpan **per grup** (tidak tercampur antar grup) dan otomatis hangus
-setelah 30 hari. Kalau bot bukan admin, aksi kick dilewati dengan pesan jelas.
+</details>
 
-### `.kas` — kas & iuran grup
+---
 
-```
-.kas set 50rb                 .kas bayar @user 50rb
-.kas keluar 30rb beli spanduk .kas cek
-.kas belum                    .kas riwayat
-.kas reset                    # periode baru, saldo tetap
-```
-
-Nominal menerima `50000`, `50rb`, `50k`, `1.5jt`. `.kas belum` me-mention
-siapa saja yang masih nunggak beserta kekurangannya. Pengeluaran melebihi
-saldo ditolak.
-
-### `.piket` — jadwal giliran bergilir
+## 🗂️ Struktur Proyek
 
 ```
-.piket set Piket Kebersihan   .piket tambah @user
-.piket now                    .piket next
-.piket list                   .piket hapus @user
+├── index.js                 # Entry point
+├── config.js                # Konfigurasi utama
+├── plugins/
+│   ├── main/                # Mayoritas command
+│   ├── group/               # Fitur & moderasi grup
+│   └── religi/              # Command religi
+├── src/
+│   ├── connection.js        # Koneksi & event Baileys
+│   ├── handler.js           # Router pesan masuk
+│   └── lib/                 # Modul inti
+├── database/main/           # Data JSON lokal
+└── assets/                  # Gambar, font, audio, video
 ```
 
-Giliran berputar otomatis. Kalau petugas yang sedang bertugas dihapus dari
-daftar, urutan tetap konsisten (tidak meleset).
+### Kategori command
 
-### `.catatan` — catatan bersama grup
+| Kategori | Jumlah | | Kategori | Jumlah |
+|---|---|---|---|---|
+| AI | 51 | | Info | 12 |
+| Group | 47 | | Fun | 12 |
+| Game | 41 | | Religi | 11 |
+| Tools | 20 | | Maker | 11 |
+| Economy | 18 | | Search | 10 |
+| Owner | 16 | | Music | 10 |
+| Download | 14 | | Main · Sticker | 17 |
 
-```
-.catatan simpan aturan Dilarang spam
-.catatan list                 .catatan hapus aturan
-#aturan                       # panggil cepat
-```
+---
 
-Bisa menyimpan dari pesan yang di-reply. Daftar diurutkan berdasarkan catatan
-yang paling sering dipanggil. Maksimal 50 catatan per grup.
+## 🧩 Menambah Command Baru
 
-## 🎨 Sambutan, Keamanan & Jadwal
+Buat file di `plugins/main/` (atau `plugins/group/`):
 
-### `.welcomecard` — kartu sambutan bergambar
+```js
+const pluginConfig = {
+  name: "ping",
+  alias: ["p", "cek"],
+  category: "main",
+  description: "Cek respon bot",
+  usage: ".ping",
+  isOwner: false,
+  isPremium: false,
+  isGroup: false,
+  cooldown: 5,
+  energi: 0,
+  isEnabled: true,
+};
 
-`src/lib/clara-welcome-card.js` (595 baris, 4 generator kartu) sudah lama ada
-tapi **tidak pernah di-import file mana pun** — sambutan grup selama ini hanya
-teks. Plugin ini yang memakainya.
+async function handler(m, { sock, config: botConfig, db }) {
+  await m.reply("Pong! 🏓");
+  return { handled: true };
+}
 
-```
-.welcomecard on / off
-.welcomecard gaya v4|discord
-.welcomecard goodbye on|off
-.welcomecard test
-```
-
-Kalau kartu nonaktif atau gagal dibuat, bot otomatis jatuh ke sambutan teks
-seperti biasa — tidak ada yang rusak.
-
-### `.spamguard` — deteksi flood yang benar-benar bekerja
-
-`.antispam` lama hanya menyalakan flag di database; tidak ada kode yang
-membacanya. `.spamguard` menyediakan logikanya:
-
-```
-.spamguard on / off
-.spamguard limit 5 7        # maks 5 pesan / 7 detik
-.spamguard duplikat 3       # maks 3x pesan sama
-.spamguard panjang 3000     # maks karakter
-.spamguard aksi warn|delete|kick
+export default { config: pluginConfig, handler };
 ```
 
-Tiga jenis deteksi: **flood**, **pesan berulang**, dan **pesan kepanjangan**.
-Admin dan owner tidak pernah kena filter. Aksi `delete`/`kick` butuh bot admin.
+Saat `dev.watchPlugins` aktif, file baru **langsung ter-load tanpa restart**.
 
-### `.jadwalgrup` — buka/tutup grup otomatis
+<details>
+<summary><b>Tips: cek admin grup dengan benar</b></summary>
 
-```
-.jadwalgrup set 07:00 22:00
-.jadwalgrup buka            .jadwalgrup tutup
-.jadwalgrup off
-```
+`m.groupMetadata` adalah **objek**, bukan fungsi — memanggil
+`m.groupMetadata()` akan melempar `TypeError`. Pakai helper bersama:
 
-Dicek tiap menit pada zona WIB. Aman dari eksekusi ganda — satu aksi per grup
-per hari. Bot harus admin.
+```js
+import { isAdmin, num } from "../../src/lib/clara-group-util.js";
 
-### `.izin` — pengajuan izin dengan persetujuan admin
-
-```
-.izin sakit demam tinggi     # member mengajukan
-.izin list                   # admin melihat antrean
-.izin setuju 1               .izin tolak 1
-.izin saya                   .izin semua
+if (!isAdmin(m)) return m.reply("Khusus admin grup.");
 ```
 
-Jenis: `sakit` · `dinas` · `cuti` · `telat` · `lain`. Satu member hanya bisa
-punya satu pengajuan menunggu per hari.
+Helper `clara-group-util.js` juga menyediakan `memberJids`, `parseDuration`,
+`humanDuration`, `todayKey`, dan `readGroupState` / `writeGroupState`.
 
-## 📝 Catatan Pengembangan
+</details>
 
-- Basis kode ini sebelumnya menggunakan penamaan internal berbeda dan sudah di-rename penuh menjadi `clara-*` di seluruh file/modul.
-- Plugin `auto-sahur`, `anti-culik`, `notif-ganti-tag`, dan `giveaway` kini **sudah tersedia**. Sebelumnya `src/connection.js` dan `index.js` sudah memanggil keempatnya, tapi file plugin-nya tidak ada sehingga fitur diam-diam tidak aktif.
-- Desain UI menu menggunakan sistem style terpusat di `src/lib/clara-menu-style.js`, dipakai konsisten di seluruh command agar tampilan seragam.
+---
+
+## 📄 Lisensi — Bot Ini **GRATIS**
+
+<div align="center">
+
+### 🆓 GRATIS SELAMANYA &nbsp;·&nbsp; 🚫 DILARANG DIPERJUALBELIKAN
+
+</div>
+
+Clara MD dirilis di bawah **Lisensi Penggunaan Non-Komersial**
+(lihat berkas [`LICENSE`](LICENSE)).
+
+### ✅ Boleh
+
+- Dipakai untuk keperluan **pribadi maupun komunitas**
+- **Dipelajari, dimodifikasi**, dan dikembangkan
+- **Dibagikan ulang** — asli atau hasil modifikasi — selama **tetap gratis**
+  dan menyertakan lisensi serta atribusi penulis asli
+- Menerima **donasi sukarela** yang tidak mengikat, selama bot tetap bisa
+  dipakai penuh tanpa membayar
+
+### ❌ Dilarang
+
+- **Menjual, menyewakan, atau melisensikan ulang** bot ini, sebagian maupun
+  seluruhnya
+- Menjadikannya bagian dari **produk atau layanan berbayar** — termasuk
+  *jasa pasang bot*, *sewa bot*, *panel berbayar*, atau paket berlangganan
+- **Mengunci fitur di balik pembayaran** (paywall), termasuk "premium" berbayar
+  di bot turunan
+- **Menghapus atau mengaburkan atribusi** penulis asli
+- **Mengklaim** karya ini sebagai buatan sendiri
+
+> 💡 Biaya pihak ketiga yang wajar dan di luar kendali penulis — misalnya sewa
+> VPS milik pengguna sendiri atau kuota API berbayar — **bukan** termasuk
+> menjual perangkat lunak ini.
+
+### 🚨 Menemukan yang menjual Clara MD?
+
+Itu **melanggar lisensi**. Kamu tidak perlu membayar siapa pun —
+[**ambil gratis di sini**](https://github.com/itsmeeaizat/Clara-Whatsapp-Bot-Multi-Device).
+Silakan laporkan lewat *issue* di repositori ini.
+
+---
 
 ## ⚠️ Disclaimer
 
-Proyek ini menggunakan library WhatsApp tidak resmi (Baileys). Gunakan dengan bijak dan pahami risiko pemblokiran nomor oleh WhatsApp, terutama untuk penggunaan bot publik dengan volume tinggi.
+Proyek ini memakai library WhatsApp **tidak resmi** ([Baileys](https://github.com/WhiskeySockets/Baileys)).
 
-## 📄 Lisensi
+- Gunakan dengan bijak dan pahami **risiko pemblokiran nomor** oleh WhatsApp,
+  terutama untuk bot publik dengan volume tinggi
+- Disarankan memakai **nomor cadangan**, bukan nomor utama
+- Perangkat lunak disediakan **apa adanya, tanpa jaminan apa pun**
+- Penulis **tidak bertanggung jawab** atas kerugian akibat penggunaan bot ini
+- Dependensi pihak ketiga memiliki lisensinya masing-masing
 
-ISC
+---
+
+## 📝 Catatan Pengembangan
+
+- Basis kode ini dikembangkan mandiri dari script pribadi — **bukan fork
+  langsung** dari `Clara-MD` (Zeltoria) yang sudah tidak aktif
+- Seluruh penamaan internal sudah diseragamkan menjadi `clara-*`
+- Tampilan menu memakai style terpusat di `src/lib/clara-menu-style.js`
+  agar seragam di seluruh command
+- Helper grup terpusat di `src/lib/clara-group-util.js`
+
+---
+
+<div align="center">
+
+**Dibuat dengan ❤️ oleh [Aizat](https://github.com/itsmeeaizat)**
+
+Kalau Clara membantu, beri ⭐ di repositori ini — itu sudah lebih dari cukup.
+
+**Gratis untuk semua. Selamanya.**
+
+</div>

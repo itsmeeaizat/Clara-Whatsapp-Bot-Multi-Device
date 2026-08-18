@@ -1,4 +1,5 @@
 import { getDatabase } from "./lib/clara-database.js";
+import { getPlugin } from "./lib/clara-plugins.js";
 import {
   notifyNewUser,
   notifyRegistration,
@@ -12,19 +13,43 @@ import {
    - Channel notifications
    ============================================================ */
 
-let registeredUsers = new Set();
+/**
+ * Cache pengguna terdaftar.
+ *
+ * Ini hanya pintasan agar tidak menyentuh database pada setiap pesan.
+ * Cache dibatasi jumlahnya supaya tidak tumbuh tanpa henti selama proses
+ * hidup, dan bisa dikosongkan bila data pengguna dihapus (mis. .unreg).
+ */
+const registeredUsers = new Set();
+const MAKS_CACHE_USER = 5000;
 
 function isRegistered(userId) {
   return registeredUsers.has(String(userId));
 }
 
 function markRegistered(userId) {
+  // Buang entri terlama saat penuh; Set mempertahankan urutan penyisipan.
+  if (registeredUsers.size >= MAKS_CACHE_USER) {
+    const terlama = registeredUsers.values().next().value;
+    if (terlama !== undefined) registeredUsers.delete(terlama);
+  }
   registeredUsers.add(String(userId));
+}
+
+/** Lupakan satu pengguna, dipakai saat pendaftarannya dibatalkan. */
+function forgetRegistered(userId) {
+  return registeredUsers.delete(String(userId));
+}
+
+/** Kosongkan seluruh cache, dipakai saat database direset. */
+function clearRegisteredCache() {
+  registeredUsers.clear();
 }
 
 async function ensureUserRegistered(m, db, botConfig) {
   const userId = String(m.sender || "");
   if (!userId) return false;
+  if (!db || typeof db.getUser !== "function") return false;
 
   const user = db.getUser(userId);
   if (user) {
@@ -35,13 +60,18 @@ async function ensureUserRegistered(m, db, botConfig) {
   const defaultName = m.pushName || m.name || "User";
   const username = m.sender?.split("@")[0] || "-";
 
-  db.addUser({
-    id: userId,
+  // API database yang benar adalah setUser(jid, data) — bukan addUser().
+  // setUser juga menolak JID grup dengan sendirinya.
+  const tersimpan = db.setUser(userId, {
     name: defaultName,
     username: username,
     role: m.isOwner ? "owner" : "user",
     registeredAt: new Date().toISOString(),
   });
+
+  // Bila JID ditolak (mis. JID grup), jangan tandai sebagai terdaftar
+  // supaya percobaan berikutnya tidak ikut dilewati.
+  if (!tersimpan) return false;
 
   markRegistered(userId);
 
@@ -59,18 +89,37 @@ async function ensureUserRegistered(m, db, botConfig) {
 }
 
 async function handleCommand(m, sock, botConfig, db, uptime) {
-  const prefix = botConfig.command?.prefix || ".";
-  const text = (m.text || "").trim();
+  /*
+   * PENTING soal bentuk pesan.
+   *
+   * clara-serialize.js sudah memisahkan pesan menjadi:
+   *   m.body    -> teks utuh, contoh ".ping halo"
+   *   m.command -> nama perintah tanpa prefix, contoh "ping"
+   *   m.text    -> ARGUMEN SAJA, contoh "halo" (kosong untuk ".ping")
+   *
+   * Versi lama membaca m.text lalu mencari prefix di dalamnya. Untuk
+   * perintah tanpa argumen m.text bernilai "", sehingga tidak pernah
+   * cocok dan SELURUH command gagal. Pakai m.command yang sudah
+   * disiapkan serializer, dengan m.body sebagai cadangan.
+   */
+  const prefix = botConfig?.command?.prefix || ".";
 
-  if (!text.startsWith(prefix)) {
-    return false;
+  let command = String(m.command || "").toLowerCase();
+
+  if (!command) {
+    // Cadangan bila pesan belum diserialisasi (mis. dipanggil dari tes).
+    const body = String(m.body ?? m.text ?? "").trim();
+    if (!body.startsWith(prefix)) return false;
+    command = body.slice(prefix.length).split(/[ \n]+/)[0].toLowerCase();
   }
 
-  const command = text.slice(prefix.length).split(/[ \n]+/)[0].toLowerCase();
   if (!command) return false;
 
-  const plugin = db.getPlugin(command);
-  if (!plugin || !plugin.handler) return false;
+  // Registri plugin ada di clara-plugins.js, BUKAN pada objek database.
+  // getPlugin() sudah menangani alias, jadi tidak perlu dicari dua kali.
+  const plugin = getPlugin(command);
+  if (!plugin || typeof plugin.handler !== "function") return false;
+  if (plugin.config?.isEnabled === false) return false;
 
   try {
     const result = await plugin.handler(m, {
@@ -91,8 +140,15 @@ async function handleCommand(m, sock, botConfig, db, uptime) {
 async function handleMessage(m, sock, botConfig, db, uptime) {
   const userId = String(m.sender || "");
 
+  // Pendaftaran tidak boleh menjatuhkan seluruh pemrosesan pesan.
+  // Sebelumnya panggilan ini telanjang, sehingga satu error saja
+  // membuat pesan tersebut tidak pernah sampai ke plugin mana pun.
   if (!isRegistered(userId)) {
-    await ensureUserRegistered(m, db, botConfig);
+    try {
+      await ensureUserRegistered(m, db, botConfig);
+    } catch (error) {
+      console.error("[handler] gagal mendaftarkan pengguna:", error.message);
+    }
   }
 
   // Pencatatan aktivitas & pengecekan AFK berjalan untuk SEMUA pesan grup,
@@ -209,7 +265,10 @@ async function handleMessage(m, sock, botConfig, db, uptime) {
 
 export {
   handleMessage,
+  handleCommand,
   ensureUserRegistered,
   isRegistered,
   markRegistered,
+  forgetRegistered,
+  clearRegisteredCache,
 };

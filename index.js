@@ -1,20 +1,50 @@
 import path from "path";
 import fs from "fs";
 import config from "./config.js";
-import { startConnection } from "./src/connection.js";
-let messageHandler = async () => {};
-let messageUpdateHandler = async () => {};
-let groupHandler = null;
-let groupSettingsHandler = async () => {};
+import { startConnection, getUptime } from "./src/connection.js";
+/* ------------------------------------------------------------------
+ * Pemuatan handler pesan
+ *
+ * Dulu blok ini mencari `handlerMod.messageHandler`, padahal
+ * src/handler.js mengekspor `handleMessage`. Karena dijaga
+ * `if (typeof ... === "function")` lalu dibungkus `catch {}`, tidak
+ * ada error yang muncul — stub kosong dibiarkan terpasang dan bot
+ * menjadi bisu total: tidak ada satu pun command yang berjalan.
+ *
+ * Sekarang nama yang dipakai benar, dan kegagalan memuat handler
+ * dilaporkan dengan lantang, bukan ditelan diam-diam.
+ * ------------------------------------------------------------------ */
+let messageHandler = null;
 let handleAntiRemoveFromUpsert = async () => {};
+
 try {
   const handlerMod = await import("./src/handler.js");
-  if (typeof handlerMod.messageHandler === "function") messageHandler = handlerMod.messageHandler;
-  if (typeof handlerMod.messageUpdateHandler === "function") messageUpdateHandler = handlerMod.messageUpdateHandler;
-  if (typeof handlerMod.groupHandler === "function") groupHandler = handlerMod.groupHandler;
-  if (typeof handlerMod.groupSettingsHandler === "function") groupSettingsHandler = handlerMod.groupSettingsHandler;
-  if (typeof handlerMod.handleAntiRemoveFromUpsert === "function") handleAntiRemoveFromUpsert = handlerMod.handleAntiRemoveFromUpsert;
-} catch {}
+  if (typeof handlerMod.handleMessage === "function") {
+    messageHandler = handlerMod.handleMessage;
+  } else {
+    throw new Error("src/handler.js tidak mengekspor handleMessage()");
+  }
+} catch (error) {
+  console.error(
+    "\n[FATAL] Gagal memuat src/handler.js — bot tidak akan membalas pesan apa pun.",
+  );
+  console.error("[FATAL] Penyebab:", error?.message || error);
+  console.error("[FATAL] Perbaiki berkas tersebut lalu jalankan ulang.\n");
+  process.exit(1);
+}
+
+// Antidelete tinggal di clara-group-protection.js, bukan di handler.js.
+try {
+  const protMod = await import("./src/lib/clara-group-protection.js");
+  if (typeof protMod.handleAntiRemoveFromUpsert === "function") {
+    handleAntiRemoveFromUpsert = protMod.handleAntiRemoveFromUpsert;
+  }
+} catch (error) {
+  console.warn(
+    "[bootstrap] antidelete dinonaktifkan:",
+    error?.message || error,
+  );
+}
 import { loadPlugins, pluginStore } from "./src/lib/clara-plugins.js";
 import { initDatabase, getDatabase } from "./src/lib/clara-database.js";
 import {
@@ -322,12 +352,20 @@ async function main() {
       try {
         const db = getDatabase();
         await handleAntiTagSW(msg, sock, db);
-      } catch (error) { }
+      } catch (error) {
+        if (config.dev?.debugLog) {
+          logger.warn("ANTITAGSW", error?.message || String(error));
+        }
+      }
     },
 
     onMessage: async (msg, sock) => {
       try {
-        const handlerPromise = messageHandler(msg, sock);
+        // handleMessage(m, sock, botConfig, db, uptime) butuh 5 argumen.
+        // Sebelumnya hanya dua yang dikirim, sehingga botConfig, db, dan
+        // uptime selalu undefined dan pemrosesan langsung gagal.
+        const db = getDatabase();
+        const handlerPromise = messageHandler(msg, sock, config, db, getUptime());
         const timeoutPromise = new Promise((_, reject) =>
           setTimeout(() => reject(new Error("Handler timeout")), 60000),
         );
@@ -340,29 +378,11 @@ async function main() {
       }
     },
 
-    onGroupUpdate: async (update, sock) => {
-      try {
-        if (typeof groupHandler === "function") await groupHandler(update, sock);
-      } catch (error) {
-        logger.error("GROUP", error.message);
-      }
-    },
-
-    onMessageUpdate: async (updates, sock) => {
-      try {
-        await messageUpdateHandler(updates, sock);
-      } catch (error) {
-        logger.error("MSG", error.message);
-      }
-    },
-
-    onGroupSettingsUpdate: async (update, sock) => {
-      try {
-        await groupSettingsHandler(update, sock);
-      } catch (error) {
-        logger.error("GROUP", error.message);
-      }
-    },
+    /* Catatan: onGroupUpdate, onMessageUpdate, dan onGroupSettingsUpdate
+     * sengaja tidak dipasang. Ketiganya dulu menunjuk ke stub kosong yang
+     * tidak pernah berbuat apa-apa, sementara connection.js sudah memanggil
+     * anticulik, welcomecard, dan notifgantitag secara langsung. Memasang
+     * callback kosong hanya menambah lapisan tanpa guna. */
 
     onStubMessage: async (msg, sock) => {
       try {

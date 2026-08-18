@@ -31,6 +31,23 @@ const msgRetryCounterCache = new NodeCache({ stdTTL: 60, useClones: false });
 
 let lastMessageReceived = Date.now();
 let watchdogTimer = null;
+
+/**
+ * Handle interval flush event.
+ *
+ * Disimpan di lingkup modul supaya interval lama bisa dibersihkan saat
+ * startConnection() dipanggil ulang. Sebelumnya interval hanya membersihkan
+ * diri bila sempat berdetak ketika koneksi sudah terputus, sehingga pada
+ * reconnect cepat interval-interval lama menumpuk dan terus berjalan.
+ */
+let flushTimer = null;
+
+function stopFlushTimer() {
+  if (flushTimer) {
+    clearInterval(flushTimer);
+    flushTimer = null;
+  }
+}
 const WATCHDOG_TIMEOUT = 30 * 60 * 1000;
 const WATCHDOG_CHECK_INTERVAL = 60 * 1000;
 
@@ -221,6 +238,10 @@ function askQuestion(question) {
  * });
  */
 async function startConnection(options = {}) {
+  // Bersihkan timer milik koneksi sebelumnya sebelum membuat yang baru,
+  // supaya tidak ada interval yatim yang tetap berjalan setelah reconnect.
+  stopFlushTimer();
+
   if (connectionState.sock) {
     try {
       connectionState.sock.end();
@@ -584,8 +605,13 @@ async function startConnection(options = {}) {
     _groupEventProcessing = false;
   }
 
-  sock.ev.on("groups.update", async ([event]) => {
-    if (options.onGroupUpdate) {
+  // Baileys mengirim groups.update sebagai ARRAY. Destrukturisasi
+  // ([event]) yang lama hanya mengambil elemen pertama, sehingga saat
+  // beberapa grup berubah dalam satu batch sisanya hilang tanpa jejak.
+  sock.ev.on("groups.update", async (events) => {
+    if (!options.onGroupUpdate) return;
+    for (const event of events || []) {
+      if (!event?.id) continue;
       _groupEventQueue.push({
         handler: async (ev, s) => {
           try {
@@ -596,8 +622,8 @@ async function startConnection(options = {}) {
         },
         args: [event, sock],
       });
-      _processGroupQueue();
     }
+    _processGroupQueue();
   });
 
   sock.ev.on("group-participants.update", async (event) => {
@@ -1348,16 +1374,17 @@ async function startConnection(options = {}) {
     } catch {}
   }, 2000);
 
-  const flushInterval = setInterval(() => {
+  stopFlushTimer();
+  flushTimer = setInterval(() => {
     if (!connectionState.isConnected) {
-      clearInterval(flushInterval);
+      stopFlushTimer();
       return;
     }
     try {
       sock.ev?.flush?.();
     } catch {}
   }, 30000);
-  if (flushInterval.unref) flushInterval.unref();
+  if (flushTimer.unref) flushTimer.unref();
 
   return sock;
 }

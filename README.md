@@ -584,7 +584,7 @@ Proyek ini memakai library WhatsApp **tidak resmi** ([Baileys](https://github.co
 
 <div align="center">
 
-**Dibuat dengan ❤️ oleh [Aizat](https://github.com/itsmeeaizat)**
+**Dibuat dengan oleh [Aizat](https://github.com/itsmeeaizat)**
 
 Kalau Clara membantu, beri ⭐ di repositori ini — itu sudah lebih dari cukup.
 

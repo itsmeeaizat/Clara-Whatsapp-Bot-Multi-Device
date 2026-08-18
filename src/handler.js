@@ -119,6 +119,17 @@ async function handleMessage(m, sock, botConfig, db, uptime) {
     }
   }
 
+  // Spam guard diperiksa SEBELUM command diproses, supaya pelaku flood
+  // tidak bisa lolos hanya dengan membanjiri command.
+  if (m.isGroup) {
+    try {
+      const { cekSpam } = await import("../plugins/group/spamguard.js");
+      if (await cekSpam(m, sock, db)) return true;
+    } catch {
+      // plugin spamguard tidak tersedia — abaikan
+    }
+  }
+
   const handled = await handleCommand(m, sock, botConfig, db, uptime);
 
   // Listener keyword non-command. Hanya diproses bila pesan tidak cocok

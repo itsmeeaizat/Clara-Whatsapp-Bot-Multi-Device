@@ -518,6 +518,14 @@ async function startConnection(options = {}) {
         colors.logger.debug("reminder", "skipped: " + e.message);
       }
       try {
+        const { startJadwalChecker } =
+          await import("../plugins/group/jadwalgrup.js");
+        const db = (await import("./lib/clara-database.js")).getDatabase();
+        startJadwalChecker(sock, db);
+      } catch (e) {
+        colors.logger.debug("jadwalgrup", "skipped: " + e.message);
+      }
+      try {
         const wfDb = (await import("./lib/clara-database.js")).getDatabase().setting?.("weatherFooter");
         const enabled = wfDb?.enabled ?? false;
         if (enabled) {
@@ -728,6 +736,17 @@ async function startConnection(options = {}) {
           const pId = typeof p === "object" && p !== null ? p.id || p.phoneNumber : p;
           if (!pId || String(pId).includes(botNumber || sock.user?.id?.split(":")[0] || "")) continue;
 
+          // Coba kartu bergambar dulu; kalau nonaktif/gagal, pakai teks.
+          try {
+            const { kirimWelcomeCard } =
+              await import("../plugins/group/welcomecard.js");
+            const dbCard = (await import("./lib/clara-database.js")).getDatabase();
+            const terkirim = await kirimWelcomeCard(sock, dbCard, event.id, pId, {
+              keluar: false,
+            });
+            if (terkirim) continue;
+          } catch {}
+
           let pushName = "Member";
           try {
             const contact = await sock.onWhatsApp(pId);
@@ -769,6 +788,17 @@ async function startConnection(options = {}) {
         for (const p of removedParticipants) {
           const pId = typeof p === "object" && p !== null ? p.id || p.phoneNumber : p;
           if (!pId || String(pId).includes(botNumber || sock.user?.id?.split(":")[0] || "")) continue;
+
+          // Coba kartu perpisahan bergambar dulu.
+          try {
+            const { kirimWelcomeCard } =
+              await import("../plugins/group/welcomecard.js");
+            const dbCard = (await import("./lib/clara-database.js")).getDatabase();
+            const terkirim = await kirimWelcomeCard(sock, dbCard, event.id, pId, {
+              keluar: true,
+            });
+            if (terkirim) continue;
+          } catch {}
 
           let pushName = "Member";
           try {

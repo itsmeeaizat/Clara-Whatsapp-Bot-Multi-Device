@@ -24,10 +24,12 @@ function drawRoundedRect(ctx, x, y, width, height, radius) {
 
 async function loadAvatarSafe(avatarUrl) {
   const { loadImage } = await _getCanvas();
+  // Folder aset bernama "image" (tunggal), bukan "images". Path lama tidak
+  // pernah ketemu sehingga fallback selalu jatuh ke URL imgur remote.
   const localFallback = path.join(
     process.cwd(),
     "assets",
-    "images",
+    "image",
     "pp-kosong.jpg",
   );
 
@@ -51,9 +53,10 @@ async function loadAvatarSafe(avatarUrl) {
     }
 
     if (avatarUrl.startsWith("http://") || avatarUrl.startsWith("https://")) {
+      // Timeout pendek: kartu sambutan tidak boleh menunda handler join.
       const response = await axios.get(avatarUrl, {
         responseType: "arraybuffer",
-        timeout: 10000,
+        timeout: 5000,
         headers: { "User-Agent": "Mozilla/5.0" },
       });
       return await loadImage(Buffer.from(response.data));
@@ -69,17 +72,37 @@ async function loadAvatarSafe(avatarUrl) {
       return await loadImage(buffer);
     }
 
-    return await loadImage(DEFAULT_AVATAR);
+    return await loadRemoteAvatar(DEFAULT_AVATAR, loadImage);
   } catch (err) {
     try {
       if (fs.existsSync(localFallback)) {
         const buffer = fs.readFileSync(localFallback);
         return await loadImage(buffer);
       }
-      return await loadImage(DEFAULT_AVATAR);
+      return await loadRemoteAvatar(DEFAULT_AVATAR, loadImage);
     } catch {
       return null;
     }
+  }
+}
+
+/**
+ * Ambil avatar remote dengan batas waktu.
+ * loadImage(url) bawaan canvas tidak punya timeout — kalau host-nya diam,
+ * pemanggilnya menggantung selamanya dan handler join ikut membeku.
+ * Kembalikan null bila gagal; kartu tetap digambar tanpa avatar.
+ */
+async function loadRemoteAvatar(url, loadImage, timeoutMs = 8000) {
+  try {
+    const res = await fetch(url, {
+      signal: AbortSignal.timeout(timeoutMs),
+      headers: { "User-Agent": "Mozilla/5.0" },
+    });
+    if (!res.ok) return null;
+    const buf = Buffer.from(await res.arrayBuffer());
+    return await loadImage(buf);
+  } catch {
+    return null;
   }
 }
 

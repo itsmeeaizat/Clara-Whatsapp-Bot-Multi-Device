@@ -346,6 +346,63 @@ daftar, urutan tetap konsisten (tidak meleset).
 Bisa menyimpan dari pesan yang di-reply. Daftar diurutkan berdasarkan catatan
 yang paling sering dipanggil. Maksimal 50 catatan per grup.
 
+## 🎨 Sambutan, Keamanan & Jadwal
+
+### `.welcomecard` — kartu sambutan bergambar
+
+`src/lib/clara-welcome-card.js` (595 baris, 4 generator kartu) sudah lama ada
+tapi **tidak pernah di-import file mana pun** — sambutan grup selama ini hanya
+teks. Plugin ini yang memakainya.
+
+```
+.welcomecard on / off
+.welcomecard gaya v4|discord
+.welcomecard goodbye on|off
+.welcomecard test
+```
+
+Kalau kartu nonaktif atau gagal dibuat, bot otomatis jatuh ke sambutan teks
+seperti biasa — tidak ada yang rusak.
+
+### `.spamguard` — deteksi flood yang benar-benar bekerja
+
+`.antispam` lama hanya menyalakan flag di database; tidak ada kode yang
+membacanya. `.spamguard` menyediakan logikanya:
+
+```
+.spamguard on / off
+.spamguard limit 5 7        # maks 5 pesan / 7 detik
+.spamguard duplikat 3       # maks 3x pesan sama
+.spamguard panjang 3000     # maks karakter
+.spamguard aksi warn|delete|kick
+```
+
+Tiga jenis deteksi: **flood**, **pesan berulang**, dan **pesan kepanjangan**.
+Admin dan owner tidak pernah kena filter. Aksi `delete`/`kick` butuh bot admin.
+
+### `.jadwalgrup` — buka/tutup grup otomatis
+
+```
+.jadwalgrup set 07:00 22:00
+.jadwalgrup buka            .jadwalgrup tutup
+.jadwalgrup off
+```
+
+Dicek tiap menit pada zona WIB. Aman dari eksekusi ganda — satu aksi per grup
+per hari. Bot harus admin.
+
+### `.izin` — pengajuan izin dengan persetujuan admin
+
+```
+.izin sakit demam tinggi     # member mengajukan
+.izin list                   # admin melihat antrean
+.izin setuju 1               .izin tolak 1
+.izin saya                   .izin semua
+```
+
+Jenis: `sakit` · `dinas` · `cuti` · `telat` · `lain`. Satu member hanya bisa
+punya satu pengajuan menunggu per hari.
+
 ## 📝 Catatan Pengembangan
 
 - Basis kode ini sebelumnya menggunakan penamaan internal berbeda dan sudah di-rename penuh menjadi `clara-*` di seluruh file/modul.

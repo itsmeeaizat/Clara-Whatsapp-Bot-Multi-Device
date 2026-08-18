@@ -510,6 +510,14 @@ async function startConnection(options = {}) {
         colors.logger.debug("giveaway", "skipped: " + e.message);
       }
       try {
+        const { startReminderChecker } =
+          await import("../plugins/group/reminder.js");
+        const db = (await import("./lib/clara-database.js")).getDatabase();
+        startReminderChecker(sock, db);
+      } catch (e) {
+        colors.logger.debug("reminder", "skipped: " + e.message);
+      }
+      try {
         const wfDb = (await import("./lib/clara-database.js")).getDatabase().setting?.("weatherFooter");
         const enabled = wfDb?.enabled ?? false;
         if (enabled) {

@@ -164,17 +164,13 @@ async function handler(m, { config: botConfig, db }) {
 
     if (sub === "on" || sub === "off") {
       // Hanya admin grup yang boleh mengubah
-      let isAdmin = m.isOwner;
+      // clara-serialize.js sudah menyediakan m.isAdmin dan m.groupMembers.
+      // Catatan: m.groupMetadata adalah OBJEK, bukan fungsi.
+      let isAdmin = m.isOwner || m.isAdmin === true;
       if (!isAdmin) {
-        try {
-          const meta = await m.groupMetadata?.();
-          const parts = meta?.participants || [];
-          isAdmin = parts.some(
-            (p) => num(p.id) === num(m.sender) && p.admin
-          );
-        } catch {
-          isAdmin = false;
-        }
+        const gm = Array.isArray(m.groupMembers) && m.groupMembers.length ? m.groupMembers : null;
+        const parts = gm || m.groupMetadata?.participants || [];
+        isAdmin = parts.some((p) => num(p.id) === num(m.sender) && p.admin);
       }
 
       if (!isAdmin) {

@@ -240,6 +240,61 @@ Memakai **jadwal imsak asli** dari `api.myquran.com` sesuai kota, bukan jam stat
 Default mengingatkan pada 60, 30, dan 10 menit sebelum imsak, dengan pesan
 bervariasi dan anti-duplikat (satu pengingat per tahap per hari).
 
+## 👥 Fitur Grup Lanjutan
+
+### `.absen` — absensi grup
+
+```
+.absen buka <judul>     .absen cek
+.absen belum            .absen tutup
+```
+
+Member cukup ketik `hadir` / `absen` / `ada` (bot beri reaksi ✅).
+`.absen belum` me-mention siapa saja yang belum absen. Buka/tutup khusus admin.
+
+### `.voting` — polling dengan bar visual
+
+```
+.voting buat Makan dimana? | Padang | Sunda | Bakso
+.voting buat 30m Libur besok? | Ya | Tidak     # dengan batas waktu
+.voting hasil     .voting tutup     .voting batal
+```
+
+Member memilih cukup dengan mengetik **angka**. Bisa ganti pilihan (reaksi 🔄),
+hasil ditampilkan sebagai bar `████░░░░░░ 4 (67%)`, dan hasil seri terdeteksi.
+Maksimal 10 opsi.
+
+### `.afk` — tandai sedang pergi
+
+```
+.afk lagi makan       .afk list
+```
+
+Kalau ada yang mention atau reply ke user yang AFK, bot memberi tahu alasan dan
+sudah berapa lama. Status otomatis lepas begitu user itu chat lagi.
+
+### `.rekap` — statistik aktivitas grup
+
+```
+.rekap hari      .rekap minggu
+.rekap sepi      .rekap reset      # reset khusus admin
+```
+
+Papan peringkat member paling aktif (🥇🥈🥉) dan `.rekap sepi` menampilkan
+anggota paling pendiam. Hanya menyimpan **hitungan angka per hari**, bukan isi
+pesan, dan otomatis dipangkas ke 8 hari terakhir.
+
+### `.reminder` — pengingat terjadwal
+
+```
+.reminder 30m rapat tim
+.reminder harian 8h minum obat
+.reminder list        .reminder hapus 1
+```
+
+Berjalan di grup maupun chat pribadi, dicek tiap 20 detik. Maksimal 20 pengingat
+per chat.
+
 ## 📝 Catatan Pengembangan
 
 - Basis kode ini sebelumnya menggunakan penamaan internal berbeda dan sudah di-rename penuh menjadi `clara-*` di seluruh file/modul.

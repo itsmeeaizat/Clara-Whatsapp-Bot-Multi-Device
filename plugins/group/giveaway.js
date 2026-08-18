@@ -275,15 +275,15 @@ function helpText(prefix) {
   );
 }
 
-async function isGroupAdmin(m) {
+function isGroupAdmin(m) {
   if (m.isOwner) return true;
-  try {
-    const meta = await m.groupMetadata?.();
-    const parts = meta?.participants || [];
-    return parts.some((p) => num(p.id) === num(m.sender) && p.admin);
-  } catch {
-    return false;
-  }
+  // clara-serialize.js sudah menyediakan m.isAdmin dan m.groupMembers.
+  // Catatan: m.groupMetadata adalah OBJEK, bukan fungsi.
+  if (m.isAdmin === true) return true;
+  // array kosong itu truthy, jadi fallback harus cek panjangnya
+  const gm = Array.isArray(m.groupMembers) && m.groupMembers.length ? m.groupMembers : null;
+  const parts = gm || m.groupMetadata?.participants || [];
+  return parts.some((p) => num(p.id) === num(m.sender) && p.admin);
 }
 
 async function handler(m, { sock, config: botConfig, db }) {
@@ -297,7 +297,7 @@ async function handler(m, { sock, config: botConfig, db }) {
 
     /* --- start --- */
     if (sub === "start" || sub === "mulai" || sub === "buka") {
-      if (!(await isGroupAdmin(m))) {
+      if (!isGroupAdmin(m)) {
         await m.reply(
           alyaHeader("Ditolak", "🚫") +
             "\n\n" +
@@ -431,7 +431,7 @@ async function handler(m, { sock, config: botConfig, db }) {
 
     /* --- cancel --- */
     if (sub === "cancel" || sub === "batal" || sub === "stop") {
-      if (!(await isGroupAdmin(m))) {
+      if (!isGroupAdmin(m)) {
         await m.reply(
           alyaHeader("Ditolak", "🚫") +
             "\n\n" +
@@ -462,7 +462,7 @@ async function handler(m, { sock, config: botConfig, db }) {
 
     /* --- draw sekarang --- */
     if (sub === "draw" || sub === "undi" || sub === "tarik") {
-      if (!(await isGroupAdmin(m))) {
+      if (!isGroupAdmin(m)) {
         await m.reply(
           alyaHeader("Ditolak", "🚫") +
             "\n\n" +

@@ -95,15 +95,39 @@ async function handleMessage(m, sock, botConfig, db, uptime) {
     await ensureUserRegistered(m, db, botConfig);
   }
 
+  // Pencatatan aktivitas & pengecekan AFK berjalan untuk SEMUA pesan grup,
+  // termasuk yang berupa command, supaya statistik tetap akurat.
+  if (m.isGroup) {
+    try {
+      const { catatPesan } = await import("../plugins/group/rekap.js");
+      await catatPesan(m, db);
+    } catch {
+      // plugin rekap tidak tersedia — abaikan
+    }
+
+    try {
+      const { checkAfk } = await import("../plugins/group/afk.js");
+      const afk = await checkAfk(m, db);
+      if (afk) {
+        await sock.sendMessage(m.chat, {
+          text: afk.text,
+          mentions: afk.mentions,
+        });
+      }
+    } catch {
+      // plugin afk tidak tersedia — abaikan
+    }
+  }
+
   const handled = await handleCommand(m, sock, botConfig, db, uptime);
 
-  // Pendaftaran giveaway lewat keyword biasa (ikut/join/gas) — bukan command,
-  // jadi diproses hanya bila pesan tidak cocok dengan plugin mana pun.
+  // Listener keyword non-command. Hanya diproses bila pesan tidak cocok
+  // dengan plugin mana pun, agar tidak bentrok dengan command.
   if (!handled && m.isGroup) {
+    // Giveaway: "ikut" / "join" / "gas"
     try {
       const { tryJoin } = await import("../plugins/group/giveaway.js");
-      const joined = await tryJoin(m, db);
-      if (joined) {
+      if (await tryJoin(m, db)) {
         try {
           await sock.sendMessage(m.chat, { react: { text: "🎉", key: m.key } });
         } catch {
@@ -113,6 +137,39 @@ async function handleMessage(m, sock, botConfig, db, uptime) {
       }
     } catch {
       // plugin giveaway tidak tersedia — abaikan
+    }
+
+    // Absen: "hadir" / "absen"
+    try {
+      const { tryAbsen } = await import("../plugins/group/absen.js");
+      if (await tryAbsen(m, db)) {
+        try {
+          await sock.sendMessage(m.chat, { react: { text: "✅", key: m.key } });
+        } catch {
+          // reaksi opsional
+        }
+        return true;
+      }
+    } catch {
+      // plugin absen tidak tersedia — abaikan
+    }
+
+    // Voting: angka polos saat sesi berjalan
+    try {
+      const { tryVote } = await import("../plugins/group/voting.js");
+      const voted = await tryVote(m, db);
+      if (voted) {
+        try {
+          await sock.sendMessage(m.chat, {
+            react: { text: voted.ganti ? "🔄" : "🗳️", key: m.key },
+          });
+        } catch {
+          // reaksi opsional
+        }
+        return true;
+      }
+    } catch {
+      // plugin voting tidak tersedia — abaikan
     }
   }
 

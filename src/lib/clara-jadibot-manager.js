@@ -113,6 +113,15 @@ function createJadibotStore() {
 
 const rateLimit = new Map();
 
+// Bersihkan entri rate-limit kedaluwarsa setiap menit.
+setInterval(() => {
+  const now = Date.now();
+  const MAX_AGE = 60_000;
+  for (const [k, v] of rateLimit) {
+    if (now - v > MAX_AGE) rateLimit.delete(k);
+  }
+}, 60000).unref?.();
+
 const ERROR_MESSAGES = {
   401: {
     reason: "Nomor tidak terdaftar WhatsApp",

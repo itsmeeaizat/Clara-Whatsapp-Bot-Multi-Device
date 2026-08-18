@@ -153,7 +153,8 @@ class Pinterest {
                 description: pd.description || '',
                 media: mediaUrls
             }
-
+        } catch (error) {
+            throw new Error(`Pinterest download failed: ${error.message || error}`)
         }
     }
 }

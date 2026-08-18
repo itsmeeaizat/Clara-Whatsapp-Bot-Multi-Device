@@ -10,6 +10,14 @@ import fs from "fs";
 const userCooldowns = new Map();
 const COOLDOWN_MS = 3000;
 
+// Bersihkan entri kedaluwarsa setiap 30 detik supaya Map tidak tumbuh tanpa batas.
+setInterval(() => {
+  const now = Date.now();
+  for (const [k, v] of userCooldowns) {
+    if (now - v > COOLDOWN_MS * 10) userCooldowns.delete(k);
+  }
+}, 30000).unref?.();
+
 const ACTION_REGEX = /\[ACTION\s*:\s*(\w+)(?:\s+([^\]]*))?\]/gi;
 
 const SYSTEM_PROMPT_ACTIONS = `

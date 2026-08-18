@@ -244,12 +244,7 @@ function isAdminCheck(participants, senderNumber) {
     const pLid = p.lid || "";
     const pNum = pJid.replace(/[^0-9]/g, "");
     const pLidNum = pLid.replace(/[^0-9]/g, "");
-    return (
-      pNum === senderNumber ||
-      pLidNum === senderNumber ||
-      pNum.includes(senderNumber) ||
-      senderNumber.includes(pNum)
-    );
+    return pNum === senderNumber || pLidNum === senderNumber;
   });
 }
 
@@ -257,7 +252,7 @@ function isBotAdminCheck(participants, botNum) {
   return participants.some((p) => {
     if (!p.admin) return false;
     const pNum = (p.jid || p.id || "").replace(/[^0-9]/g, "");
-    return pNum === botNum || pNum.includes(botNum) || botNum.includes(pNum);
+    return pNum === botNum;
   });
 }
 
@@ -514,14 +509,16 @@ async function executeProtectionAction({
   kickMessageKey = null,
   replacements = {},
 }) {
-  await sock.sendMessage(chatId, {
-    delete: {
-      remoteJid: chatId,
-      fromMe: false,
-      id: keyId,
-      participant: sender,
-    },
-  });
+  try {
+    await sock.sendMessage(chatId, {
+      delete: {
+        remoteJid: chatId,
+        fromMe: false,
+        id: keyId,
+        participant: sender,
+      },
+    });
+  } catch {}
 
   if (mode === "kick") {
     try {

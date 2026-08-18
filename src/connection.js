@@ -83,7 +83,7 @@ function startWatchdog(reconnectFn, options) {
       connectionState.isConnected = false;
       try {
         connectionState.sock?.end();
-      } catch {}
+      } catch (e) {}
     }
   }, WATCHDOG_CHECK_INTERVAL);
 
@@ -495,7 +495,7 @@ async function startConnection(options = {}) {
           const { reloadAllPlugins: R, getPluginCount: G } =
             await import("./lib/clara-plugins.js");
           !G() && (await R());
-        } catch {}
+        } catch (e) {}
       }, 100);
 
       startWatchdog(startConnection, options);
@@ -582,19 +582,6 @@ async function startConnection(options = {}) {
       } catch (e) {
         colors.logger.debug("weather-footer", "skipped: " + e.message);
       }
-      try {
-        const wfDb = (await import("./lib/clara-database.js")).getDatabase().setting?.("weatherFooter");
-        const enabled = wfDb?.enabled ?? false;
-        if (enabled) {
-          patchWeatherFooter(sock);
-          colors.logger.success("weather-footer", "aktif");
-        } else {
-          unpatchWeatherFooter(sock);
-          colors.logger.debug("weather-footer", "nonaktif");
-        }
-      } catch (e) {
-        colors.logger.debug("weather-footer", "skipped: " + e.message);
-      }
     }
 
     options.onConnectionUpdate && (await options.onConnectionUpdate(u, sock));
@@ -647,7 +634,7 @@ async function startConnection(options = {}) {
           try {
             const m = await s.groupMetadata(ev.id);
             groupCache.set(ev.id, m);
-          } catch {}
+          } catch (e) {}
           // Bentuk data: Partial<GroupMetadata> (metadata grup berubah)
           if (options.onGroupUpdate) {
             await options.onGroupUpdate(
@@ -669,7 +656,7 @@ async function startConnection(options = {}) {
       try {
         metadata = await sock.groupMetadata(event.id);
         groupCache.set(event.id, metadata);
-      } catch {}
+      } catch (e) {}
     }
 
     const botNumber =
@@ -745,7 +732,7 @@ async function startConnection(options = {}) {
           try {
             const meta = await sock.groupMetadata(event.id);
             groupName = meta.subject || "grup ini";
-          } catch {}
+          } catch (e) {}
 
           const saluranId =
             config.saluran?.id || "120363400911374213@newsletter";
@@ -817,7 +804,7 @@ async function startConnection(options = {}) {
           try {
             const contact = await sock.onWhatsApp(pId);
             pushName = contact?.name || contact?.notify || "Member";
-          } catch {}
+          } catch (e) {}
 
           const text =
             `🎉 *SELAMAT DATANG*\n\n` +
@@ -872,7 +859,7 @@ async function startConnection(options = {}) {
           try {
             const contact = await sock.onWhatsApp(pId);
             pushName = contact?.name || contact?.notify || "Member";
-          } catch {}
+          } catch (e) {}
 
           const text =
             `👋 *SAMPAI JUMPA*\n\n` +
@@ -1237,13 +1224,22 @@ async function startConnection(options = {}) {
               result = await eval(`(async () => { return ${code} })()`);
             }
 
-            if (typeof result !== "string") {
-              const { inspect } = await import("util");
-              result = inspect(result, { depth: 2 });
+            if (result !== undefined && result !== null) {
+              if (typeof result !== "string") {
+                const { inspect } = await import("util");
+                result = inspect(result, { depth: 2 });
+              }
+              await currentSock.sendMessage(
+                msg.key.remoteJid,
+                {
+                  text: `✅ *ᴇᴠᴀʟ ʀᴇsᴜʟᴛ*\n\n\`\`\`\n${String(result).slice(0, 4000)}\n\`\`\``,
+                },
+                { quoted: msg },
+              );
             }
           } catch (err) {
             await currentSock.sendMessage(
-              jid,
+              msg.key.remoteJid,
               {
                 text: `❌ *ᴇᴠᴀʟ ᴇʀʀᴏʀ*\n\n\`\`\`\n${err.message}\n\`\`\``,
               },
@@ -1266,7 +1262,7 @@ async function startConnection(options = {}) {
             const shell = isWindows ? "powershell.exe" : "/bin/bash";
 
             await currentSock.sendMessage(
-              jid,
+              msg.key.remoteJid,
               {
                 text: `🕕 *ᴇxᴇᴄᴜᴛɪɴɢ...*\n\n\`$ ${command}\``,
               },
@@ -1282,12 +1278,12 @@ async function startConnection(options = {}) {
 
             const output = stdout || stderr || "No output";
 
-            await currentSock.sendMessage(jid, {
+            await currentSock.sendMessage(msg.key.remoteJid, {
               text: `✅ *ᴛᴇʀᴍɪɴᴀʟ*\n\n\`$ ${command}\`\n\n\`\`\`\n${output.slice(0, 3500)}\n\`\`\``,
             });
           } catch (err) {
             const errorMsg = err.stderr || err.stdout || err.message;
-            await currentSock.sendMessage(jid, {
+            await currentSock.sendMessage(msg.key.remoteJid, {
               text: `❌ *ᴛᴇʀᴍɪɴᴀʟ ᴇʀʀᴏʀ*\n\n\`$ ${command}\`\n\n\`\`\`\n${errorMsg.slice(0, 3500)}\n\`\`\``,
             });
           }
@@ -1303,41 +1299,14 @@ async function startConnection(options = {}) {
     }
   });
 
-  // Dulu event ini dilempar mentah ke onGroupUpdate, padahal listener
-  // groups.update mengirim Partial<GroupMetadata>. Satu callback menerima
-  // dua bentuk data yang sama sekali berbeda, sehingga penerima harus
-  // menebak sendiri dan event.action kerap undefined.
+  // Callback onGroupUpdate, onGroupSettingsUpdate, dan onMessageUpdate
+  // sengaja tidak dipasang di index.js — group events sudah ditangani
+  // langsung oleh listener-listener di atas (welcome, goodbye, anticulik,
+  // groupCache refresh). Mendaftar listener tambahan untuk callback yang
+  // undefined hanya membuang resource, jadi blok ini dihapus.
   //
-  // Sekarang keduanya dibungkus amplop seragam { tipe, grupId, data }.
-  sock.ev.on("group-participants.update", async (update) => {
-    if (!options.onGroupUpdate || !update?.id) return;
-    _groupEventQueue.push({
-      handler: options.onGroupUpdate,
-      args: [
-        { tipe: "peserta", grupId: update.id, data: update },
-        sock,
-      ],
-    });
-    _processGroupQueue();
-  });
-
-  sock.ev.on("groups.update", async (updates) => {
-    for (const update of updates) {
-      if (options.onGroupSettingsUpdate) {
-        try {
-          await options.onGroupSettingsUpdate(update, sock);
-        } catch (error) {
-          console.error("[GroupsUpdate] Error:", error.message);
-        }
-      }
-    }
-  });
-
-  sock.ev.on("messages.update", async (updates) => {
-    if (options.onMessageUpdate) {
-      await options.onMessageUpdate(updates, sock);
-    }
-  });
+  // Jika nanti perlu menambahkan onGroupSettingsUpdate, cukup tambahkan
+  // logikanya ke listener groups.update yang sudah ada di atas.
 
   {
     const { getDatabase: _getDb } = await import("./lib/clara-database.js");
@@ -1419,13 +1388,13 @@ async function startConnection(options = {}) {
   process.nextTick(() => {
     try {
       sock.ev?.flush?.();
-    } catch {}
+    } catch (e) {}
   });
 
   setTimeout(() => {
     try {
       sock.ev?.flush?.();
-    } catch {}
+    } catch (e) {}
   }, 2000);
 
   stopFlushTimer();
@@ -1436,7 +1405,7 @@ async function startConnection(options = {}) {
     }
     try {
       sock.ev?.flush?.();
-    } catch {}
+    } catch (e) {}
   }, 30000);
   if (flushTimer.unref) flushTimer.unref();
 

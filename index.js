@@ -471,7 +471,7 @@ main().catch((error) => {
     if (error?.stack) console.error(error.stack);
     const missing = /Cannot find module ['"](.+?)['"]/.exec(String(error?.message || ""));
     if (missing) console.error("[MISSING] " + missing[1]);
-  } catch {}
+  } catch (e) {}
   logErrorBox("Fatal Error", error.message);
   console.error(c.gray(error.stack));
   process.exit(1);

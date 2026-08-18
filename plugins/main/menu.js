@@ -1,36 +1,47 @@
-import {
-  prepareWAMessageMedia,
-} from "ourin";
+/**
+ * Menu Utama — Tampilan Clara Klasik
+ * ---------------------------------------------------------------
+ * Tampilan disamakan dengan Clara-MD orisinal (Zeltoria) yang sudah
+ * berhenti dikembangkan, karena repo ini adalah penerusnya.
+ *
+ * Struktur asli yang ditiru:
+ *   ╔┈┈「 *Info User* 」  →  ╠┈┈「 *Info Hari* 」  →  ╠┈┈「 *Info Bot* 」
+ *   lalu readmore, lalu blok per kategori ╔┈「 Kategori 」 dengan ╎ぎ .cmd
+ *
+ * Tombol interaktif tetap dipertahankan sebagai pelengkap (Clara lama
+ * "No Button"), tapi isi teksnya kini bergaya klasik. Bila pengiriman
+ * interaktif gagal, otomatis jatuh ke teks polos yang sudah lengkap.
+ */
+
+import { prepareWAMessageMedia } from "ourin";
 import config from "../../config.js";
+import { getTimeGreeting } from "../../src/lib/clara-formatter.js";
 import {
-  formatUptime,
-  getTimeGreeting,
-} from "../../src/lib/clara-formatter.js";
-import {
-  alyaHeader,
-  bracketBox,
-  infoBlock,
-  userInfoBlock,
-  alyaCategoryRow,
-  separator,
-  tipText,
-  toSmallCaps,
-  toMonoUpperBold,
-} from "../../src/lib/clara-menu-style.js";
+  blok,
+  blokKategori,
+  baris,
+  barisKosong,
+  clockString,
+  getWeton,
+  tanggalIslam,
+  namaHari,
+  tanggalLengkap,
+  jamWib,
+  READ_MORE,
+} from "../../src/lib/clara-classic-style.js";
+import { getRole } from "../../src/lib/clara-level.js";
 import {
   getCommandsByCategory,
-  getCategories,
   getSortedCategories,
   getPluginCount,
   CATEGORY_EMOJIS,
 } from "../../src/lib/clara-plugins.js";
-import { getDatabase } from "../../src/lib/clara-database.js";
 import fs from "fs";
 import os from "os";
 
 const pluginConfig = {
   name: "menu",
-  alias: ["help", "bantuan", "commands", "m"],
+  alias: ["help", "bantuan", "commands", "m", "?"],
   category: "main",
   description: "Menampilkan menu utama bot",
   usage: ".menu",
@@ -44,271 +55,304 @@ const pluginConfig = {
   isEnabled: true,
 };
 
-async function buildCategoryMenuText(selectedCategory, m, botConfig, prefix) {
-  const commandsByCategory = getCommandsByCategory();
-  const categories = getCategories();
+/** Label kategori rapi, meniru tabel `tags` di Clara lama. */
+const LABEL_KATEGORI = {
+  main: "Main",
+  ai: "AI",
+  anime: "Animanga",
+  internet: "Internet",
+  download: "Download",
+  downloader: "Download",
+  sticker: "Sticker",
+  tools: "Tools",
+  religi: "Islamic",
+  islamic: "Islamic",
+  group: "Group",
+  game: "Game",
+  rpg: "RPG",
+  economy: "Economy",
+  quotes: "Quotes",
+  maker: "Maker",
+  owner: "Owner",
+  info: "Info",
+  fun: "Fun",
+  search: "Search",
+  music: "Music",
+  media: "Media",
+};
 
-  const categoryLabel = selectedCategory ? toMonoUpperBold(selectedCategory) : "ALL";
-  const emoji = CATEGORY_EMOJIS[selectedCategory || ""] || "📁";
-
-  let txt = alyaHeader(selectedCategory ? `Menu ${selectedCategory}` : "Menu All", emoji);
-  txt += "\n\n";
-
-  const targetCategories = selectedCategory ? [selectedCategory] : categories;
-
-  for (const cat of targetCategories) {
-    if (cat === "owner" && !m.isOwner) continue;
-    const cmds = commandsByCategory[cat] || [];
-    if (cmds.length === 0) continue;
-    const catEmoji = CATEGORY_EMOJIS[cat] || "📁";
-    txt += alyaCategoryRow(catEmoji, cat, cmds.map((cmd) => `${prefix}${cmd}`).join(" | "));
-    txt += "\n\n";
-  }
-
-  txt += separator() + "\n";
-  txt += tipText(`Ketik ${prefix}menu untuk kembali ke menu utama`);
-  txt += "\n";
-  txt += tipText(`Ketik ${prefix}daftar untuk melihat daftar kategori`);
-
-  return txt;
+function labelKategori(cat) {
+  return LABEL_KATEGORI[cat] || cat.charAt(0).toUpperCase() + cat.slice(1);
 }
 
 function formatRAM() {
   const used = process.memoryUsage().rss;
   const total = os.totalmem();
-  const usedMB = (used / 1024 / 1024).toFixed(0);
-  const totalGB = (total / 1024 / 1024 / 1024).toFixed(1);
-  return `${usedMB}MB / ${totalGB}GB`;
+  return `${(used / 1024 / 1024).toFixed(0)}MB / ${(total / 1024 / 1024 / 1024).toFixed(1)}GB`;
 }
 
-function buildHomeText(m, botConfig, uptime, greeting, db) {
+/* ------------------------------------------------------------------ */
+/* Blok header ala Clara lama                                          */
+/* ------------------------------------------------------------------ */
+
+function buildHeaderKlasik(m, botConfig, uptime, db) {
   const prefix = botConfig.command?.prefix || ".";
-  const timeStr = new Date().toLocaleTimeString("id-ID", { timeZone: "Asia/Jakarta" });
-  const dateStr = new Date().toLocaleDateString("id-ID", { timeZone: "Asia/Jakarta", weekday: "long", day: "numeric", month: "long", year: "numeric" });
-  const uptimeFormatted = formatUptime(uptime);
-  const totalCommand = getPluginCount();
+  const d = new Date();
+  const nomor = String(m.sender || "").split("@")[0];
 
-  const role = m.isOwner ? "owner" : "user";
+  // Menu tidak boleh gagal total hanya karena database bermasalah.
+  let user = {};
+  try {
+    user = (db?.getUser ? db.getUser(m.sender) : null) || {};
+  } catch {
+    user = {};
+  }
+  const level = user.level ?? 1;
+  const exp = user.exp ?? 0;
+  const koin = user.koin ?? 0;
+  const energi = user.energi === -1 ? "∞" : (user.energi ?? 0);
+  const prems = user.isPremium ? "Premium" : "Free";
+  const role = m.isOwner ? "👑 Owner" : getRole(level);
 
-  let txt = alyaHeader("Menu Utama", "🤖") + "\n\n";
-  txt += userInfoBlock(m.pushName, m.sender, "active", role);
-  txt += "\n\n";
+  // Progres exp menuju level berikutnya (Clara lama: %exp / %maxexp)
+  const EXP_PER_LEVEL = 10000;
+  const expSekarang = exp % EXP_PER_LEVEL;
 
-  const userData = db?.getUser ? db.getUser(m.sender) : null;
-  if (userData && !m.isOwner) {
-    txt += infoBlock([
-      ["Level", userData.level ?? 1],
-      ["Exp", userData.exp ?? 0],
-      ["Koin", userData.koin ?? 0],
-      ["Energi", userData.energi === -1 ? "∞" : (userData.energi ?? 0)],
-      ["Status", userData.isPremium ? "💎 Premium" : "Reguler"],
-    ], "sᴛᴀᴛɪsᴛɪᴋ ᴋᴀᴍᴜ", "🌸");
-    txt += "\n\n";
+  let totalUser = 0;
+  try {
+    totalUser = Object.keys(db?.getAllUsers?.() || {}).length;
+  } catch {
+    totalUser = 0;
   }
 
-  txt += infoBlock([
-    ["Bot", botConfig.bot?.name || "Clara-AI"],
-    ["Versi", botConfig.bot?.version || "1.0"],
-    ["Mode", (botConfig.mode || "public").toUpperCase()],
-    ["Total Command", totalCommand],
-    ["Uptime", uptimeFormatted],
-    ["RAM", formatRAM()],
-    ["Platform", `${os.type()} · Node ${process.version}`],
-    ["Prefix", `[ ${prefix} ]`],
-    ["Tanggal", dateStr],
-    ["Waktu", timeStr],
-  ], "sᴇʀᴠᴇʀ", "📊");
-  txt += "\n\n";
-  txt += separator() + "\n";
-  txt += tipText(`Ketik ${prefix}allmenu untuk semua command`);
-  txt += "\n";
-  txt += tipText(`Ketik ${prefix}daftar untuk lihat kategori`);
-  return txt;
+  const mode = (botConfig.mode || "public").toLowerCase() === "self" ? "Private" : "Publik";
+
+  return blok([
+    {
+      judul: "Info User",
+      baris: [
+        baris("Nama", m.pushName || "Tanpa Nama"),
+        baris("Nomor", `@${nomor}`),
+        baris("Premium", prems),
+        // Clara lama memakai istilah "Limit" dan "Money"; di basis ini
+        // field-nya bernama energi & koin, jadi labelnya disamakan.
+        baris("Limit", energi),
+        baris("Money", koin),
+        baris("Role", role),
+        baris("Level", level),
+        baris("Xp", `${expSekarang} / ${EXP_PER_LEVEL}`),
+        baris("Total Xp", exp),
+      ],
+    },
+    {
+      judul: "Info Hari",
+      baris: [
+        baris("Waktu", jamWib(d)),
+        baris("Hari", `${namaHari(d)} ${getWeton(d)}`),
+        baris("Tanggal", tanggalLengkap(d)),
+        baris("Tanggal Islam", tanggalIslam(d)),
+      ],
+    },
+    {
+      judul: "Info Bot",
+      baris: [
+        baris("Bot Name", botConfig.bot?.name || "Clara"),
+        baris("Mode", mode),
+        baris("Platform", os.platform()),
+        baris("Type", "Node.Js"),
+        baris("Baileys", "Multi Device"),
+        baris("Prefix", `[ *${prefix}* ]`),
+        baris("Uptime", clockString((uptime || 0) * 1000)),
+        baris("RAM", formatRAM()),
+        baris("Total Command", getPluginCount()),
+        baris("Database", `${totalUser} pengguna`),
+      ],
+    },
+  ]);
 }
+
+/* ------------------------------------------------------------------ */
+/* Daftar kategori ala Clara lama                                      */
+/* ------------------------------------------------------------------ */
+
+function buildDaftarKategori(m, prefix, hanyaKategori = null) {
+  const commandsByCategory = getCommandsByCategory();
+  const sorted = getSortedCategories(m);
+  const out = [];
+
+  for (const { name: cat } of sorted) {
+    if (cat === "owner" && !m.isOwner) continue;
+    if (hanyaKategori && cat !== hanyaKategori) continue;
+
+    const cmds = commandsByCategory[cat] || [];
+    if (!cmds.length) continue;
+
+    out.push(blokKategori(labelKategori(cat), cmds, prefix));
+  }
+
+  return out.join("\n");
+}
+
+/**
+ * Teks menu lengkap bergaya klasik: header + readmore + semua kategori.
+ * Dipakai juga sebagai fallback bila pesan interaktif gagal dikirim.
+ */
+function buildMenuLengkap(m, botConfig, uptime, db, { pakaiReadMore = true } = {}) {
+  const prefix = botConfig.command?.prefix || ".";
+  const header = buildHeaderKlasik(m, botConfig, uptime, db);
+  const kategori = buildDaftarKategori(m, prefix);
+  const sambungan = pakaiReadMore ? READ_MORE : "\n";
+  return `${header}\n${sambungan}\n${kategori}`;
+}
+
+/* ------------------------------------------------------------------ */
+/* Handler                                                             */
+/* ------------------------------------------------------------------ */
 
 async function handler(m, { sock, config: botConfig, db, uptime }) {
-  await m.react('🕐');
-  const menuVariant = botConfig.ui?.menuVariant || 2;
-  const groupData = m.isGroup ? db.getGroup(m.chat) || {} : {};
-  const botMode = groupData.botMode || "md";
+  try {
+    await m.react("🕐");
+  } catch {
+    // reaksi opsional
+  }
+
   const prefix = botConfig.command?.prefix || ".";
   const greeting = getTimeGreeting();
-
-  const imageBuffer = fs.readFileSync(botConfig.assets["clara"]);
+  const namaBot = botConfig.bot?.name || "Clara";
 
   const sortedCategories = getSortedCategories(m);
-  const categories = getCategories();
-  const commandsByCategory = getCommandsByCategory();
-
-  if (sortedCategories.length === 0) {
+  if (!sortedCategories.length) {
     await m.reply("Belum ada menu yang tersedia saat ini.");
-    await m.react('✅');
-    return;
+    try {
+      await m.react("✅");
+    } catch {}
+    return { handled: true };
   }
 
-  const categoryRows = [];
-  for (const { name: cat, commands: cmds, emoji } of sortedCategories) {
-    const target = `${prefix}menucat ${cat}`;
-    categoryRows.push({
-      title: `${emoji} ${toMonoUpperBold(cat)}`,
-      description: `Menampilkan menu ${cat} (${cmds.length} command)`,
-      id: target,
-    });
-  }
+  const teksLengkap = buildMenuLengkap(m, botConfig, uptime, db);
+  const mentions = [m.sender];
 
-  const bodyText = buildHomeText(m, botConfig, uptime, greeting, db);
-  const rowTexts = [];
-  for (const { name: cat, commands: cmds, emoji } of sortedCategories) {
-    const label = `${emoji} ${toMonoUpperBold(cat)}`;
-    rowTexts.push(label + "\n  ◦ " + cmds.map(cmd => `${prefix}${cmd}`).join("\n  ◦ "));
-  }
-
-  const sections = [
-    {
-      title: `${botConfig.bot?.name || "Clara-AI"} | DAFTAR KATEGORI`,
-      rows: categoryRows.slice(0, 10),
-    },
-  ];
-
-  const quoted = {
-    key: {
-      participant: '0@s.whatsapp.net',
-      remoteJid: 'status@broadcast',
-    },
-    message: {
-      contactMessage: {
-        displayName: '🪸 ' + (botConfig.bot?.name || 'Clara-AI'),
-        vcard: 'BEGIN:VCARD\nVERSION:3.0\nN:XL;' + (botConfig.bot?.name || 'Clara') + ';;;\nFN:' + (botConfig.bot?.name || 'Clara-AI') + '\nitem1.TEL;waid=' + ((botConfig.owner?.number?.[0] || '0').replace(/[^0-9]/g, '')) + ':' + (botConfig.owner?.number?.[0] || '0') + '\nitem1.X-ABLabel:Ponsel\nEND:VCARD',
-        sendEphemeral: true,
-      },
-    },
-  };
-
+  // --- Coba kirim versi interaktif (header + tombol kategori) ---
   try {
-    const media = await prepareWAMessageMedia({
-      image: imageBuffer,
-    }, { upload: sock.waUploadToServer });
+    let media = null;
+    try {
+      const gambar = botConfig.assets?.["clara"];
+      if (gambar && fs.existsSync(gambar)) {
+        media = await prepareWAMessageMedia(
+          { image: fs.readFileSync(gambar) },
+          { upload: sock.waUploadToServer },
+        );
+      }
+    } catch {
+      media = null;
+    }
 
-    await sock.sendMessage(m.chat, {
-      text: bodyText,
-      footer: `${greeting} • Pilih kategori menu dibawah ini`,
-    });
+    const categoryRows = sortedCategories
+      .filter(({ name }) => name !== "owner" || m.isOwner)
+      .slice(0, 10)
+      .map(({ name: cat, commands }) => ({
+        title: `${CATEGORY_EMOJIS[cat] || "📁"} ${labelKategori(cat)}`,
+        description: `${commands.length} command`,
+        id: `${prefix}menucat ${cat}`,
+      }));
 
-    await sock.relayMessage(m.chat, {
-      viewOnceMessage: {
-        message: {
-          messageContextInfo: {
-            mentionedJid: [m.sender],
-          },
-          interactiveMessage: {
-            header: {
-              title: "",
-              subtitle: "",
-              hasMediaAttachment: true,
-              imageMessage: media.imageMessage,
-            },
-            body: {
-              text: `📂 *Pilih kategori menu*\n\n${separator()}\n💡 *Ketik ${prefix}menu untuk kembali ke menu utama*`,
-            },
-            footer: {
-              text: `${greeting} • Pilih kategori menu dibawah ini`,
-            },
-            contextInfo: {
-              isForwarded: true,
-              forwardingScore: 9,
-              forwardedNewsletterMessageInfo: {
-                newsletterJid: botConfig.saluran?.id || "120363400911374213@newsletter",
-                newsletterName: botConfig.saluran?.name || botConfig.bot?.name || "Clara-AI",
-                serverMessageId: 127,
+    const sections = [
+      { title: `${namaBot} | DAFTAR KATEGORI`, rows: categoryRows },
+    ];
+
+    const quoted = {
+      key: { participant: "0@s.whatsapp.net", remoteJid: "status@broadcast" },
+      message: {
+        contactMessage: {
+          displayName: `🪸 ${namaBot}`,
+          vcard:
+            `BEGIN:VCARD\nVERSION:3.0\nN:;${namaBot};;;\nFN:${namaBot}\n` +
+            `item1.TEL;waid=0:0\nitem1.X-ABLabel:Ponsel\nEND:VCARD`,
+          sendEphemeral: true,
+        },
+      },
+    };
+
+    await sock.relayMessage(
+      m.chat,
+      {
+        viewOnceMessage: {
+          message: {
+            messageContextInfo: { mentionedJid: mentions },
+            interactiveMessage: {
+              header: {
+                title: "",
+                subtitle: "",
+                hasMediaAttachment: !!media,
+                ...(media ? { imageMessage: media.imageMessage } : {}),
               },
-              mentionedJid: [m.sender],
-            },
-            nativeFlowMessage: {
-              messageParamsJson: JSON.stringify({
-                bottom_sheet: {
-                  in_thread_buttons_limit: 2,
-                  divider_indices: [],
-                  list_title: "📂 Pilih kategori menu",
-                  button_title: "📂 Lihat Kategori",
+              body: { text: teksLengkap },
+              footer: { text: `${greeting} • ${namaBot} Multidevice` },
+              contextInfo: {
+                isForwarded: true,
+                forwardingScore: 9,
+                mentionedJid: mentions,
+                forwardedNewsletterMessageInfo: {
+                  newsletterJid:
+                    botConfig.saluran?.id || "120363400911374213@newsletter",
+                  newsletterName: botConfig.saluran?.name || namaBot,
+                  serverMessageId: 127,
                 },
-                limited_time_offer: {
-                  text: greeting,
-                  expiration_time: Date.now() + 1000000,
-                },
-              }),
-              buttons: [
-                {
-                  name: "single_select",
-                  buttonParamsJson: JSON.stringify({
-                    title: "📂 Menu Kategori",
-                    sections,
-                    icon: "DEFAULT",
-                  }),
-                },
-                {
-                  name: "quick_reply",
-                  buttonParamsJson: JSON.stringify({
-                    display_text: "📋 Menu",
-                    id: `${prefix}menu`,
-                  }),
-                },
-                {
-                  name: "quick_reply",
-                  buttonParamsJson: JSON.stringify({
-                    display_text: "💡 Tanya AI",
-                    id: `${prefix}aihelp`,
-                  }),
-                },
-                {
-                  name: "quick_reply",
-                  buttonParamsJson: JSON.stringify({
-                    display_text: "📌 Semua Menu",
-                    id: `${prefix}allmenu`,
-                  }),
-                },
-                {
-                  name: "quick_reply",
-                  buttonParamsJson: JSON.stringify({
-                    display_text: "🔙 Kembali",
-                    id: `${prefix}menu`,
-                  }),
-                },
-                {
-                  name: "single_select",
-                  buttonParamsJson: JSON.stringify({
-                    title: "📂 All Kategori",
-                    sections,
-                    icon: "DEFAULT",
-                  }),
-                },
-                {
-                  name: "quick_reply",
-                  buttonParamsJson: JSON.stringify({
-                    display_text: "💝 Donasi",
-                    id: `${prefix}donasi`,
-                  }),
-                },
-                {
-                  name: "quick_reply",
-                  buttonParamsJson: JSON.stringify({
-                    display_text: "👑 Owner",
-                    id: `${prefix}owner`,
-                  }),
-                },
-              ],
+              },
+              nativeFlowMessage: {
+                messageParamsJson: JSON.stringify({
+                  bottom_sheet: {
+                    in_thread_buttons_limit: 2,
+                    divider_indices: [],
+                    list_title: "📂 Pilih kategori menu",
+                    button_title: "📂 Lihat Kategori",
+                  },
+                }),
+                buttons: [
+                  {
+                    name: "single_select",
+                    buttonParamsJson: JSON.stringify({
+                      title: "📂 Menu Kategori",
+                      sections,
+                      icon: "DEFAULT",
+                    }),
+                  },
+                  {
+                    name: "quick_reply",
+                    buttonParamsJson: JSON.stringify({
+                      display_text: "📌 Semua Menu",
+                      id: `${prefix}allmenu`,
+                    }),
+                  },
+                  {
+                    name: "quick_reply",
+                    buttonParamsJson: JSON.stringify({
+                      display_text: "👑 Owner",
+                      id: `${prefix}owner`,
+                    }),
+                  },
+                ],
+              },
             },
           },
         },
       },
-    }, { quoted });
-  } catch (e) {
-    await m.reply(bodyText);
+      { quoted },
+    );
+  } catch {
+    // Fallback: teks polos, isinya sudah lengkap (header + semua kategori)
+    await m.reply(teksLengkap, { mentions });
   }
 
-  await m.react('✅');
+  try {
+    await m.react("✅");
+  } catch {}
+
+  return { handled: true };
 }
 
 export default {
   config: pluginConfig,
   handler,
 };
+export { buildHeaderKlasik, buildDaftarKategori, buildMenuLengkap, labelKategori };

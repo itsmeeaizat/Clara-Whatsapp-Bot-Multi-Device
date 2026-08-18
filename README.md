@@ -381,11 +381,15 @@ Proyek ini memakai library WhatsApp **tidak resmi** ([Baileys](https://github.co
 
 ## 📝 Catatan Pengembangan
 
-- Basis kode ini dikembangkan mandiri dari script pribadi — **bukan fork
-  langsung** dari `Clara-MD` (Zeltoria) yang sudah tidak aktif
+- Proyek ini adalah **penerus [Clara-MD](https://github.com/Zeltoria/Clara-MD)**
+  karya [Zeltoria](https://github.com/Zeltoria) yang sudah berhenti dikembangkan
+  sejak 2023. Basis kodenya ditulis ulang mandiri (bukan fork langsung), namun
+  **tampilan menunya sengaja disamakan** dengan Clara orisinal agar pengguna
+  lama tetap merasa familier — blok `╔┈┈「 」` dengan `╎❏`, dan daftar command
+  `╎ぎ`. Terima kasih untuk Zeltoria atas Clara yang asli 🙏
 - Seluruh penamaan internal sudah diseragamkan menjadi `clara-*`
-- Tampilan menu memakai style terpusat di `src/lib/clara-menu-style.js`
-  agar seragam di seluruh command
+- Tampilan menu klasik ada di `src/lib/clara-classic-style.js`; style modern
+  untuk command lain di `src/lib/clara-menu-style.js`
 - Helper grup terpusat di `src/lib/clara-group-util.js`
 
 ---

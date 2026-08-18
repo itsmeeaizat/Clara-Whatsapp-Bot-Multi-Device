@@ -27,7 +27,7 @@ import {
 
 const pluginConfig = {
   name: "menucategory",
-  alias: ["menukategori", "menucatall", "catall"],
+  alias: ["allmenucategory", "allmenucat"],
   category: "main",
   description: "Menampilkan semua kategori beserta commandnya",
   usage: ".menucategory",

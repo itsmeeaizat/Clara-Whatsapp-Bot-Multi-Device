@@ -308,6 +308,74 @@ Fitur harian yang benar-benar dipakai di Indonesia — semuanya **gratis, tanpa 
 
 ---
 
+## 🎬 Sticker & Editor Foto
+
+Semua diproses **langsung di server** memakai `sharp`, `canvas`, dan `ffmpeg` — tanpa API luar,
+jadi tetap jalan walau layanan pihak ketiga sedang mati.
+
+| Command | Fungsi |
+|---|---|
+| `.tovideo` | Sticker gerak → video MP4 |
+| `.togif` | Sticker gerak → GIF (dikirim sebagai dokumen) |
+| `.stickerinfo` | Intip metadata sticker: paket, pembuat, frame, dimensi |
+| `.take Nama \| Pembuat` | Klaim sticker — ganti label tanpa merusak gambar |
+| `.edit <efek>` | 13 filter foto |
+| `.qc <teks>` | Teks jadi sticker gelembung chat |
+
+<details>
+<summary><b>13 efek <code>.edit</code> dan contoh pemakaian</b></summary>
+
+| Efek | Hasil | Efek | Hasil |
+|---|---|---|---|
+| `blur` | Buramkan | `cerah` | Naikkan kecerahan |
+| `pixelate` | Sensor kotak-kotak | `gelap` | Turunkan kecerahan |
+| `grayscale` | Hitam putih | `jenuh` | Pekatkan warna |
+| `sepia` | Nuansa jadul | `putar` | Putar 90/180/270° |
+| `invert` | Negatif | `mirror` | Balik kiri-kanan |
+| `sketsa` | Seperti pensil | `balik` | Balik atas-bawah |
+| `tajam` | Perjelas detail | | |
+
+```bash
+# Editor foto — kirim foto + caption, atau reply foto
+.edit blur 15
+.edit pixelate 30        # sensor wajah
+.edit sketsa
+.edit putar 180
+
+# Sticker
+.tovideo                 # reply sticker gerak
+.togif
+.stickerinfo             # lihat siapa pembuat sticker
+.take Clara MD | Aizat   # ganti label sticker
+
+# Quote chat
+.qc halo semua
+.qc                      # reply pesan untuk mengutipnya
+```
+
+</details>
+
+> `.take` hanya menulis ulang metadata, **tidak** mengkodekan ulang gambar —
+> sticker gerak tetap utuh 100% dan kualitasnya tidak turun sedikit pun.
+
+---
+
+## 🕌 Hadits
+
+```bash
+.hadits                  # hadits acak dari kitab acak
+.hadits arbain 1         # Arbain Nawawi (1-42)
+.hadits bukhari 100      # sembilan kitab perawi
+.hadits perawi           # daftar kitab + jumlah hadits
+```
+
+Sembilan kitab tersedia — **Bukhari** (6.638), **Muslim** (4.930), **Nasai** (5.364),
+**Abu Dawud** (4.419), **Ahmad** (4.305), **Ibnu Majah** (4.285), **Tirmidzi** (3.625),
+**Darimi** (2.949), dan **Malik** (1.587) — lengkap dengan teks Arab dan terjemahan Indonesia.
+Salah eja umum seperti `bukhori` atau `turmudzi` tetap dikenali.
+
+---
+
 ## 🎨 Dua Mode Tampilan Menu
 
 Bot ini punya **dua gaya menu** yang bisa ditukar kapan saja:
@@ -373,6 +441,9 @@ sehingga bertahan setelah restart.
 │   ├── connection.js        # Koneksi & event Baileys
 │   ├── handler.js           # Router pesan masuk
 │   └── lib/                 # Modul inti
+│       ├── clara-media-util.js    # Unduh & konversi gambar/sticker/video
+│       ├── clara-sticker-util.js  # Pembuatan sticker
+│       └── clara-menu-*.js        # Gaya & pembangun menu
 ├── database/main/           # Data JSON lokal
 └── assets/                  # Gambar, font, audio, video
 ```
@@ -381,13 +452,13 @@ sehingga bertahan setelah restart.
 
 | Kategori | Jumlah | | Kategori | Jumlah |
 |---|---|---|---|---|
-| AI | 51 | | Info | 14 |
+| AI | 51 | | Info | 15 |
 | Group | 48 | | Fun | 13 |
-| Game | 41 | | Religi | 12 |
-| Tools | 20 | | Maker | 11 |
+| Game | 41 | | Religi | 13 |
+| Tools | 20 | | Maker | 13 |
 | Economy | 18 | | Search | 10 |
-| Owner | 16 | | Music | 10 |
-| Download | 14 | | Main · Sticker | 17 |
+| Owner | 17 | | Music | 10 |
+| Download | 14 | | Sticker | 11 |
 
 ---
 

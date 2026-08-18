@@ -295,6 +295,57 @@ pesan, dan otomatis dipangkas ke 8 hari terakhir.
 Berjalan di grup maupun chat pribadi, dicek tiap 20 detik. Maksimal 20 pengingat
 per chat.
 
+## 🛠️ Moderasi & Administrasi Grup
+
+### `.autowarn` — peringatan yang benar-benar menindak
+
+Plugin `.warn` lama menampilkan "Warn Count: 1/3" tapi tidak pernah melakukan
+apa pun saat mencapai 3. `.autowarn` melengkapinya:
+
+```
+.autowarn @user <alasan>      .autowarn cabut @user
+.autowarn limit 3             .autowarn aksi kick|mute|notify
+.autowarn list                .autowarn reset @user
+```
+
+Warn disimpan **per grup** (tidak tercampur antar grup) dan otomatis hangus
+setelah 30 hari. Kalau bot bukan admin, aksi kick dilewati dengan pesan jelas.
+
+### `.kas` — kas & iuran grup
+
+```
+.kas set 50rb                 .kas bayar @user 50rb
+.kas keluar 30rb beli spanduk .kas cek
+.kas belum                    .kas riwayat
+.kas reset                    # periode baru, saldo tetap
+```
+
+Nominal menerima `50000`, `50rb`, `50k`, `1.5jt`. `.kas belum` me-mention
+siapa saja yang masih nunggak beserta kekurangannya. Pengeluaran melebihi
+saldo ditolak.
+
+### `.piket` — jadwal giliran bergilir
+
+```
+.piket set Piket Kebersihan   .piket tambah @user
+.piket now                    .piket next
+.piket list                   .piket hapus @user
+```
+
+Giliran berputar otomatis. Kalau petugas yang sedang bertugas dihapus dari
+daftar, urutan tetap konsisten (tidak meleset).
+
+### `.catatan` — catatan bersama grup
+
+```
+.catatan simpan aturan Dilarang spam
+.catatan list                 .catatan hapus aturan
+#aturan                       # panggil cepat
+```
+
+Bisa menyimpan dari pesan yang di-reply. Daftar diurutkan berdasarkan catatan
+yang paling sering dipanggil. Maksimal 50 catatan per grup.
+
 ## 📝 Catatan Pengembangan
 
 - Basis kode ini sebelumnya menggunakan penamaan internal berbeda dan sudah di-rename penuh menjadi `clara-*` di seluruh file/modul.

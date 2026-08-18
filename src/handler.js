@@ -171,6 +171,22 @@ async function handleMessage(m, sock, botConfig, db, uptime) {
     } catch {
       // plugin voting tidak tersedia — abaikan
     }
+
+    // Catatan: pemanggilan cepat "#nama"
+    try {
+      const { tryCatatan } = await import("../plugins/group/catatan.js");
+      const note = await tryCatatan(m, db);
+      if (note) {
+        await sock.sendMessage(
+          m.chat,
+          { text: note.isi },
+          { quoted: m }
+        );
+        return true;
+      }
+    } catch {
+      // plugin catatan tidak tersedia — abaikan
+    }
   }
 
   if (!handled && botConfig.registration?.enabled && !m.isOwner && !isRegistered(userId)) {

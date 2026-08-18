@@ -536,6 +536,37 @@ class Database {
     return this.db.data.groups || {};
   }
 
+  /**
+   * Baca satu setting grup.
+   * Dipakai plugin toggle seperti antispam/antisticker/antivirtual yang
+   * sudah memanggil API ini sejak lama, tapi metodenya belum pernah ada
+   * sehingga command-nya selalu gagal dengan
+   * "db.getGroupSetting is not a function".
+   *
+   * @param {string} jid - JID grup
+   * @param {string} key - nama setting
+   * @param {any} fallback - nilai bila belum pernah diset
+   */
+  getGroupSetting(jid, key, fallback = false) {
+    if (!jid || !key) return fallback;
+    const group = this.db.data.groups[jid];
+    if (!group) return fallback;
+    const val = group[key];
+    return val === undefined ? fallback : val;
+  }
+
+  /**
+   * Tulis satu setting grup (membuat entri grup bila belum ada).
+   * @returns {any} nilai yang tersimpan
+   */
+  setGroupSetting(jid, key, value) {
+    if (!jid || !key) return undefined;
+    if (!this.db.data.groups[jid]) this.setGroup(jid, {});
+    this.db.data.groups[jid][key] = value;
+    this.markDirty("groups");
+    return value;
+  }
+
   setting(key, value = undefined) {
     if (value !== undefined) {
       this.db.data.settings[key] = value;

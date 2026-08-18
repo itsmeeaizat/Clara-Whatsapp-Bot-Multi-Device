@@ -21,6 +21,7 @@ import {
   simpanPemain,
   ambilKoin,
   beriHadiah,
+  progresQuest,
   tambahBarang,
   kurangiBarang,
   cariBarang,
@@ -149,6 +150,7 @@ async function handler(m, { config: botConfig, db }) {
 
       tambahBarang(db, m.sender, barang.kode, 1);
       const sesudah = ambilPemain(db, m.sender);
+      if (sesudah.questHarian) progresQuest(sesudah, "belanja_1k", barang.harga);
 
       await m.reply(
         alyaHeader("Pembelian Berhasil", "🛍️") +

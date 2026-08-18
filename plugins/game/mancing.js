@@ -18,6 +18,7 @@ import {
   ambilPemain,
   pakaiStamina,
   beriHadiah,
+  progresQuest,
   tambahBarang,
   menitStaminaBerikutnya,
   STAMINA_MAKS,
@@ -142,6 +143,8 @@ async function handler(m, { config: botConfig, db }) {
     const koin = Math.floor(tangkapan.koin * bonus);
     const exp = Math.floor(tangkapan.exp * bonus);
     const hadiah = beriHadiah(db, m.sender, koin, exp);
+    const curP = ambilPemain(db, m.sender);
+    if (curP.questHarian) progresQuest(curP, "mancing_3x", 1);
 
     // Berat ikan sekadar hiasan cerita
     const berat = tangkapan.sampah

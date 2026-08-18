@@ -19,6 +19,7 @@ import {
   simpanPemain,
   pakaiStamina,
   beriHadiah,
+  progresQuest,
   tambahBarang,
   menitStaminaBerikutnya,
   STAMINA_MAKS,
@@ -141,6 +142,8 @@ async function handler(m, { config: botConfig, db }) {
     totalExp = Math.floor(totalExp * bonus);
 
     const hadiah = beriHadiah(db, m.sender, totalKoin, totalExp);
+    const curP = ambilPemain(db, m.sender);
+    if (curP.questHarian) progresQuest(curP, "tambang_5x", 1);
 
     // Peluang kecil menemukan peti harta
     let peti = false;

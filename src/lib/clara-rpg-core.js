@@ -424,6 +424,87 @@ function labelKelas(kode) {
   return `${k.ikon} ${k.nama}`;
 }
 
+
+/* ------------------------------------------------------------------ */
+/* Peliharaan (Pet)                                                    */
+/* ------------------------------------------------------------------ */
+
+const JENIS_PET = {
+  kucing: { nama: "Kucing", ikon: "🐱", atkBonus: 5, defBonus: 0, raritas: "common", bobot: 40 },
+  anjing: { nama: "Anjing", ikon: "🐶", atkBonus: 0, defBonus: 5, raritas: "common", bobot: 40 },
+  elang: { nama: "Elang", ikon: "🦅", atkBonus: 10, defBonus: 0, raritas: "uncommon", bobot: 25 },
+  serigala: { nama: "Serigala", ikon: "🐺", atkBonus: 15, defBonus: 5, raritas: "rare", bobot: 12 },
+  naga_kecil: { nama: "Naga Kecil", ikon: "🐉", atkBonus: 25, defBonus: 10, raritas: "epic", bobot: 3 },
+  feniks: { nama: "Feniks", ikon: "🔥", atkBonus: 40, defBonus: 20, raritas: "legendary", bobot: 0.5 },
+};
+
+function ambilPet(p) {
+  if (!p?.peliharaan?.jenis) return null;
+  return p.peliharaan;
+}
+
+function bonusPet(p) {
+  const pet = ambilPet(p);
+  if (!pet) return { atk: 0, def: 0 };
+  const base = JENIS_PET[pet.jenis] || {};
+  const lvlBonus = Math.floor((pet.level || 1) / 5);
+  return {
+    atk: (base.atkBonus || 0) + lvlBonus * 2,
+    def: (base.defBonus || 0) + lvlBonus * 1,
+  };
+}
+
+/* ------------------------------------------------------------------ */
+/* Quest Harian                                                        */
+/* ------------------------------------------------------------------ */
+
+const QUEST_TEMPLATES = [
+  { id: "menang_tarung", deskripsi: "Menangkan 3 pertarungan", target: 3, hadiahKoin: 500, hadiahExp: 80 },
+  { id: "tambang_5x", deskripsi: "Tambang 5 kali", target: 5, hadiahKoin: 400, hadiahExp: 60 },
+  { id: "mancing_3x", deskripsi: "Mancing 3 kali", target: 3, hadiahKoin: 300, hadiahExp: 50 },
+  { id: "belanja_1k", deskripsi: "Belanjakan 1000 koin di toko", target: 1000, hadiahKoin: 600, hadiahExp: 70 },
+  { id: "petualang_3x", deskripsi: "Petualang 3 kali", target: 3, hadiahKoin: 350, hadiahExp: 55 },
+  { id: "duel_1x", deskripsi: "Menangkan 1 duel PvP", target: 1, hadiahKoin: 700, hadiahExp: 100 },
+];
+
+function buatQuestHarian(level) {
+  const multiplier = 1 + Math.floor(level / 10) * 0.5;
+  const pool = [...QUEST_TEMPLATES];
+  const terpilih = [];
+  for (let i = 0; i < 3 && pool.length; i++) {
+    const idx = Math.floor(Math.random() * pool.length);
+    const q = pool.splice(idx, 1)[0];
+    terpilih.push({
+      ...q,
+      progres: 0,
+      selesai: false,
+      claimed: false,
+      hadiahKoin: Math.floor(q.hadiahKoin * multiplier),
+      hadiahExp: Math.floor(q.hadiahExp * multiplier),
+    });
+  }
+  return terpilih;
+}
+
+function progresQuest(p, questId, jumlah = 1) {
+  if (!p?.questHarian) return;
+  for (const q of p.questHarian) {
+    if (q.id === questId && !q.selesai) {
+      q.progres = Math.min(q.target, q.progres + jumlah);
+      if (q.progres >= q.target) q.selesai = true;
+    }
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Guild                                                               */
+/* ------------------------------------------------------------------ */
+
+const KEY_GUILD = "rpgGuilds";
+const GUILD_MAKS_ANGGOTA = 20;
+const GUILD_BIAYA_BUAT = 5000;
+
+
 export {
   // konstanta
   KEY_PEMAIN,
@@ -468,4 +549,16 @@ export {
   bar,
   angka,
   labelKelas,
+  // peliharaan
+  JENIS_PET,
+  ambilPet,
+  bonusPet,
+  // quest harian
+  QUEST_TEMPLATES,
+  buatQuestHarian,
+  progresQuest,
+  // guild
+  KEY_GUILD,
+  GUILD_MAKS_ANGGOTA,
+  GUILD_BIAYA_BUAT,
 };

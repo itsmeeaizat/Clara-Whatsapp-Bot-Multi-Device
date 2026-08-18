@@ -162,6 +162,8 @@ async function handler(m, { config: botConfig, db }) {
       const exp = Math.floor(monster.exp * pengali);
       hadiah = beriHadiah(db, m.sender, koin, exp);
       st.monster = (st.monster || 0) + 1;
+      const curP = ambilPemain(db, m.sender);
+      if (curP.questHarian) progresQuest(curP, "menang_tarung", 1);
     } else {
       st.kalah = (st.kalah || 0) + 1;
     }

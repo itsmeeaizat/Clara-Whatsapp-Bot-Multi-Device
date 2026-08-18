@@ -19,6 +19,7 @@ import {
   ambilPemain,
   simpanPemain,
   beriHadiah,
+  progresQuest,
   ambilKoin,
   hitungSerangan,
   kekuatanBela,
@@ -271,6 +272,8 @@ async function handler(m, { sock, config: botConfig, db }) {
           statistik: stM,
           hp: hasil.pemenang === "a" ? hasil.hpA : hasil.hpB,
         });
+        const curP = ambilPemain(db, jidMenang);
+        if (curP.questHarian) progresQuest(curP, "duel_1x", 1);
 
         const stK = { ...(ambilPemain(db, jidKalah).statistik || {}) };
         stK.kalah = (stK.kalah || 0) + 1;

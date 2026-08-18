@@ -244,6 +244,58 @@ kepanjangan. Admin & owner kebal.
 
 ---
 
+## 🎨 Dua Mode Tampilan Menu
+
+Bot ini punya **dua gaya menu** yang bisa ditukar kapan saja:
+
+```bash
+.modemenu                  # lihat gaya aktif + pilihan
+.modemenu klasik           # gaya Clara orisinal
+.modemenu modern           # gaya khas repo ini
+.modemenu contoh klasik    # intip dulu sebelum memilih
+```
+
+<table>
+<tr><th width="50%">1️⃣ Klasik <sub>(default)</sub></th><th width="50%">2️⃣ Modern</th></tr>
+<tr><td valign="top">
+
+```
+╔┈┈「 *Info User* 」
+╎
+╎❏ *Nama:* Aizat
+╎❏ *Limit:* 25
+╠┈┈「 *Info Bot* 」
+╎❏ *Prefix:* [ *.* ]
+╚┈┈┈┈┈┈┈┈┈❖
+
+╔┈「 Main 」
+╎ぎ .menu
+╚┈┈┈┈┈┈┈┈┈❖
+```
+
+Meniru **[Clara-MD orisinal](https://github.com/Zeltoria/Clara-MD)**
+lengkap dengan weton Jawa, tanggal Hijriah, dan uptime `02 H 15 M 30 S`.
+
+</td><td valign="top">
+
+```
+✧　🤖 *ᴍᴇɴᴜ ᴜᴛᴀᴍᴀ* 　✧
+┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+
+╭─ 📊 *ꜱᴇʀᴠᴇʀ*
+│  ✿ Bot  ·  *Clara*
+│  ✿ Prefix  ·  *[ . ]*
+╰─ · · ·
+```
+
+Gaya khas repo ini: header `✧`, kotak `╭─`, dan huruf small caps.
+
+</td></tr>
+</table>
+
+Pilihan berlaku untuk **`.menu` dan `.allmenu`**, tersimpan di database
+sehingga bertahan setelah restart.
+
 ## 🗂️ Struktur Proyek
 
 ```
@@ -388,8 +440,9 @@ Proyek ini memakai library WhatsApp **tidak resmi** ([Baileys](https://github.co
   lama tetap merasa familier — blok `╔┈┈「 」` dengan `╎❏`, dan daftar command
   `╎ぎ`. Terima kasih untuk Zeltoria atas Clara yang asli 🙏
 - Seluruh penamaan internal sudah diseragamkan menjadi `clara-*`
-- Tampilan menu klasik ada di `src/lib/clara-classic-style.js`; style modern
-  untuk command lain di `src/lib/clara-menu-style.js`
+- Tampilan menu: `clara-classic-style.js` (gaya Clara lama),
+  `clara-menu-style.js` (gaya modern), `clara-menu-builder.js` (penyusun
+  kedua gaya), dan `clara-menu-mode.js` (pemilih mode)
 - Helper grup terpusat di `src/lib/clara-group-util.js`
 
 ---

@@ -115,54 +115,78 @@ function isBlocked(recipient, sender) {
   return blocked.has(sender);
 }
 
-function buildConfesMessage(mode, pesan, targetName, confesId) {
+function buildConfesMessage(mode, pesan, targetName, confesId, isAnonim, senderName, senderNumber) {
   const m = MODES[mode] || MODES.nembak;
   const opener = pickRandom(OPENERS);
   const outro = pickRandom(OUTROS);
   const name = targetName ? `, *${targetName}*` : "";
 
+  const headerBox = isAnonim
+    ? `╔═══════════════════════════════╗\n║  ${m.emoji} CONFES ANONIM  ║\n╚═══════════════════════════════╝`
+    : `╔═══════════════════════════════╗\n║  ${m.emoji} CONFES TERBUKA  ║\n╚═══════════════════════════════╝`;
+
+  const senderInfo = isAnonim
+    ? "👤 Pengirim: *Anonim* 🕵️"
+    : `👤 Pengirim: *${senderName}*\n📱 Nomor: ${senderNumber}`;
+
   return (
-    `╔═══════════════════════════════╗\n` +
-    `║  ${m.emoji} CONFES ANONIM  ║\n` +
-    `╚═══════════════════════════════╝\n\n` +
+    headerBox + "\n\n" +
     `Halo${name},\n\n` +
     `${opener}\n\n` +
     `${m.intro}.\n\n` +
     `💬 *"${pesan}"*\n\n` +
     `${outro}\n\n` +
     `━━━━━━━━━━━━━━━━━\n` +
+    `${senderInfo}\n` +
     `🆔 ID: ${confesId}\n` +
     `🎭 Mode: ${m.emoji} ${m.label}\n` +
     `📅 ${new Date().toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" })}\n` +
+    `🔒 Tipe: ${isAnonim ? "Anonim 🕵️" : "Terbuka 👤"}\n` +
     `━━━━━━━━━━━━━━━━━\n\n` +
     `_Balas dengan: .confes balas ${confesId} <pesan>_`
   );
 }
 
-function buildMenfesMessage(pesan, menfesId, groupName) {
+function buildMenfesMessage(pesan, menfesId, groupName, isAnonim, senderName, senderNumber) {
+  const headerBox = isAnonim
+    ? `╔═══════════════════════════════╗\n║  📢 MENFES ANONIM GRUP  ║\n╚═══════════════════════════════╝`
+    : `╔═══════════════════════════════╗\n║  📢 MENFES TERBUKA GRUP  ║\n╚═══════════════════════════════╝`;
+
+  const senderInfo = isAnonim
+    ? "👤 Pengirim: *Anonim* 🕵️"
+    : `👤 Pengirim: *${senderName}*\n📱 Nomor: ${senderNumber}`;
+
   return (
-    `╔═══════════════════════════════╗\n` +
-    `║  📢 MENFES ANONIM GRUP  ║\n` +
-    `╚═══════════════════════════════╝\n\n` +
+    headerBox + "\n\n" +
     `${groupName ? "📍 " + groupName + "\n\n" : ""}` +
     `💬 *"${pesan}"*\n\n` +
     `━━━━━━━━━━━━━━━━━\n` +
+    `${senderInfo}\n` +
     `🆔 ID: ${menfesId}\n` +
     `📅 ${new Date().toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" })}\n` +
+    `🔒 Tipe: ${isAnonim ? "Anonim 🕵️" : "Terbuka 👤"}\n` +
     `━━━━━━━━━━━━━━━━━\n\n` +
     `_Balas dengan: .menfes balas ${menfesId} <pesan>_`
   );
 }
 
-function buildReplyMessage(replyText, originalId, isReplyToReply) {
+function buildReplyMessage(replyText, originalId, isAnonim, senderName, senderNumber) {
+  const headerBox = isAnonim
+    ? `╔═══════════════════════════════╗\n║  💬 BALASAN ANONIM  ║\n╚═══════════════════════════════╝`
+    : `╔═══════════════════════════════╗\n║  💬 BALASAN TERBUKA  ║\n╚═══════════════════════════════╝`;
+
+  const senderInfo = isAnonim
+    ? "👤 Pengirim: *Anonim* 🕵️"
+    : `👤 Pengirim: *${senderName}*\n📱 Nomor: ${senderNumber}`;
+
   return (
-    `╔═══════════════════════════════╗\n` +
-    `║  💬 BALASAN ANONIM  ║\n` +
-    `╚═══════════════════════════════╝\n\n` +
+    headerBox + "\n\n" +
     `💬 *"${replyText}"*\n\n` +
     `━━━━━━━━━━━━━━━━━\n` +
+    `${senderInfo}\n` +
     `🆔 Reply to: ${originalId}\n` +
     `📅 ${new Date().toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" })}\n` +
+    `🔒 Tipe: ${isAnonim ? "Anonim 🕵️" : "Terbuka 👤"}\n` +
     `━━━━━━━━━━━━━━━━━\n\n` +
     `_Balas dengan: .confes balas ${originalId} <pesan>_`
   );
@@ -190,7 +214,8 @@ async function handler(m, { sock, db: dbArg, groupMetadata, config: botConfig })
       let text = alyaHeader("Confes Anonymous", "💘") + "\n\n";
       text += "Sistem confess anonymous modern dengan balas, inbox, block & stats.\n\n";
       text += bracketBox("📋", "ᴄᴀʀᴀ ᴘᴀᴋᴀɪ", [
-        `◦ Kirim: *${prefix}confes <nomor>|<mode>|<pesan>*`,
+        `◦ Kirim Anonim: *${prefix}confes <nomor>|<mode>|anon|<pesan>*`,
+        `◦ Kirim Terbuka: *${prefix}confes <nomor>|<mode>|buka|<pesan>*`,
         `◦ Balas: *${prefix}confes balas <id> <pesan>*`,
         `◦ Inbox: *${prefix}confes inbox*`,
         `◦ Baca: *${prefix}confes read <id>*`,
@@ -200,7 +225,10 @@ async function handler(m, { sock, db: dbArg, groupMetadata, config: botConfig })
         `◦ Setting: *${prefix}confes settings*`,
       ]) + "\n\n";
       text += bracketBox("🎭", "ᴍᴏᴅᴇ", modeList.split("\n   ")) + "\n\n";
-      text += separator() + "\n" + tipText(`Contoh: ${prefix}confes 6281234567890|nembak|Aku suka kamu 💕`);
+      text += bracketBox("🔒", "ᴛɪᴘᴇ ᴘᴇɴɢɪʀɪᴍᴀɴ", [
+        "🕵️ anon — Identitas tersembunyi",
+        "👤 buka — Identitas diperlihatkan",
+      ]) + "\n\n" + separator() + "\n" + tipText(`Contoh: ${prefix}confes 6281234567890|nembak|anon|Aku suka kamu 💕`);
       return m.reply(text);
     }
 
@@ -217,7 +245,25 @@ async function handler(m, { sock, db: dbArg, groupMetadata, config: botConfig })
       if (!original) return m.reply(`❌ Confes dengan ID ${confesId} tidak ditemukan di inbox kamu.`);
 
       // Kirim balasan ke pengirim asli
-      const replyText = buildReplyMessage(replyMsg, confesId);
+      // Cek apakah balasan ini anonim atau terbuka
+      // Jika confes asli anonim, balasan juga anonim (default)
+      // Tapi user bisa specify: .confes balas <id> anon <pesan> atau .confes balas <id> buka <pesan>
+      let replyIsAnonim = original.isAnonim !== false; // default ikut confes asli
+      let actualReplyMsg = replyMsg;
+      if (replyMsg.toLowerCase() === "anon" || replyMsg.toLowerCase() === "anonim") {
+        replyIsAnonim = true;
+        actualReplyMsg = parts.slice(3).join(" ");
+      } else if (replyMsg.toLowerCase() === "buka" || replyMsg.toLowerCase() === "terbuka") {
+        replyIsAnonim = false;
+        actualReplyMsg = parts.slice(3).join(" ");
+      }
+      if (!actualReplyMsg) return m.reply(`❌ Pesan tidak boleh kosong!\n\nContoh: .confes balas ${confesId} Iya aku juga suka`);
+
+      const senderNumber = sender.split("@")[0];
+      let senderName = "";
+      try { senderName = (await sock.getName(sender)) || m.pushName || senderNumber; } catch { senderName = m.pushName || senderNumber; }
+
+      const replyText = buildReplyMessage(actualReplyMsg, confesId, replyIsAnonim, senderName, senderNumber);
       try {
         await sock.sendMessage(original.from, { text: replyText });
       } catch (e) {
@@ -226,7 +272,7 @@ async function handler(m, { sock, db: dbArg, groupMetadata, config: botConfig })
 
       // Tambahkan reply ke thread
       original.replies = original.replies || [];
-      original.replies.push({ from: sender, message: replyMsg, timestamp: Date.now() });
+      original.replies.push({ from: sender, message: actualReplyMsg, isAnonim: replyIsAnonim, timestamp: Date.now() });
 
       return m.reply(`✅ Balasan terkirim ke pengirim confes ${confesId}!\n\nBalasan tetap anonim — pengirim tidak tahu siapa kamu.`);
     }
@@ -354,17 +400,33 @@ async function handler(m, { sock, db: dbArg, groupMetadata, config: botConfig })
     }
 
     // ---- KIRIM CONFES (default) ----
-    if (!args.includes("|")) return m.reply(`❌ Format salah!\n\nContoh: .confes 6281234567890|nembak|Aku suka kamu`);
+    // Format: .confes <nomor>|<mode>|<anon|buka>|<pesan>
+    // Backward compat: .confes <nomor>|<mode>|<pesan> (default: anon)
+    if (!args.includes("|")) return m.reply(`❌ Format salah!\n\nContoh:\n.confes 6281234567890|nembak|anon|Aku suka kamu\n.confes 6281234567890|nembak|buka|Aku suka kamu`);
 
     const parts = args.split("|").map(s => s.trim()).filter(Boolean);
-    if (parts.length < 3) return m.reply(`❌ Format salah!\n\nContoh: .confes 6281234567890|nembak|Aku suka kamu`);
+    if (parts.length < 3) return m.reply(`❌ Format salah!\n\nContoh: .confes 6281234567890|nembak|anon|Aku suka kamu`);
 
-    const [numberRaw, modeRaw, ...rest] = parts;
+    const [numberRaw, modeRaw, thirdPart, ...rest] = parts;
     const number = String(numberRaw).replace(/\D/g, "");
     const mode = String(modeRaw).toLowerCase();
-    const pesan = rest.join("|");
 
-    if (!number || !MODES[mode] || !pesan) return m.reply(`❌ Mode tidak valid atau pesan kosong!\n\nMode: ${Object.keys(MODES).join(", ")}`);
+    // Cek apakah bagian ketiga adalah "anon" atau "buka"
+    let isAnonim = true; // default anonim
+    let pesan = "";
+    if (thirdPart === "anon" || thirdPart === "anonim" || thirdPart === "a") {
+      isAnonim = true;
+      pesan = rest.join("|");
+    } else if (thirdPart === "buka" || thirdPart === "terbuka" || thirdPart === "t" || thirdPart === "publik") {
+      isAnonim = false;
+      pesan = rest.join("|");
+    } else {
+      // Backward compat: tidak ada tipe, anggap sisanya adalah pesan
+      isAnonim = true;
+      pesan = [thirdPart, ...rest].join("|");
+    }
+
+    if (!number || !MODES[mode] || !pesan) return m.reply(`❌ Mode tidak valid atau pesan kosong!\n\nMode: ${Object.keys(MODES).join(", ")}\nTipe: anon, buka`);
 
     const targetJid = number + "@s.whatsapp.net";
 
@@ -385,7 +447,12 @@ async function handler(m, { sock, db: dbArg, groupMetadata, config: botConfig })
 
     // Buat confes
     const confesId = nextId();
-    const confesMsg = buildConfesMessage(mode, pesan, targetName, confesId);
+    // Dapatkan info pengirim
+    const senderNumber = sender.split("@")[0];
+    let senderName = "";
+    try { senderName = (await sock.getName(sender)) || m.pushName || senderNumber; } catch { senderName = m.pushName || senderNumber; }
+
+    const confesMsg = buildConfesMessage(mode, pesan, targetName, confesId, isAnonim, senderName, senderNumber);
 
     // Kirim ke target
     try {
@@ -401,6 +468,7 @@ async function handler(m, { sock, db: dbArg, groupMetadata, config: botConfig })
       from: sender,
       mode: mode,
       message: pesan,
+      isAnonim: isAnonim,
       replies: [],
       timestamp: Date.now(),
       read: false,
@@ -412,9 +480,10 @@ async function handler(m, { sock, db: dbArg, groupMetadata, config: botConfig })
     receipt += bracketBox("✅", modeData.label, [
       "◦ Ke: " + number,
       "◦ Mode: " + modeData.emoji + " " + modeData.label,
+      "◦ Tipe: " + (isAnonim ? "Anonim 🕵️" : "Terbuka 👤"),
       "◦ ID: " + confesId,
       "◦ Status: *Terkirim*",
-    ]) + "\n\n" + separator() + "\n" + tipText("Balasan akan masuk ke chat kamu jika dibalas 📬");
+    ]) + "\n\n" + separator() + "\n" + tipText(isAnonim ? "Identitasmu tersembunyi 🕵️" : "Identitasmu diperlihatkan 👤");
 
     return m.reply(receipt);
   }
@@ -458,18 +527,48 @@ async function handler(m, { sock, db: dbArg, groupMetadata, config: botConfig })
       if (!original) return m.reply("❌ Menfes " + menfesId + " tidak ditemukan.");
 
       // Kirim balasan ke grup (anonim)
-      const replyText = buildReplyMessage(replyMsg, menfesId);
+      // Cek tipe balasan: anon atau buka
+      let replyIsAnonim = original.isAnonim !== false;
+      let actualReplyMsg = replyMsg;
+      if (replyMsg.toLowerCase() === "anon" || replyMsg.toLowerCase() === "anonim") {
+        replyIsAnonim = true;
+        actualReplyMsg = parts.slice(3).join(" ");
+      } else if (replyMsg.toLowerCase() === "buka" || replyMsg.toLowerCase() === "terbuka") {
+        replyIsAnonim = false;
+        actualReplyMsg = parts.slice(3).join(" ");
+      }
+      if (!actualReplyMsg) return m.reply(`❌ Pesan tidak boleh kosong!\n\nContoh: .menfes balas ${menfesId} Iya aku mau!`);
+
+      const senderNumber = sender.split("@")[0];
+      let senderName = "";
+      try { senderName = (await sock.getName(sender)) || m.pushName || senderNumber; } catch { senderName = m.pushName || senderNumber; }
+
+      const replyText = buildReplyMessage(actualReplyMsg, menfesId, replyIsAnonim, senderName, senderNumber);
       await m.reply(replyText);
 
       // Simpan reply
       original.replies = original.replies || [];
-      original.replies.push({ from: sender, message: replyMsg, timestamp: Date.now() });
+      original.replies.push({ from: sender, message: actualReplyMsg, isAnonim: replyIsAnonim, timestamp: Date.now() });
 
       return;
     }
 
     // ---- KIRIM MENFES ----
-    if (!args) return m.reply(`❌ Format: .menfes <pesan>\n\nContoh: .menfes Ada yang mau kenalan sama admin grup?`);
+    // Format: .menfes <anon|buka> <pesan>  atau  .menfes <pesan> (default: anon)
+    if (!args) return m.reply(`❌ Format:\n.menfes anon <pesan> — Anonim\n.menfes buka <pesan> — Terbuka\n.menfes <pesan> — Default (anonim)\n\nContoh: .menfes buka Ada yang mau kenalan?`);
+
+    let menfesIsAnonim = true;
+    let menfesPesan = args;
+    const menfesSub = args.toLowerCase().split(" ")[0];
+    if (menfesSub === "anon" || menfesSub === "anonim") {
+      menfesIsAnonim = true;
+      menfesPesan = args.split(" ").slice(1).join(" ");
+    } else if (menfesSub === "buka" || menfesSub === "terbuka" || menfesSub === "publik") {
+      menfesIsAnonim = false;
+      menfesPesan = args.split(" ").slice(1).join(" ");
+    }
+
+    if (!menfesPesan) return m.reply(`❌ Pesan tidak boleh kosong!\n\nContoh: .menfes buka Halo semua!`);
 
     const menfesId = nextId();
     let groupName = "";
@@ -478,7 +577,11 @@ async function handler(m, { sock, db: dbArg, groupMetadata, config: botConfig })
       groupName = meta?.subject || "";
     } catch { /* ignore */ }
 
-    const menfesMsg = buildMenfesMessage(args, menfesId, groupName);
+    const senderNumber = sender.split("@")[0];
+    let senderName = "";
+    try { senderName = (await sock.getName(sender)) || m.pushName || senderNumber; } catch { senderName = m.pushName || senderNumber; }
+
+    const menfesMsg = buildMenfesMessage(menfesPesan, menfesId, groupName, menfesIsAnonim, senderName, senderNumber);
 
     // Kirim ke grup
     await m.reply(menfesMsg);
@@ -488,7 +591,8 @@ async function handler(m, { sock, db: dbArg, groupMetadata, config: botConfig })
     list.push({
       id: menfesId,
       from: sender,
-      message: args,
+      message: menfesPesan,
+      isAnonim: menfesIsAnonim,
       replies: [],
       timestamp: Date.now(),
     });

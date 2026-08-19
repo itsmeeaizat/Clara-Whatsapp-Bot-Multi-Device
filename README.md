@@ -634,19 +634,11 @@ Silakan laporkan lewat *issue* di repositori ini.
 
 ---
 
-<div align="center">
-
 **Dibuat dengan oleh [Aizat](https://github.com/itsmeeaizat)**
 
 Kalau Clara membantu, beri ⭐ di repositori ini — itu sudah lebih dari cukup.
 
 **Gratis untuk semua. Selamanya.**
-
-## Credits
-
-* **Developer:** Aizat
-* **Website:** [Aizat](itsmee_aizat.oneapp.dev)
-* **Thanks to:** All contributors, AI Agent & API providers
 
 ---
 
@@ -658,13 +650,16 @@ Proyek ini memakai library WhatsApp **tidak resmi** ([Baileys](https://github.co
 
 - Gunakan dengan bijak dan pahami **risiko pemblokiran nomor** oleh WhatsApp,
   terutama untuk bot publik dengan volume tinggi
-- Disarankan memakai **nomor cadangan**, bukan nomor utama
+- Disarankan memakai **nomor kedua atau cadangan**, bukan nomor utama
 - Perangkat lunak disediakan **apa adanya, tanpa jaminan apa pun**
 - Penulis **tidak bertanggung jawab** atas kerugian akibat penggunaan bot ini
 - Dependensi pihak ketiga memiliki lisensinya masing-masing.
+
 ---
 
-<div align="center">
-  <b>Rara Multi Device v3.3</b>
-  <p>Developer by Aizat</p>
-</div>
+
+## Credits
+
+* **Developer:** Aizat
+* **Website:** [Aizat](itsmee_aizat.oneapp.dev)
+* **Thanks to:** All contributors, AI Agent & API providers

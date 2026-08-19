@@ -233,7 +233,7 @@ function buildHeaderModern(m, botConfig, uptime, db) {
     year: "numeric",
   });
 
-  let txt = alyaHeader("Menu Utama") + "\n\n";
+  let txt = alyaHeader("Menu Utama", "🤖") + "\n\n";
   txt += userInfoBlock(m.pushName, m.sender, "active", m.isOwner ? "owner" : "user");
   txt += "\n\n";
 
@@ -244,10 +244,11 @@ function buildHeaderModern(m, botConfig, uptime, db) {
         ["Level", user.level ?? 1],
         ["Exp", user.exp ?? 0],
         ["Koin", user.koin ?? 0],
-        ["Energi", user.energi === -1 ? "Unlimited" : (user.energi ?? 0)],
-        ["Status", user.isPremium ? "Premium" : "Reguler"],
+        ["Energi", user.energi === -1 ? "∞" : (user.energi ?? 0)],
+        ["Status", user.isPremium ? "💎 Premium" : "Reguler"],
       ],
-      "Statistik Kamu",
+      "sᴛᴀᴛɪsᴛɪᴋ ᴋᴀᴍᴜ",
+      "🌸",
     );
     txt += "\n\n";
   }
@@ -260,12 +261,13 @@ function buildHeaderModern(m, botConfig, uptime, db) {
       ["Total Command", getPluginCount()],
       ["Uptime", formatUptime(uptimeMs(uptime))],
       ["RAM", formatRAM()],
-      ["Platform", os.type() + " · Node " + process.version],
-      ["Prefix", "[ " + prefix + " ]"],
+      ["Platform", `${os.type()} · Node ${process.version}`],
+      ["Prefix", `[ ${prefix} ]`],
       ["Tanggal", dateStr],
       ["Waktu", timeStr],
     ],
-    "Server",
+    "sᴇʀᴠᴇʀ",
+    "📊",
   );
   return txt;
 }
@@ -279,9 +281,12 @@ function buildKategoriModern(m, prefix, hanyaKategori = null) {
     if (hanyaKategori && cat !== hanyaKategori) continue;
     const cmds = commandsByCategory[cat] || [];
     if (!cmds.length) continue;
-    const label = labelKategori(cat);
-    const cmdList = cmds.map((c) => prefix + c).join(" · ");
-    txt += "*" + label + "*\n" + cmdList + "\n\n";
+    txt +=
+      alyaCategoryRow(
+        CATEGORY_EMOJIS[cat] || "📁",
+        cat,
+        cmds.map((c) => `${prefix}${c}`).join(" | "),
+      ) + "\n\n";
   }
   return txt.trimEnd();
 }
@@ -295,10 +300,12 @@ function buildMenuModern(m, botConfig, uptime, db, opsi = {}) {
   const header = buildHeaderModern(m, botConfig, uptime, db);
   const kategori = buildKategoriModern(m, prefix, hanyaKategori);
   return (
-    header + "\n\n" + kategori + "\n\n" +
-    separator() + "\n" +
-    tipText("Ketik " + prefix + "menucat <kategori> untuk detail") + "\n" +
-    tipText("Ketik " + prefix + "modemenu untuk ganti gaya tampilan")
+    `${header}\n\n${kategori}\n\n` +
+    separator() +
+    "\n" +
+    tipText(`Ketik ${prefix}menucat <kategori> untuk detail`) +
+    "\n" +
+    tipText(`Ketik ${prefix}modemenu untuk ganti gaya tampilan`)
   );
 }
 

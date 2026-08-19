@@ -114,7 +114,7 @@ function tipText(text) {
 // Clean row — no emoji unless provided
 
 function alyaCategoryRow(emoji, name, description) {
-  const e = emoji && emoji !== "📁" ? `${emoji} ` : "";
+  const e = emoji ? `${emoji} ` : "";
   return `*${toSmallCaps(name)}* — ${e}${description}`;
 }
 

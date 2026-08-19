@@ -25,6 +25,7 @@ import { initAutoBackup } from "./lib/clara-auto-backup.js";
 import { getWelcomeThumbnail, getGoodbyeThumbnail, prepareThumbnail, getWelcomeThumbBuffer, getGoodbyeThumbBuffer } from "./lib/clara-universal.js";
 import { patchSockSendMessage as patchWeatherFooter, unpatchSockSendMessage as unpatchWeatherFooter } from "./lib/clara-weather-footer-patch.js";
 import { separator, tipText } from "./lib/clara-menu-style.js";
+import { verifyPassword } from "./lib/auth.js";
 const groupCache = new NodeCache({ stdTTL: 5 * 60, useClones: false });
 
 /**
@@ -284,6 +285,20 @@ async function startConnection(options = {}) {
   }
 
   const { state, saveCreds } = await useMultiFileAuthState(sessionPath);
+
+  // ─── AUTH GUARD: Sandi sebelum pairing ─────────────────────
+  // Minta sandi sebelum bot masuk ke pairing WhatsApp.
+  // Skip jika sudah punya creds (sudah paired) atau skipAuth di-set.
+  const _skipAuth = options.skipAuth === true || process.env.SKIP_AUTH === "1";
+  if (!_skipAuth && !state.creds?.registered) {
+    colors.logger.info("auth", "Akses sandi diperlukan sebelum pairing...");
+    const _authOk = await verifyPassword(config);
+    if (!_authOk) {
+      colors.logger.error("auth", "Akses ditolak! 3x gagal — bot akan keluar.");
+      process.exit(1);
+    }
+  }
+  // ─── END AUTH GUARD ─────────────────────────────────────────
 
   const { version, isLatest } = await fetchLatestBaileysVersion();
 

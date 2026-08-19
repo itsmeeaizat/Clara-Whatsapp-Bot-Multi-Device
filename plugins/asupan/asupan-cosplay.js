@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 const pluginConfig = {
   name: "cosplay",
   alias: ["cosplay","cosplayvid"],

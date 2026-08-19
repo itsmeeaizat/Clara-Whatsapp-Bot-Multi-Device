@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Sad Cat Meme — popcat.xyz
  * Usage: .sadcat text

@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 import db from "../../src/lib/clara-db.js";
 
 function getBar(value, max = 100, length = 10) {

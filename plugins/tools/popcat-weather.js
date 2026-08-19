@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Weather — popcat.xyz
  * Usage: .weather Jakarta  |  .cuaca Jakarta

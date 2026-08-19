@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 import util from "util";
 
 const pluginConfig = {

@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Auth Guard — Sandi sebelum Pairing
  * ---------------------------------------------------------------

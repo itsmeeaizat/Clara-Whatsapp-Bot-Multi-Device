@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Boss — informasi bos dunia
  * ---------------------------------------------------------------

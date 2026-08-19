@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 import { getWeatherFooter, clearWeatherCache } from "./clara-weather-footer.js";
 
 const PATCH_KEY = "clara.weatherFooterPatched";

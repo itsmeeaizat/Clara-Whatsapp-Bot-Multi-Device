@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 import nodemailer from "nodemailer";
 import config from "../../config.js";
 import { getDatabase } from "./clara-database.js";
@@ -132,7 +133,7 @@ export async function sendOtp(sender, email) {
   const expiresAt = now + (config.emailOtp?.ttlMs || DEFAULT_TTL_MS);
   const maxAttempts = config.emailOtp?.maxAttempts || DEFAULT_MAX_ATTEMPTS;
 
-  const fromName = config.emailOtp?.fromName || config.bot?.name || "Clara Bot";
+  const fromName = config.emailOtp?.fromName || config.bot?.name || "Aizat";
   const subject = `${fromName} — Kode Verifikasi (OTP)`;
 
   const html = `

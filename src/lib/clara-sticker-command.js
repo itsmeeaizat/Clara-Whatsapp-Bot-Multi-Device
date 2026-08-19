@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * @file src/lib/stickerCommand.js
  * @description Global sticker-to-command mapping system

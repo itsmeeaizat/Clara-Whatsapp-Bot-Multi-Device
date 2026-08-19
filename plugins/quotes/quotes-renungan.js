@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Quotes Renungan
  * Random kata-kata renungan kehidupan.

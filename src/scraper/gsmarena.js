@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 import gsmarena from "gsmarena-api";
 
 async function search(query) {

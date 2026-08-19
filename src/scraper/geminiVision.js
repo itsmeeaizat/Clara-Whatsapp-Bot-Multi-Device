@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 import gemini from "./gemini.js";
 
 function buildMessage({ message, history = [], imageBuffer = null }) {

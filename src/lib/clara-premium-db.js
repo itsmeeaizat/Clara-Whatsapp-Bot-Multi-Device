@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 import fs from 'fs'
 import path from 'path'
 const DB_PATH = path.join(process.cwd(), 'src', 'database')

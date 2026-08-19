@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Raid — melawan bos bersama satu grup
  * ---------------------------------------------------------------

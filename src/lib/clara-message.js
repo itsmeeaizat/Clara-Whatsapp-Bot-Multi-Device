@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 import { generateWAMessageFromContent, proto } from "ourin";
 import fs from "fs";
 import path from "path";

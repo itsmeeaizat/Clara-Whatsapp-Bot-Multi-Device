@@ -1,7 +1,8 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Info Gempa (BMKG)
  * ---------------------------------------------------------------
- * Recode dari internet-gempa.js (Clara Aizat/Clara-MD).
+ * Recode dari internet-gempa.js (Aizat/Aizat).
  * Menampilkan info gempa terkini dari BMKG.
  */
 

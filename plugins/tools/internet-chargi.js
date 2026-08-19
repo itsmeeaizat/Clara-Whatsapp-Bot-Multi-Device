@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Phone Charger Search & Info
  * Cari charger HP, daya pengisian (Watt), tipe port, dan rekomendasi.

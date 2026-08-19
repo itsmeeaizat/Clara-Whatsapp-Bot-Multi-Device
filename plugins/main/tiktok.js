@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 import ttdown from "../../src/scraper/tiktok.js";
 import {
   alyaHeader,

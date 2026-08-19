@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Jadwal TV - TV Schedule
  * Fetch dari https://api.jol.network/jadwal-tv atau fallback static schedule.

@@ -1,7 +1,8 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Ayat Kursi
  * ---------------------------------------------------------------
- * Recode dari islamic-ayatkursi.js (Clara Aizat/Clara-MD).
+ * Recode dari islamic-ayatkursi.js (Aizat/Aizat).
  * Menampilkan Ayat Kursi dengan teks Arab, latin, dan terjemahan.
  */
 

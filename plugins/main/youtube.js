@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 import ssyoutube from "../../src/scraper/youtube.js";
 import {
   alyaHeader,

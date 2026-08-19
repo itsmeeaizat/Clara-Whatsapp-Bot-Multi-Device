@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * VN — Voice Notes Collection
  * Kirim voice note lucu / react.

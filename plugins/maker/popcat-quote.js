@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Quote Image — popcat.xyz
  * Membuat gambar quote dengan foto profil & teks.

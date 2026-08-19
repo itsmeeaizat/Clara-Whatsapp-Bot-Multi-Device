@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 function cekfemboy(nama) {
     try {
         if (!nama) throw new Error('Masukkan nama dulu dong!');

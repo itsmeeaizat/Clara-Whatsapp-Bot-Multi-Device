@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 const pluginConfig = {
   name: "hackerquote",
   alias: ["hacker", "heker", "hekel"],

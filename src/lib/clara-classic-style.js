@@ -1,7 +1,8 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Clara Classic Style — Enhanced
  * ---------------------------------------------------------------
- * Tampilan menu bergaya Clara-MD orisinal (Clara Aizat, 2023) yang sudah
+ * Tampilan menu bergaya Aizat orisinal (Aizat, 2023) yang sudah
  * tidak dikembangkan lagi. Repo ini melanjutkannya.
  *
  * Versi enhanced: tetap pakai ╔┈┈「 」 tapi dengan:

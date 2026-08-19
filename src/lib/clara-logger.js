@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 import chalk from "chalk";
 import * as timeHelper from "./clara-time.js";
 import { getCachedJid, isLidConverted } from "./clara-lid.js";

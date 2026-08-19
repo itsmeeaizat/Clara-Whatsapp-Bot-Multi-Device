@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 import { callAI, DEFAULT_PROVIDERS } from "./clara-ai-service.js";
 
 /**

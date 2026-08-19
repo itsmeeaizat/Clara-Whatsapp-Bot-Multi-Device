@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Anti Virtex — Deteksi & blokir pesan berbahaya (virus WhatsApp)
  * Deteksi: pesan terlalu panjang, karakter aneh, sticker jahat

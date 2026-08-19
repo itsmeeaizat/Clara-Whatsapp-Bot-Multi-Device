@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 import { logger } from './clara-logger.js'
 const INACTIVE_THRESHOLD = 14 * 24 * 60 * 60 * 1000
 const PRUNE_INTERVAL = 6 * 60 * 60 * 1000

@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Guild — sistem guild/komunitas RPG
  * ---------------------------------------------------------------

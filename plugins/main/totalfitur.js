@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Info — Total Fitur
  * Hitung total command/fitur yang tersedia di bot.

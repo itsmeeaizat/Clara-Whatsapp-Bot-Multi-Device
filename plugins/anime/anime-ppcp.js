@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * PP Couple Anime Plugin
  * Kirim 2 foto PP Couple Anime (Male & Female).
@@ -50,7 +51,7 @@ async function handler(m, { sock }) {
 
     try {
       const res = await fetch("https://api.jikan.moe/v4/characters?q=anime&limit=2", {
-        headers: { "User-Agent": "Clara-MD" },
+        headers: { "User-Agent": "Aizat" },
         signal: AbortSignal.timeout(6000),
       });
       if (res.ok) {

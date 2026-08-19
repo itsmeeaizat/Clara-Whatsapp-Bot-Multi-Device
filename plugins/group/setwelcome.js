@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Group — Set Welcome & Set Bye
  * Atur custom welcome/goodbye message untuk grup.

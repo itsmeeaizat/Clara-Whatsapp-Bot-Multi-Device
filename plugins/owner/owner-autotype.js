@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Auto Type — Otomatis show typing indicator
  * .autotype on/off — Toggle

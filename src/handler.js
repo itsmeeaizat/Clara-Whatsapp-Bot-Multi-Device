@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 import { getDatabase } from "./lib/clara-database.js";
 import { getPlugin } from "./lib/clara-plugins.js";
 import {
@@ -7,7 +8,7 @@ import {
 } from "./lib/clara-channel-notify.js";
 
 /* ============================================================
-   Clara Bot Handler
+   Aizat Handler
    - Plugin routing
    - Registration / database
    - Channel notifications

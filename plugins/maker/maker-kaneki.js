@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Kaneki Ken (Tokyo Ghoul) Mask Effect
  * Apply a Kaneki mask and Ghoul Kakugan eye effect on avatar.

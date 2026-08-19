@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Anti Tag — Deteksi & blokir tag berlebihan (spam tag)
  * .antitag on/off — Toggle (admin grup)

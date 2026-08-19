@@ -1,4 +1,4 @@
-/***
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
   @ Base: https://chatgpt.com/
   @ Author: Shannz
   @ Note: Access chatgpt without login, support continuing chat, streaming, web search, and uploading images.

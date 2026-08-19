@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Age Card Generator
  * Generate an "Age Card" showing avatar, name, and a random age (1-99) with funny commentary.

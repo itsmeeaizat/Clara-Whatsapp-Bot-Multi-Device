@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Toko RPG — beli senjata, armor, dan bahan
  * ---------------------------------------------------------------

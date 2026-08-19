@@ -1,10 +1,11 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Clara Menu Mode
  * ---------------------------------------------------------------
  * Bot ini menyediakan DUA gaya tampilan menu:
  *
  *   1. "modern"  — gaya khas repo ini: ✧ header, ╭─ bracketBox, small caps
- *   2. "klasik"  — meniru Clara-MD orisinal (Clara Aizat): ╔┈┈「 」 dan ╎❏ / ╎ぎ
+ *   2. "klasik"  — meniru Aizat orisinal (Aizat): ╔┈┈「 」 dan ╎❏ / ╎ぎ
  *
  * Mode tersimpan di settings database sehingga bertahan setelah restart,
  * dan bisa diubah kapan saja lewat command .modemenu.

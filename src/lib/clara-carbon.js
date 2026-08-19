@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 let _canvas = null;
 async function _getCanvas() {
   if (!_canvas) _canvas = await import("@napi-rs/canvas");

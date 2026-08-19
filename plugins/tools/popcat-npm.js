@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * NPM Package Info — popcat.xyz
  * Usage: .npm baileys

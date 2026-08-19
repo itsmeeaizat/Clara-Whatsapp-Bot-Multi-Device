@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Style Text — qaz.wtf
  * Konversi teks ke berbagai style unicode.

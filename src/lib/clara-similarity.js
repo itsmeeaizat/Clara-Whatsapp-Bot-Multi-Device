@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 async function levenshteinDistance(str1, str2) {
     const m = str1.length
     const n = str2.length

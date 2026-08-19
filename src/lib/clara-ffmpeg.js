@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 import { cpus } from 'os'
 import { exec } from 'child_process'
 import { logger } from './clara-logger.js'

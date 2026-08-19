@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Channel notification utilities
  * Send registration/new-user events to the configured WhatsApp channel/newsletter

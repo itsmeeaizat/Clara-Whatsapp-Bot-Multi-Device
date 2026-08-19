@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * clara-loker-scheduler.js
  * Scheduler loker otomatis dan helper fetch loker.

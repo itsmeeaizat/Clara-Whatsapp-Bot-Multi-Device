@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * LOLI GGO Card Generator
  * Generate a "LOLI GGO" style card with avatar and cute styling.

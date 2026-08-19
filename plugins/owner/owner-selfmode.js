@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Self Mode — Bot hanya merespon owner, abaikan orang lain
  * .selfmode on/off — Toggle

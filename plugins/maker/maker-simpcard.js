@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Simp Card Generator
  * Buat "Simp Card" ID dengan avatar.

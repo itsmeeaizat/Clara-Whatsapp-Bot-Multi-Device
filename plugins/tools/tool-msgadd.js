@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Tool Add Stored Message
  * Usage: .msgadd <key> <value>

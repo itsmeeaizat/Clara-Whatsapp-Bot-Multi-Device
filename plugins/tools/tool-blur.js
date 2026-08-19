@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Tool Blur Image
  * Blur image using @napi-rs/canvas. Reply to image.

@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 import { getDatabase } from '../../src/lib/clara-database.js'
 const DEFAULT_JEDA = 5 * 60 * 1000
 

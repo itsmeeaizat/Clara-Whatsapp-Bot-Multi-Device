@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 const THEME = {
   botName: "Clara-AI",
   ownerName: "Owner",

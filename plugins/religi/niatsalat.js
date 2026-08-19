@@ -1,7 +1,8 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Niat Sholat
  * ---------------------------------------------------------------
- * Recode dari islamic-niatsholat.js (Clara Aizat/Clara-MD).
+ * Recode dari islamic-niatsholat.js (Aizat/Aizat).
  * Menampilkan niat sholat 5 waktu dengan teks Arab, latin, dan terjemahan.
  */
 

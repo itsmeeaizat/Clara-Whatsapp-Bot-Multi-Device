@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Confes & Menfes — Modern Anonymous Messaging System
  * ---------------------------------------------------------------

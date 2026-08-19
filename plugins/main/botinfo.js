@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Info — Bot Stats
  * Tampilkan info bot (runtime, memory, total fitur).
@@ -62,7 +63,7 @@ async function handler(m, { sock }) {
 
     let txt = `📊 *Bot Info*\n`;
     txt += `━━━━━━━━━━━━━━━━━\n`;
-    txt += `🤖 *Bot:* Clara-MD Modular\n`;
+    txt += `🤖 *Bot:* Aizat Modular\n`;
     txt += `⏱️ *Runtime:* ${uptime}\n`;
     txt += `💾 *Memory:* ${formatBytes(usedMem)} / ${formatBytes(totalMem)}\n`;
     txt += `🖥️ *CPU:* ${cpuModel.slice(0, 40)} (${cpuCount} cores)\n`;

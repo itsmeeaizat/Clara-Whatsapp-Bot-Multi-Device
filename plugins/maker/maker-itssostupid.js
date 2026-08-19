@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * It's So Stupid Meme Generator
  * Buat meme "It's so stupid" dengan avatar dan teks.

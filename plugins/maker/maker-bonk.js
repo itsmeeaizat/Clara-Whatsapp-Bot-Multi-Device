@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Sticker — Bonk
  * Overlay "BONK" text on a quoted image/sticker.

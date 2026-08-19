@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Anti Spam Chat — Deteksi & blokir spam di private chat (bukan grup)
  * .antispamchat on/off — Toggle (owner only, setting global)

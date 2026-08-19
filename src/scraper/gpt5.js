@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 import crypto from "node:crypto";
 
 const API = "https://api.overchat.ai/v1/chat/completions";

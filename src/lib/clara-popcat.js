@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 const POPCAT_BASE = "https://api.popcat.xyz";
 
 function buildUrl(endpoint, params = {}) {

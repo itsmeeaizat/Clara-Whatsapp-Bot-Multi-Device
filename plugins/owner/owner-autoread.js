@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Auto Read — Otomatis read semua pesan masuk
  * .autoread on/off — Toggle

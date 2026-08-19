@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 import { Agent, setGlobalDispatcher } from 'undici'
 import { cpus } from 'os'
 const cpuCount = cpus().length

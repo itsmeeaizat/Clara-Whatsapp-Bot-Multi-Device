@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Anti Phishing — Deteksi & blokir link phishing/scam berbahaya
  * .antiphishing on/off — Toggle (admin grup)

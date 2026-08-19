@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Sad Neko Card Generator
  * Generate a "Sad Neko" card with avatar, dark blue/grey theme, tear drops, and sad cat styling.

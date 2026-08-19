@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 import axios from 'axios'
 import config from '../../config.js'
 const BASE_URL = 'https://api.jasaotp.id/v1'

@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Fetch URL Content
  * Mengambil isi konten dari URL/API endpoint.

@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Sticker — Quote (Quote as sticker)
  * Buat sticker dari quote teks dengan background.

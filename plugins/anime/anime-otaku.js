@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Otaku Search Plugin
  * Cari top 5 hasil anime dari Jikan API v4.
@@ -29,7 +30,7 @@ async function handler(m) {
   try {
     const url = `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(query)}&limit=5`;
     const res = await fetch(url, {
-      headers: { "User-Agent": "Clara-MD" },
+      headers: { "User-Agent": "Aizat" },
       signal: AbortSignal.timeout(10000),
     });
 

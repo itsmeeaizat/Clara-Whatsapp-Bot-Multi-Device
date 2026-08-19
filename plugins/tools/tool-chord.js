@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Chord Gitar — Search guitar chords
  * Fetch dari https://api.lolhuman.xyz/api/chord?apikey=demo&query=QUERY

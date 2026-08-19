@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Clara Canvas Helper
  * Utility functions for canvas-based maker plugins.

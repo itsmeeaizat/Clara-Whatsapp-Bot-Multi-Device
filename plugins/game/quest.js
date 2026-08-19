@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Quest Harian — misi harian dengan hadiah
  * ---------------------------------------------------------------

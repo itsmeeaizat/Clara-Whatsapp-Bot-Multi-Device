@@ -1,7 +1,8 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * IQ Test (Fun Game)
  * ---------------------------------------------------------------
- * Recode dari game-iqtest.js (Clara Aizat/Clara-MD).
+ * Recode dari game-iqtest.js (Aizat/Aizat).
  * Memberikan nilai IQ random untuk hiburan.
  */
 

@@ -1,10 +1,11 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Clara Menu Builder — Enhanced
  * ---------------------------------------------------------------
  * Penyusun teks menu untuk DUA gaya tampilan:
  *
  *   buildMenuModern()  — gaya repo ini (✧ header, ╭─ box, small caps)
- *   buildMenuKlasik()  — gaya Clara-MD orisinal + sentuhan enhanced
+ *   buildMenuKlasik()  — gaya Aizat orisinal + sentuhan enhanced
  *                        (emoji per section, greeting, footer)
  *
  * Dipisah dari plugin supaya .menu dan .allmenu bisa memakai keduanya
@@ -115,7 +116,7 @@ function totalPengguna(db) {
 }
 
 /* ================================================================== */
-/* GAYA KLASIK — Clara-MD orisinal + enhanced                           */
+/* GAYA KLASIK — Aizat orisinal + enhanced                           */
 /* ================================================================== */
 
 function buildHeaderKlasik(m, botConfig, uptime, db) {

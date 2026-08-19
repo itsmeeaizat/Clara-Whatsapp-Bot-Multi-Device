@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Neko Girl Card Generator
  * Generate a "Neko Girl" card with cat ears overlay on avatar and pastel background.

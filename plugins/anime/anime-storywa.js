@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Story WA Anime Plugin
  * Menampilkan quote anime acak yang diformat untuk Status WhatsApp.

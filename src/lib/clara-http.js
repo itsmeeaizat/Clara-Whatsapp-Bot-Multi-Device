@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 import { request } from 'undici'
 const REQUEST_TIMEOUT = 60_000
 

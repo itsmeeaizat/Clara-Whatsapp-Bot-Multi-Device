@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 import axios from "axios";
 import { getDatabase } from "./clara-database.js";
 import { saluranCtx } from "./clara-context.js";

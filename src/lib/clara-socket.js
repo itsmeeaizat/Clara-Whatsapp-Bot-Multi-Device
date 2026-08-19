@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 import axios from "axios";
 let _sharp = null;
 async function getSharp() {

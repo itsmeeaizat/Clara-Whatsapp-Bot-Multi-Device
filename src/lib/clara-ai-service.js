@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Multi-Provider AI Service
  * Supports: OpenAI, Google Gemini, Anthropic Claude,

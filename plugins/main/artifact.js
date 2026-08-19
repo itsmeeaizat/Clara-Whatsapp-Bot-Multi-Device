@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Artifact — barang langka yang dimiliki
  * ---------------------------------------------------------------

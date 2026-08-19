@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Sticker — Meme (WM overlay)
  * Tambahkan watermark teks pada sticker.

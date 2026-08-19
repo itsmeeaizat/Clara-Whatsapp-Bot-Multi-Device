@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Anti Bot WA — Deteksi & kick bot WhatsApp lain di grup ini
  * .antibot on/off — Toggle (admin grup)

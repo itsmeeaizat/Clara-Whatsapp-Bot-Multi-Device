@@ -1,4 +1,4 @@
-// ============================================================
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 // CLARA STYLE SYSTEM — CLEAN EDITION
 // Gaya minimal, rapi, mudah di-maintain
 // ============================================================

@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Encode Text — popcat.xyz
  * Usage: .encode <type> <text>

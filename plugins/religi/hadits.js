@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Hadits
  * ---------------------------------------------------------------
@@ -58,7 +59,7 @@ const ARBAIN_MAKS = 42;
 async function ambilJson(url) {
   const res = await fetch(url, {
     signal: AbortSignal.timeout(WAKTU_HABIS),
-    headers: { "User-Agent": "Clara-MD-Bot" },
+    headers: { "User-Agent": "Aizat-Bot" },
   });
   if (!res.ok) throw new Error(`Server hadits menolak (HTTP ${res.status})`);
   const json = await res.json();

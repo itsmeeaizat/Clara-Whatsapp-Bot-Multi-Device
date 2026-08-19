@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * YouTube Comment Generator
  * Buat fake YouTube comment dengan avatar.

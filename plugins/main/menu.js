@@ -1,9 +1,10 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Menu Utama — dua mode tampilan
  * ---------------------------------------------------------------
  * Bot ini punya dua gaya menu yang bisa dipilih lewat .modemenu:
  *
- *   klasik (default) — meniru Clara-MD orisinal (Clara Aizat) yang sudah
+ *   klasik (default) — meniru Aizat orisinal (Aizat) yang sudah
  *                      berhenti dikembangkan; repo ini penerusnya
  *                      dipercantik dengan emoji section, greeting, footer
  *   modern           — gaya khas repo ini: ✧ header, ╭─ box, small caps
@@ -21,10 +22,10 @@ import {
 } from "../../src/lib/clara-plugins.js";
 import fs from "fs";
 
-// Thumbnail default (sama dengan Clara-MD aslinya)
+// Thumbnail default (sama dengan Aizat aslinya)
 const DEFAULT_THUMBNAIL = "https://telegra.ph/file/c5170017e92f837e28d5f.jpg";
 
-// Audio PTT untuk menu (dari Clara-MD aslinya)
+// Audio PTT untuk menu (dari Aizat aslinya)
 const MENU_AUDIO = [
   "https://bucin-livid.vercel.app/audio/yowaimo.mp3",
   "https://bucin-livid.vercel.app/audio/summer.mp3",
@@ -107,7 +108,7 @@ async function handler(m, { sock, config: botConfig, db, uptime }) {
       { title: `${namaBot} | DAFTAR KATEGORI`, rows: categoryRows },
     ];
 
-    // Quoted message: contact message seperti Clara-MD aslinya
+    // Quoted message: contact message seperti Aizat aslinya
     const quoted = {
       key: {
         participant: "0@s.whatsapp.net",
@@ -145,7 +146,7 @@ async function handler(m, { sock, config: botConfig, db, uptime }) {
                 mentionedJid: mentions,
                 externalAdReply: {
                   title: namaBot,
-                  body: botConfig.bot?.author || "Clara Bot",
+                  body: botConfig.bot?.author || "Aizat",
                   thumbnailUrl: thumbnailUrl,
                   sourceUrl: botConfig.bot?.website || "https://wa.me",
                   mediaType: 1,
@@ -200,7 +201,7 @@ async function handler(m, { sock, config: botConfig, db, uptime }) {
       { quoted },
     );
 
-    // --- Kirim audio PTT (seperti Clara-MD aslinya) ---
+    // --- Kirim audio PTT (seperti Aizat aslinya) ---
     try {
       const audioUrl = pickRandom(MENU_AUDIO);
       await sock.sendMessage(
@@ -226,7 +227,7 @@ async function handler(m, { sock, config: botConfig, db, uptime }) {
             mentionedJid: mentions,
             externalAdReply: {
               title: namaBot,
-              body: botConfig.bot?.author || "Clara Bot",
+              body: botConfig.bot?.author || "Aizat",
               thumbnailUrl: thumbnailUrl,
               sourceUrl: botConfig.bot?.website || "https://wa.me",
               mediaType: 1,

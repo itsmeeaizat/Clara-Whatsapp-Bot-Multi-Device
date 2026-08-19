@@ -1,7 +1,8 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * AI Cartoon — Photo to Cartoon
  * ---------------------------------------------------------------
- * Recode bersih dari plugin ai-cartoon.js (Clara Aizat/Clara-MD) yang
+ * Recode bersih dari plugin ai-cartoon.js (Aizat/Aizat) yang
  * di-obfuscate. Menggunakan API imglarger.com/PhoAi.
  *
  * Fitur:

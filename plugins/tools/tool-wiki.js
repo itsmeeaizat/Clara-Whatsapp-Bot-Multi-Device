@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Wikipedia (Indonesian)
  * Search Wikipedia bahasa Indonesia.

@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Credits & Thanks to
  * Developer = Lucky Archz ( Zann )

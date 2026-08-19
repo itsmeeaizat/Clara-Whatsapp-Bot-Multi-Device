@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * GitHub Search
  * Cari repository di GitHub.
@@ -27,7 +28,7 @@ async function handler(m) {
   try {
     const url = `https://api.github.com/search/repositories?q=${encodeURIComponent(query)}&sort=stars&per_page=5`;
     const res = await fetch(url, {
-      headers: { "Accept": "application/vnd.github.v3+json", "User-Agent": "Clara-MD" },
+      headers: { "Accept": "application/vnd.github.v3+json", "User-Agent": "Aizat" },
       signal: AbortSignal.timeout(10000),
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);

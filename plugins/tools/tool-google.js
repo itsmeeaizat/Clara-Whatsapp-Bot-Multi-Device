@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 /**
  * Google Search
  * Search Google dan return top results.
@@ -51,7 +52,7 @@ async function handler(m) {
       const link = decodeURIComponent(linkMatches[i]?.[1] || "");
       txt += `\n${i + 1}. *${title}*\n   ${link}\n`;
     }
-    txt += `\n━━━━━━━━━━━━━━━━━\nGoogle Search by Clara-MD`;
+    txt += `\n━━━━━━━━━━━━━━━━━\nGoogle Search by Aizat`;
 
     await m.reply(txt);
   } catch (err) {

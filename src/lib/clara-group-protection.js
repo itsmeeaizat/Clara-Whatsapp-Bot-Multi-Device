@@ -1,3 +1,4 @@
+// CLARA WHATSAPP MULTIDEVICE, AIZAT, MADE IN INDONESIA
 import { downloadMediaMessage } from "ourin";
 import { isLid, lidToJid, lidToJidSafe } from "./clara-lid.js";
 import config from "../../config.js";

@@ -7,7 +7,7 @@ import {
 
 const pluginConfig = {
   name: "confes",
-  alias: ["confes", "confession", "nembak", "sling", "shoot", "crush", "kenal", "pcr", "nyata"],
+  alias: ["confes", "confession", "sling", "shoot", "crush", "kenal", "pcr", "nyata"],
   category: "fun",
   description: "Confes anonymous ala viral TikTok: nembak, kenalan, ndate, pcr",
   usage: ".confes <nomor>|<mode>|<pesan>",

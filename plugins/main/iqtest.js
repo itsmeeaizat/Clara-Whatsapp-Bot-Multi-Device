@@ -1,7 +1,7 @@
 /**
  * IQ Test (Fun Game)
  * ---------------------------------------------------------------
- * Recode dari game-iqtest.js (Zeltoria/Clara-MD).
+ * Recode dari game-iqtest.js (Clara Aizat/Clara-MD).
  * Memberikan nilai IQ random untuk hiburan.
  */
 

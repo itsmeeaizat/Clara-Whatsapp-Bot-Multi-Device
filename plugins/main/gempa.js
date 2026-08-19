@@ -1,7 +1,7 @@
 /**
  * Info Gempa (BMKG)
  * ---------------------------------------------------------------
- * Recode dari internet-gempa.js (Zeltoria/Clara-MD).
+ * Recode dari internet-gempa.js (Clara Aizat/Clara-MD).
  * Menampilkan info gempa terkini dari BMKG.
  */
 

@@ -1,7 +1,7 @@
 /**
  * AI Cartoon — Photo to Cartoon
  * ---------------------------------------------------------------
- * Recode bersih dari plugin ai-cartoon.js (Zeltoria/Clara-MD) yang
+ * Recode bersih dari plugin ai-cartoon.js (Clara Aizat/Clara-MD) yang
  * di-obfuscate. Menggunakan API imglarger.com/PhoAi.
  *
  * Fitur:

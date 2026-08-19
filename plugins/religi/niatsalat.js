@@ -1,7 +1,7 @@
 /**
  * Niat Sholat
  * ---------------------------------------------------------------
- * Recode dari islamic-niatsholat.js (Zeltoria/Clara-MD).
+ * Recode dari islamic-niatsholat.js (Clara Aizat/Clara-MD).
  * Menampilkan niat sholat 5 waktu dengan teks Arab, latin, dan terjemahan.
  */
 

@@ -1,7 +1,7 @@
 /**
  * AI Remini — Image Enhancer
  * ---------------------------------------------------------------
- * Recode bersih dari plugin ai-remini.js (Zeltoria/Clara-MD) yang
+ * Recode bersih dari plugin ai-remini.js (Clara Aizat/Clara-MD) yang
  * di-obfuscate. Menggunakan API inferenceengine.vyro.ai.
  *
  * Fitur:

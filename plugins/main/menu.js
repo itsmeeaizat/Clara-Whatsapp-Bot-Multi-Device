@@ -3,7 +3,7 @@
  * ---------------------------------------------------------------
  * Bot ini punya dua gaya menu yang bisa dipilih lewat .modemenu:
  *
- *   klasik (default) — meniru Clara-MD orisinal (Zeltoria) yang sudah
+ *   klasik (default) — meniru Clara-MD orisinal (Clara Aizat) yang sudah
  *                      berhenti dikembangkan; repo ini penerusnya
  *                      dipercantik dengan emoji section, greeting, footer
  *   modern           — gaya khas repo ini: ✧ header, ╭─ box, small caps

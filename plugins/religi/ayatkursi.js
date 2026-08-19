@@ -1,7 +1,7 @@
 /**
  * Ayat Kursi
  * ---------------------------------------------------------------
- * Recode dari islamic-ayatkursi.js (Zeltoria/Clara-MD).
+ * Recode dari islamic-ayatkursi.js (Clara Aizat/Clara-MD).
  * Menampilkan Ayat Kursi dengan teks Arab, latin, dan terjemahan.
  */
 

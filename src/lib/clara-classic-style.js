@@ -1,7 +1,7 @@
 /**
  * Clara Classic Style — Enhanced
  * ---------------------------------------------------------------
- * Tampilan menu bergaya Clara-MD orisinal (Zeltoria, 2023) yang sudah
+ * Tampilan menu bergaya Clara-MD orisinal (Clara Aizat, 2023) yang sudah
  * tidak dikembangkan lagi. Repo ini melanjutkannya.
  *
  * Versi enhanced: tetap pakai ╔┈┈「 」 tapi dengan:

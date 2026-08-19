@@ -10,13 +10,13 @@
  * Runtime:
  * - Baileys: @whiskeysockets/baileys (latest)
  *
- * Created by Nixel
- * Contributors: ~ Ahmad tumbuh kembang
+ * Created by Aizat
+ * Contributors: ~ Aizat
  *
  * WhatsApp: wa.me/6285188349341
  * Channel: https://whatsapp.com/channel/0029VbCV1ck8fewpdNb2TY2k
  *
- * Copyright (c) 2026 Nixel
+ * Copyright (c) 2026 Aizat
  *
  * Permission is granted to use and modify this library
  * for personal or commercial projects.
@@ -1354,7 +1354,7 @@ class AIRich extends BaseBuilder {
 
         this._submessages.push({
             messageType: 2,
-            messageText: '[ CANNOT_LOAD_PRODUCT - NIXEL ]',
+            messageText: '[ CANNOT_LOAD_PRODUCT - AIZAT ]',
         });
 
         const items = Array.isArray(data) ? data : [data];
@@ -1390,7 +1390,7 @@ class AIRich extends BaseBuilder {
 
         this._submessages.push({
             messageType: 2,
-            messageText: '[ CANNOT_LOAD_POST - NIXEL ]',
+            messageText: '[ CANNOT_LOAD_POST - AIZAT ]',
         });
 
         const primitives = posts.map((p) => ({
@@ -1475,7 +1475,7 @@ class AIRich extends BaseBuilder {
         const notif = notification
             ? {
                 sessionTransparencyMetadata: {
-                    disclaimerText: '~ Ahmad tumbuh kembang',
+                    disclaimerText: '~ Aizat',
                     hcaId: `hca_${Date.now()}`,
                     sessionTransparencyType: 1,
                 },

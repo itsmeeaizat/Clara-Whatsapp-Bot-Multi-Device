@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🌸 Clara Whatsapp Bot - Multi Device
+# 🌟 Clara Whatsapp Bot - Multi Device 🌟
 
 **Bot WhatsApp Multi-Device dengan 290+ command, AI Agent, dan sistem plugin modular**
 
@@ -614,18 +614,7 @@ Itu **melanggar lisensi**. Kamu tidak perlu membayar siapa pun —
 [**ambil gratis di sini**](https://github.com/itsmeeaizat/Clara-Whatsapp-Bot-Multi-Device).
 Silakan laporkan lewat *issue* di repositori ini.
 
----
 
-## ⚠️ Disclaimer
-
-Proyek ini memakai library WhatsApp **tidak resmi** ([Baileys](https://github.com/WhiskeySockets/Baileys)).
-
-- Gunakan dengan bijak dan pahami **risiko pemblokiran nomor** oleh WhatsApp,
-  terutama untuk bot publik dengan volume tinggi
-- Disarankan memakai **nomor cadangan**, bukan nomor utama
-- Perangkat lunak disediakan **apa adanya, tanpa jaminan apa pun**
-- Penulis **tidak bertanggung jawab** atas kerugian akibat penggunaan bot ini
-- Dependensi pihak ketiga memiliki lisensinya masing-masing
 
 ---
 
@@ -653,4 +642,29 @@ Kalau Clara membantu, beri ⭐ di repositori ini — itu sudah lebih dari cukup.
 
 **Gratis untuk semua. Selamanya.**
 
+## Credits
+
+* **Developer:** Aizat
+* **Website:** [Aizat](itsmee_aizat.oneapp.dev)
+* **Thanks to:** All contributors, AI Agent & API providers
+
+---
+
+## ⚠️ Disclaimer
+
+Bot ini dibuat untuk tujuan penggunaan pribadi, jaga grup, edukasi dan hiburan. Bot ini 100℅ gratis tidak untuk diperjualbelikan, Gunakan dengan bijak dan sesuai dengan ketentuan WhatsApp. Developer tidak bertanggung jawab atas penyalahgunaan bot.
+
+Proyek ini memakai library WhatsApp **tidak resmi** ([Baileys](https://github.com/WhiskeySockets/Baileys)).
+
+- Gunakan dengan bijak dan pahami **risiko pemblokiran nomor** oleh WhatsApp,
+  terutama untuk bot publik dengan volume tinggi
+- Disarankan memakai **nomor cadangan**, bukan nomor utama
+- Perangkat lunak disediakan **apa adanya, tanpa jaminan apa pun**
+- Penulis **tidak bertanggung jawab** atas kerugian akibat penggunaan bot ini
+- Dependensi pihak ketiga memiliki lisensinya masing-masing.
+---
+
+<div align="center">
+  <b>Rara Multi Device v3.3</b>
+  <p>Developer by Aizat</p>
 </div>

@@ -77,51 +77,14 @@ const defaultConfig = {
 };
 
 const CATEGORY_EMOJIS = {
-  owner: "👑",
-  main: "🏠",
-  utility: "🔧",
-  tools: "🛠️",
-  fun: "🎮",
-  game: "🎯",
-  download: "📥",
-  downloader: "📥",
-  search: "🔍",
-  sticker: "🖼️",
-  media: "🎬",
-  ai: "🤖",
-  group: "👥",
-  religi: "☪️",
-  islamic: "🕌",
-  info: "ℹ️",
-  cek: "📁",
-  user: "📊",
-  canvas: "🎨",
-  random: "🎲",
-  ephoto: "🖌️",
-  jpm: "📨",
-  anime: "🍥",
-  asupan: "🎞️",
-  clan: "⚔️",
-  convert: "🔄",
-  berita: "📰",
-  rpg: "🗡️",
-  nsfw: "🔞",
-  linode: "☁️",
-  primbon: "🔮",
-  cecan: "💃",
-  stalker: "🕵️",
-  tts: "🗣️",
-  vps: "🌊",
-  panel: "🖥️",
-  economy: "💸",
-  premium: "💎",
-  pushkontak: "📩",
-  store: "🏪",
-  menu: "📋",
-  music: "🎵",
-  image: "🖼️",
-  event: "🎉",
-  maker: "🎨",
+  owner: "", main: "", utility: "", tools: "", fun: "", game: "",
+  download: "", downloader: "", search: "", sticker: "", media: "",
+  ai: "", group: "", religi: "", islamic: "", info: "", cek: "",
+  user: "", canvas: "", random: "", ephoto: "", jpm: "", anime: "",
+  asupan: "", clan: "", convert: "", berita: "", rpg: "", nsfw: "",
+  linode: "", primbon: "", cecan: "", stalker: "", tts: "", vps: "",
+  panel: "", economy: "", premium: "", pushkontak: "", store: "",
+  menu: "", music: "", image: "", event: "", maker: "",
 };
 
 const CATEGORY_ORDER = [
@@ -167,7 +130,7 @@ function getSortedCategories(m = {}) {
     if (cat === "owner" && !m.isOwner) continue;
     const cmds = commandsByCategory[cat] || [];
     if (cmds.length === 0) continue;
-    const emoji = CATEGORY_EMOJIS[cat] || "📁";
+    const emoji = CATEGORY_EMOJIS[cat] || "";
     result.push({ name: cat, emoji, commands: cmds });
   }
   return result;
